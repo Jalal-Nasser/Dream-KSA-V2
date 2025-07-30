@@ -1,0 +1,14 @@
+Management Token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3NTMzNDQ4MzAsImV4cCI6MTc1NDU1NDQzMCwianRpIjoiNzU0NjNkNGItOTdkYy00NzVhLWIzYjEtNDY1MGY3ZWVlYTg3IiwidHlwZSI6Im1hbmFnZW1lbnQiLCJ2ZXJzaW9uIjoyLCJuYmYiOjE3NTMzNDQ4MzAsImFjY2Vzc19rZXkiOiI2ODc2NTZjZWJkMGRhYjVmOWEwMTMwMzUifQ.CO_jl3aO-fsmOdQg96ob2zo2s8-ln7PbrtW8U-GVp3k"
+
+
+App Access Key= "687656cebd0dab5f9a013035"
+
+App Secret= "6teL2TLkJcMcH-FSRlCtx9CbKJaL568U1Cvu1_q3iRl01KAD5cy_oF0H6n3A4z6t1a8Mi0pb0Da5ekpCtvp__JUslF83dcYbIW8lbfMrqGgZKCGNS88FBCHG84l_1ho4zYplbhOpXLWD43FLYOAGnQeTp5wYaGfDUVT11xkw_Nc="
+
+
+---------------------------
+SIP Interconnect Credentials
+
+Username= 687656cebd0dab5f9a013035
+Password= cG_FpjM176TbHwp2vo1iRcnaopZp5psutA==
+SIP Endpoint= sip.100ms.live

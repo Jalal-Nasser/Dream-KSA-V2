@@ -1,0 +1,14 @@
+diff --git a/node_modules/@100mslive/react-native-hms/lib/module/classes/HMSSDK.js b/node_modules/@100mslive/react-native-hms/lib/module/classes/HMSSDK.js
+index abcdef0..1234567 100644
+--- a/node_modules/@100mslive/react-native-hms/lib/module/classes/HMSSDK.js
++++ b/node_modules/@100mslive/react-native-hms/lib/module/classes/HMSSDK.js
+@@
+-    const {
+-      version
+-    } = require('../../package.json');
++    // Patch: Metro bundler fails to resolve ../../package.json
++    const version = { version: '1.11.0' }; // mimic package.json export
+     const {
+       major,
+       minor,
+       patch
