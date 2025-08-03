@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "Dreams KSA",
+    "scheme": "dream-ksa",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -50,5 +50,7 @@
       }
     },
     "owner": "jnasser"
+    ,
+    "jsEngine": "jsc"
   }
 }

@@ -26,6 +26,7 @@
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="Dreams KSA"/>
         <data android:scheme="exp+dream-ksa"/>
+        <data android:scheme="dream-ksa"/>
       </intent-filter>
     </activity>
   </application>

@@ -1,14 +1,1361 @@
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/.transforms/244c8699f2d4b7944f1535cd8f27310f/results.bin b/node_modules/@100mslive/react-native-hms/android/build/.transforms/244c8699f2d4b7944f1535cd8f27310f/results.bin
+new file mode 100644
+index 0000000..0d259dd
+--- /dev/null
++++ b/node_modules/@100mslive/react-native-hms/android/build/.transforms/244c8699f2d4b7944f1535cd8f27310f/results.bin
+@@ -0,0 +1 @@
++o/classes
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/.transforms/244c8699f2d4b7944f1535cd8f27310f/transformed/classes/classes_dex/classes.dex b/node_modules/@100mslive/react-native-hms/android/build/.transforms/244c8699f2d4b7944f1535cd8f27310f/transformed/classes/classes_dex/classes.dex
+new file mode 100644
+index 0000000..d203342
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/.transforms/244c8699f2d4b7944f1535cd8f27310f/transformed/classes/classes_dex/classes.dex differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-anydpi-v24/ic_camera_toggle_off.xml b/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-anydpi-v24/ic_camera_toggle_off.xml
+new file mode 100644
+index 0000000..531ca46
+--- /dev/null
++++ b/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-anydpi-v24/ic_camera_toggle_off.xml
+@@ -0,0 +1,11 @@
++<vector xmlns:android="http://schemas.android.com/apk/res/android"
++    android:width="24dp"
++    android:height="24dp"
++    android:viewportWidth="24"
++    android:viewportHeight="24">
++  <path
++      android:pathData="M4.3515,3.2319C4.0423,2.9227 3.541,2.9227 3.2319,3.2319C2.9227,3.541 2.9227,4.0423 3.2319,4.3515L5.067,6.1866C4.5508,6.2541 4.0678,6.49 3.6956,6.8622C3.2502,7.3076 3,7.9117 3,8.5416V16.4583C3,17.0881 3.2502,17.6922 3.6956,18.1376C4.141,18.583 4.7451,18.8333 5.375,18.8333H14.0833C14.7132,18.8333 15.3173,18.583 15.7627,18.1376C15.9799,17.9204 16.1507,17.6655 16.2687,17.3883L20.6485,21.7681C20.9577,22.0773 21.459,22.0773 21.7681,21.7681C22.0773,21.459 22.0773,20.9577 21.7681,20.6485L16.233,15.1134C16.2308,15.1112 16.2287,15.109 16.2265,15.1068L7.5181,6.3985C7.5159,6.3963 7.5137,6.3941 7.5115,6.3919L4.3515,3.2319ZM6.6303,7.7499L14.875,15.9946V16.4583C14.875,16.6682 14.7916,16.8696 14.6431,17.018C14.4947,17.1665 14.2933,17.2499 14.0833,17.2499H5.375C5.165,17.2499 4.9637,17.1665 4.8152,17.018C4.6667,16.8696 4.5833,16.6682 4.5833,16.4583V8.5416C4.5833,8.3316 4.6667,8.1303 4.8152,7.9818C4.9637,7.8333 5.165,7.7499 5.375,7.7499H6.6303ZM11.4392,7.7499H14.0833C14.2933,7.7499 14.4947,7.8333 14.6431,7.9818C14.7916,8.1303 14.875,8.3316 14.875,8.5416V11.1858C14.875,11.3957 14.9584,11.5971 15.1069,11.7455L15.8985,12.5372C16.1735,12.8121 16.6073,12.8467 16.9223,12.6189L20.4167,10.0913V16.4583C20.4167,16.8955 20.7711,17.2499 21.2083,17.2499C21.6456,17.2499 22,16.8955 22,16.4583V8.5416C22,8.2442 21.8333,7.9719 21.5685,7.8366C21.3036,7.7013 20.9853,7.7258 20.7444,7.9001L16.541,10.9405L16.4583,10.8578V8.5416C16.4583,7.9117 16.2081,7.3076 15.7627,6.8622C15.3173,6.4168 14.7132,6.1666 14.0833,6.1666H11.4392C11.0019,6.1666 10.6475,6.521 10.6475,6.9583C10.6475,7.3955 11.0019,7.7499 11.4392,7.7499Z"
++      android:fillColor="#F5F9FF"
++      android:fillAlpha="0.95"
++      android:fillType="evenOdd"/>
++</vector>
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-anydpi-v24/ic_camera_toggle_on.xml b/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-anydpi-v24/ic_camera_toggle_on.xml
+new file mode 100644
+index 0000000..c75e22b
+--- /dev/null
++++ b/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-anydpi-v24/ic_camera_toggle_on.xml
+@@ -0,0 +1,10 @@
++<vector xmlns:android="http://schemas.android.com/apk/res/android"
++    android:width="24dp"
++    android:height="24dp"
++    android:viewportWidth="24"
++    android:viewportHeight="24">
++  <path
++      android:pathData="M16.4583,10.7951V8.375C16.4583,7.0633 15.395,6 14.0833,6H5.375C4.0633,6 3,7.0633 3,8.375V16.2917C3,17.6033 4.0633,18.6667 5.375,18.6667H14.0833C15.395,18.6667 16.4583,17.6033 16.4583,16.2917V13.8718L20.7482,16.936C20.9895,17.1083 21.3069,17.1314 21.5706,16.9957C21.8343,16.86 22,16.5883 22,16.2917V8.3751C22,8.0785 21.8343,7.8068 21.5706,7.6712C21.3069,7.5355 20.9895,7.5585 20.7482,7.7309L16.4583,10.7951ZM4.5833,8.375C4.5833,7.9378 4.9378,7.5833 5.375,7.5833H14.0833C14.5206,7.5833 14.875,7.9378 14.875,8.375V16.2917C14.875,16.7289 14.5206,17.0833 14.0833,17.0833H5.375C4.9378,17.0833 4.5833,16.7289 4.5833,16.2917V8.375ZM20.4167,14.7534L17.0287,12.3334L20.4167,9.9134V14.7534Z"
++      android:fillColor="#ffffff"
++      android:fillType="evenOdd"/>
++</vector>
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-hdpi/ic_camera_toggle_off.png b/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-hdpi/ic_camera_toggle_off.png
+new file mode 100644
+index 0000000..e1138c0
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-hdpi/ic_camera_toggle_off.png differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-hdpi/ic_camera_toggle_on.png b/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-hdpi/ic_camera_toggle_on.png
+new file mode 100644
+index 0000000..0bd3968
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-hdpi/ic_camera_toggle_on.png differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-ldpi/ic_camera_toggle_off.png b/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-ldpi/ic_camera_toggle_off.png
+new file mode 100644
+index 0000000..33c2175
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-ldpi/ic_camera_toggle_off.png differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-ldpi/ic_camera_toggle_on.png b/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-ldpi/ic_camera_toggle_on.png
+new file mode 100644
+index 0000000..d6c57b2
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-ldpi/ic_camera_toggle_on.png differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-mdpi/ic_camera_toggle_off.png b/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-mdpi/ic_camera_toggle_off.png
+new file mode 100644
+index 0000000..07adfe2
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-mdpi/ic_camera_toggle_off.png differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-mdpi/ic_camera_toggle_on.png b/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-mdpi/ic_camera_toggle_on.png
+new file mode 100644
+index 0000000..abb68fb
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-mdpi/ic_camera_toggle_on.png differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-xhdpi/ic_camera_toggle_off.png b/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-xhdpi/ic_camera_toggle_off.png
+new file mode 100644
+index 0000000..c7296d3
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-xhdpi/ic_camera_toggle_off.png differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-xhdpi/ic_camera_toggle_on.png b/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-xhdpi/ic_camera_toggle_on.png
+new file mode 100644
+index 0000000..4ae1eb9
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-xhdpi/ic_camera_toggle_on.png differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-xxhdpi/ic_camera_toggle_off.png b/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-xxhdpi/ic_camera_toggle_off.png
+new file mode 100644
+index 0000000..decb74f
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-xxhdpi/ic_camera_toggle_off.png differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-xxhdpi/ic_camera_toggle_on.png b/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-xxhdpi/ic_camera_toggle_on.png
+new file mode 100644
+index 0000000..260eeec
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-xxhdpi/ic_camera_toggle_on.png differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-xxxhdpi/ic_camera_toggle_off.png b/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-xxxhdpi/ic_camera_toggle_off.png
+new file mode 100644
+index 0000000..184abf6
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-xxxhdpi/ic_camera_toggle_off.png differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-xxxhdpi/ic_camera_toggle_on.png b/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-xxxhdpi/ic_camera_toggle_on.png
+new file mode 100644
+index 0000000..14b6589
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/generated/res/pngs/debug/drawable-xxxhdpi/ic_camera_toggle_on.png differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/generated/source/buildConfig/debug/com/reactnativehmssdk/BuildConfig.java b/node_modules/@100mslive/react-native-hms/android/build/generated/source/buildConfig/debug/com/reactnativehmssdk/BuildConfig.java
+new file mode 100644
+index 0000000..4aac69a
+--- /dev/null
++++ b/node_modules/@100mslive/react-native-hms/android/build/generated/source/buildConfig/debug/com/reactnativehmssdk/BuildConfig.java
+@@ -0,0 +1,10 @@
++/**
++ * Automatically generated file. DO NOT MODIFY
++ */
++package com.reactnativehmssdk;
++
++public final class BuildConfig {
++  public static final boolean DEBUG = Boolean.parseBoolean("true");
++  public static final String LIBRARY_PACKAGE_NAME = "com.reactnativehmssdk";
++  public static final String BUILD_TYPE = "debug";
++}
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/AndroidManifest.xml b/node_modules/@100mslive/react-native-hms/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/AndroidManifest.xml
+new file mode 100644
+index 0000000..46368ee
+--- /dev/null
++++ b/node_modules/@100mslive/react-native-hms/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/AndroidManifest.xml
+@@ -0,0 +1,7 @@
++<?xml version="1.0" encoding="utf-8"?>
++<manifest xmlns:android="http://schemas.android.com/apk/res/android"
++    package="com.reactnativehmssdk" >
++
++    <uses-sdk android:minSdkVersion="21" />
++
++</manifest>
+\ No newline at end of file
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/output-metadata.json b/node_modules/@100mslive/react-native-hms/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/output-metadata.json
+new file mode 100644
+index 0000000..e7ec18d
+--- /dev/null
++++ b/node_modules/@100mslive/react-native-hms/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/output-metadata.json
+@@ -0,0 +1,18 @@
++{
++  "version": 3,
++  "artifactType": {
++    "type": "AAPT_FRIENDLY_MERGED_MANIFESTS",
++    "kind": "Directory"
++  },
++  "applicationId": "com.reactnativehmssdk",
++  "variantName": "debug",
++  "elements": [
++    {
++      "type": "SINGLE",
++      "filters": [],
++      "attributes": [],
++      "outputFile": "AndroidManifest.xml"
++    }
++  ],
++  "elementType": "File"
++}
+\ No newline at end of file
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/aar_metadata/debug/writeDebugAarMetadata/aar-metadata.properties b/node_modules/@100mslive/react-native-hms/android/build/intermediates/aar_metadata/debug/writeDebugAarMetadata/aar-metadata.properties
+new file mode 100644
+index 0000000..1211b1e
+--- /dev/null
++++ b/node_modules/@100mslive/react-native-hms/android/build/intermediates/aar_metadata/debug/writeDebugAarMetadata/aar-metadata.properties
+@@ -0,0 +1,6 @@
++aarFormatVersion=1.0
++aarMetadataVersion=1.0
++minCompileSdk=1
++minCompileSdkExtension=0
++minAndroidGradlePluginVersion=1.0.0
++coreLibraryDesugaringEnabled=false
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/annotation_processor_list/debug/javaPreCompileDebug/annotationProcessors.json b/node_modules/@100mslive/react-native-hms/android/build/intermediates/annotation_processor_list/debug/javaPreCompileDebug/annotationProcessors.json
+new file mode 100644
+index 0000000..9e26dfe
+--- /dev/null
++++ b/node_modules/@100mslive/react-native-hms/android/build/intermediates/annotation_processor_list/debug/javaPreCompileDebug/annotationProcessors.json
+@@ -0,0 +1 @@
++{}
+\ No newline at end of file
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/compile_library_classes_jar/debug/bundleLibCompileToJarDebug/classes.jar b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compile_library_classes_jar/debug/bundleLibCompileToJarDebug/classes.jar
+new file mode 100644
+index 0000000..cc0e7e8
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compile_library_classes_jar/debug/bundleLibCompileToJarDebug/classes.jar differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/compile_r_class_jar/debug/generateDebugRFile/R.jar b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compile_r_class_jar/debug/generateDebugRFile/R.jar
+new file mode 100644
+index 0000000..01e5443
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compile_r_class_jar/debug/generateDebugRFile/R.jar differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/compile_symbol_list/debug/generateDebugRFile/R.txt b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compile_symbol_list/debug/generateDebugRFile/R.txt
+new file mode 100644
+index 0000000..989dc98
+--- /dev/null
++++ b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compile_symbol_list/debug/generateDebugRFile/R.txt
+@@ -0,0 +1,9 @@
++int drawable ic_call_end_24 0x0
++int drawable ic_camera_toggle_off 0x0
++int drawable ic_camera_toggle_on 0x0
++int drawable ic_mic_24 0x0
++int drawable ic_mic_off_24 0x0
++int id hls_view 0x0
++int id hmsVideoView 0x0
++int layout hms_view 0x0
++int layout player_view 0x0
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-anydpi-v24_ic_camera_toggle_off.xml.flat b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-anydpi-v24_ic_camera_toggle_off.xml.flat
+new file mode 100644
+index 0000000..4c3a925
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-anydpi-v24_ic_camera_toggle_off.xml.flat differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-anydpi-v24_ic_camera_toggle_on.xml.flat b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-anydpi-v24_ic_camera_toggle_on.xml.flat
+new file mode 100644
+index 0000000..60b1caa
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-anydpi-v24_ic_camera_toggle_on.xml.flat differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-hdpi-v4_ic_camera_toggle_off.png.flat b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-hdpi-v4_ic_camera_toggle_off.png.flat
+new file mode 100644
+index 0000000..6535706
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-hdpi-v4_ic_camera_toggle_off.png.flat differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-hdpi-v4_ic_camera_toggle_on.png.flat b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-hdpi-v4_ic_camera_toggle_on.png.flat
+new file mode 100644
+index 0000000..2e2aefb
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-hdpi-v4_ic_camera_toggle_on.png.flat differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-ldpi-v4_ic_camera_toggle_off.png.flat b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-ldpi-v4_ic_camera_toggle_off.png.flat
+new file mode 100644
+index 0000000..56a7c0e
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-ldpi-v4_ic_camera_toggle_off.png.flat differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-ldpi-v4_ic_camera_toggle_on.png.flat b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-ldpi-v4_ic_camera_toggle_on.png.flat
+new file mode 100644
+index 0000000..0436e91
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-ldpi-v4_ic_camera_toggle_on.png.flat differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-mdpi-v4_ic_camera_toggle_off.png.flat b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-mdpi-v4_ic_camera_toggle_off.png.flat
+new file mode 100644
+index 0000000..3512765
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-mdpi-v4_ic_camera_toggle_off.png.flat differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-mdpi-v4_ic_camera_toggle_on.png.flat b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-mdpi-v4_ic_camera_toggle_on.png.flat
+new file mode 100644
+index 0000000..a3dd573
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-mdpi-v4_ic_camera_toggle_on.png.flat differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-xhdpi-v4_ic_camera_toggle_off.png.flat b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-xhdpi-v4_ic_camera_toggle_off.png.flat
+new file mode 100644
+index 0000000..72daab2
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-xhdpi-v4_ic_camera_toggle_off.png.flat differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-xhdpi-v4_ic_camera_toggle_on.png.flat b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-xhdpi-v4_ic_camera_toggle_on.png.flat
+new file mode 100644
+index 0000000..2c466cf
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-xhdpi-v4_ic_camera_toggle_on.png.flat differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-xxhdpi-v4_ic_camera_toggle_off.png.flat b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-xxhdpi-v4_ic_camera_toggle_off.png.flat
+new file mode 100644
+index 0000000..de2861b
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-xxhdpi-v4_ic_camera_toggle_off.png.flat differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-xxhdpi-v4_ic_camera_toggle_on.png.flat b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-xxhdpi-v4_ic_camera_toggle_on.png.flat
+new file mode 100644
+index 0000000..1080617
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-xxhdpi-v4_ic_camera_toggle_on.png.flat differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-xxxhdpi-v4_ic_camera_toggle_off.png.flat b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-xxxhdpi-v4_ic_camera_toggle_off.png.flat
+new file mode 100644
+index 0000000..6d158c1
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-xxxhdpi-v4_ic_camera_toggle_off.png.flat differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-xxxhdpi-v4_ic_camera_toggle_on.png.flat b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-xxxhdpi-v4_ic_camera_toggle_on.png.flat
+new file mode 100644
+index 0000000..e4c8261
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable-xxxhdpi-v4_ic_camera_toggle_on.png.flat differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable_ic_call_end_24.xml.flat b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable_ic_call_end_24.xml.flat
+new file mode 100644
+index 0000000..e8ff58c
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable_ic_call_end_24.xml.flat differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable_ic_mic_24.xml.flat b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable_ic_mic_24.xml.flat
+new file mode 100644
+index 0000000..281f7c1
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable_ic_mic_24.xml.flat differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable_ic_mic_off_24.xml.flat b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable_ic_mic_off_24.xml.flat
+new file mode 100644
+index 0000000..157c09e
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/drawable_ic_mic_off_24.xml.flat differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/layout_hms_view.xml.flat b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/layout_hms_view.xml.flat
+new file mode 100644
+index 0000000..845460d
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/layout_hms_view.xml.flat differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/layout_player_view.xml.flat b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/layout_player_view.xml.flat
+new file mode 100644
+index 0000000..905d045
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/intermediates/compiled_local_resources/debug/compileDebugLibraryResources/out/layout_player_view.xml.flat differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/incremental/debug/packageDebugResources/compile-file-map.properties b/node_modules/@100mslive/react-native-hms/android/build/intermediates/incremental/debug/packageDebugResources/compile-file-map.properties
+new file mode 100644
+index 0000000..8eff348
+--- /dev/null
++++ b/node_modules/@100mslive/react-native-hms/android/build/intermediates/incremental/debug/packageDebugResources/compile-file-map.properties
+@@ -0,0 +1,20 @@
++#Mon Jul 28 14:53:48 AST 2025
++com.reactnativehmssdk.100mslive_react-native-hms-main-6\:/drawable/ic_call_end_24.xml=C\:\\Users\\jnass\\Downloads\\Projects\\voice-chat-app\\node_modules\\@100mslive\\react-native-hms\\android\\build\\intermediates\\packaged_res\\debug\\packageDebugResources\\drawable\\ic_call_end_24.xml
++com.reactnativehmssdk.100mslive_react-native-hms-pngs-0\:/drawable-hdpi/ic_camera_toggle_on.png=C\:\\Users\\jnass\\Downloads\\Projects\\voice-chat-app\\node_modules\\@100mslive\\react-native-hms\\android\\build\\intermediates\\packaged_res\\debug\\packageDebugResources\\drawable-hdpi-v4\\ic_camera_toggle_on.png
++com.reactnativehmssdk.100mslive_react-native-hms-main-6\:/layout/hms_view.xml=C\:\\Users\\jnass\\Downloads\\Projects\\voice-chat-app\\node_modules\\@100mslive\\react-native-hms\\android\\build\\intermediates\\packaged_res\\debug\\packageDebugResources\\layout\\hms_view.xml
++com.reactnativehmssdk.100mslive_react-native-hms-pngs-0\:/drawable-anydpi-v24/ic_camera_toggle_off.xml=C\:\\Users\\jnass\\Downloads\\Projects\\voice-chat-app\\node_modules\\@100mslive\\react-native-hms\\android\\build\\intermediates\\packaged_res\\debug\\packageDebugResources\\drawable-anydpi-v24\\ic_camera_toggle_off.xml
++com.reactnativehmssdk.100mslive_react-native-hms-pngs-0\:/drawable-mdpi/ic_camera_toggle_on.png=C\:\\Users\\jnass\\Downloads\\Projects\\voice-chat-app\\node_modules\\@100mslive\\react-native-hms\\android\\build\\intermediates\\packaged_res\\debug\\packageDebugResources\\drawable-mdpi-v4\\ic_camera_toggle_on.png
++com.reactnativehmssdk.100mslive_react-native-hms-pngs-0\:/drawable-mdpi/ic_camera_toggle_off.png=C\:\\Users\\jnass\\Downloads\\Projects\\voice-chat-app\\node_modules\\@100mslive\\react-native-hms\\android\\build\\intermediates\\packaged_res\\debug\\packageDebugResources\\drawable-mdpi-v4\\ic_camera_toggle_off.png
++com.reactnativehmssdk.100mslive_react-native-hms-pngs-0\:/drawable-xhdpi/ic_camera_toggle_off.png=C\:\\Users\\jnass\\Downloads\\Projects\\voice-chat-app\\node_modules\\@100mslive\\react-native-hms\\android\\build\\intermediates\\packaged_res\\debug\\packageDebugResources\\drawable-xhdpi-v4\\ic_camera_toggle_off.png
++com.reactnativehmssdk.100mslive_react-native-hms-pngs-0\:/drawable-anydpi-v24/ic_camera_toggle_on.xml=C\:\\Users\\jnass\\Downloads\\Projects\\voice-chat-app\\node_modules\\@100mslive\\react-native-hms\\android\\build\\intermediates\\packaged_res\\debug\\packageDebugResources\\drawable-anydpi-v24\\ic_camera_toggle_on.xml
++com.reactnativehmssdk.100mslive_react-native-hms-pngs-0\:/drawable-xxxhdpi/ic_camera_toggle_on.png=C\:\\Users\\jnass\\Downloads\\Projects\\voice-chat-app\\node_modules\\@100mslive\\react-native-hms\\android\\build\\intermediates\\packaged_res\\debug\\packageDebugResources\\drawable-xxxhdpi-v4\\ic_camera_toggle_on.png
++com.reactnativehmssdk.100mslive_react-native-hms-pngs-0\:/drawable-xxhdpi/ic_camera_toggle_on.png=C\:\\Users\\jnass\\Downloads\\Projects\\voice-chat-app\\node_modules\\@100mslive\\react-native-hms\\android\\build\\intermediates\\packaged_res\\debug\\packageDebugResources\\drawable-xxhdpi-v4\\ic_camera_toggle_on.png
++com.reactnativehmssdk.100mslive_react-native-hms-pngs-0\:/drawable-xxhdpi/ic_camera_toggle_off.png=C\:\\Users\\jnass\\Downloads\\Projects\\voice-chat-app\\node_modules\\@100mslive\\react-native-hms\\android\\build\\intermediates\\packaged_res\\debug\\packageDebugResources\\drawable-xxhdpi-v4\\ic_camera_toggle_off.png
++com.reactnativehmssdk.100mslive_react-native-hms-pngs-0\:/drawable-hdpi/ic_camera_toggle_off.png=C\:\\Users\\jnass\\Downloads\\Projects\\voice-chat-app\\node_modules\\@100mslive\\react-native-hms\\android\\build\\intermediates\\packaged_res\\debug\\packageDebugResources\\drawable-hdpi-v4\\ic_camera_toggle_off.png
++com.reactnativehmssdk.100mslive_react-native-hms-main-6\:/drawable/ic_mic_off_24.xml=C\:\\Users\\jnass\\Downloads\\Projects\\voice-chat-app\\node_modules\\@100mslive\\react-native-hms\\android\\build\\intermediates\\packaged_res\\debug\\packageDebugResources\\drawable\\ic_mic_off_24.xml
++com.reactnativehmssdk.100mslive_react-native-hms-pngs-0\:/drawable-ldpi/ic_camera_toggle_off.png=C\:\\Users\\jnass\\Downloads\\Projects\\voice-chat-app\\node_modules\\@100mslive\\react-native-hms\\android\\build\\intermediates\\packaged_res\\debug\\packageDebugResources\\drawable-ldpi-v4\\ic_camera_toggle_off.png
++com.reactnativehmssdk.100mslive_react-native-hms-pngs-0\:/drawable-xhdpi/ic_camera_toggle_on.png=C\:\\Users\\jnass\\Downloads\\Projects\\voice-chat-app\\node_modules\\@100mslive\\react-native-hms\\android\\build\\intermediates\\packaged_res\\debug\\packageDebugResources\\drawable-xhdpi-v4\\ic_camera_toggle_on.png
++com.reactnativehmssdk.100mslive_react-native-hms-pngs-0\:/drawable-ldpi/ic_camera_toggle_on.png=C\:\\Users\\jnass\\Downloads\\Projects\\voice-chat-app\\node_modules\\@100mslive\\react-native-hms\\android\\build\\intermediates\\packaged_res\\debug\\packageDebugResources\\drawable-ldpi-v4\\ic_camera_toggle_on.png
++com.reactnativehmssdk.100mslive_react-native-hms-pngs-0\:/drawable-xxxhdpi/ic_camera_toggle_off.png=C\:\\Users\\jnass\\Downloads\\Projects\\voice-chat-app\\node_modules\\@100mslive\\react-native-hms\\android\\build\\intermediates\\packaged_res\\debug\\packageDebugResources\\drawable-xxxhdpi-v4\\ic_camera_toggle_off.png
++com.reactnativehmssdk.100mslive_react-native-hms-main-6\:/drawable/ic_mic_24.xml=C\:\\Users\\jnass\\Downloads\\Projects\\voice-chat-app\\node_modules\\@100mslive\\react-native-hms\\android\\build\\intermediates\\packaged_res\\debug\\packageDebugResources\\drawable\\ic_mic_24.xml
++com.reactnativehmssdk.100mslive_react-native-hms-main-6\:/layout/player_view.xml=C\:\\Users\\jnass\\Downloads\\Projects\\voice-chat-app\\node_modules\\@100mslive\\react-native-hms\\android\\build\\intermediates\\packaged_res\\debug\\packageDebugResources\\layout\\player_view.xml
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/incremental/debug/packageDebugResources/merger.xml b/node_modules/@100mslive/react-native-hms/android/build/intermediates/incremental/debug/packageDebugResources/merger.xml
+new file mode 100644
+index 0000000..e20b6c5
+--- /dev/null
++++ b/node_modules/@100mslive/react-native-hms/android/build/intermediates/incremental/debug/packageDebugResources/merger.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<merger version="3"><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="main$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\src\main\res"><file path="C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\src\main\res\drawable\ic_camera_toggle_off.xml" preprocessing="true" qualifiers=""><generated-file path="C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\build\generated\res\pngs\debug\drawable-xxxhdpi\ic_camera_toggle_off.png" qualifiers="xxxhdpi-v4" type="drawable"/><generated-file path="C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\build\generated\res\pngs\debug\drawable-mdpi\ic_camera_toggle_off.png" qualifiers="mdpi-v4" type="drawable"/><generated-file path="C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\build\generated\res\pngs\debug\drawable-ldpi\ic_camera_toggle_off.png" qualifiers="ldpi-v4" type="drawable"/><generated-file path="C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\build\generated\res\pngs\debug\drawable-xxhdpi\ic_camera_toggle_off.png" qualifiers="xxhdpi-v4" type="drawable"/><generated-file path="C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\build\generated\res\pngs\debug\drawable-hdpi\ic_camera_toggle_off.png" qualifiers="hdpi-v4" type="drawable"/><generated-file path="C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\build\generated\res\pngs\debug\drawable-xhdpi\ic_camera_toggle_off.png" qualifiers="xhdpi-v4" type="drawable"/><generated-file path="C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\build\generated\res\pngs\debug\drawable-anydpi-v24\ic_camera_toggle_off.xml" qualifiers="anydpi-v24" type="drawable"/></file><file path="C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\src\main\res\drawable\ic_camera_toggle_on.xml" preprocessing="true" qualifiers=""><generated-file path="C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\build\generated\res\pngs\debug\drawable-xxxhdpi\ic_camera_toggle_on.png" qualifiers="xxxhdpi-v4" type="drawable"/><generated-file path="C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\build\generated\res\pngs\debug\drawable-mdpi\ic_camera_toggle_on.png" qualifiers="mdpi-v4" type="drawable"/><generated-file path="C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\build\generated\res\pngs\debug\drawable-ldpi\ic_camera_toggle_on.png" qualifiers="ldpi-v4" type="drawable"/><generated-file path="C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\build\generated\res\pngs\debug\drawable-xxhdpi\ic_camera_toggle_on.png" qualifiers="xxhdpi-v4" type="drawable"/><generated-file path="C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\build\generated\res\pngs\debug\drawable-hdpi\ic_camera_toggle_on.png" qualifiers="hdpi-v4" type="drawable"/><generated-file path="C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\build\generated\res\pngs\debug\drawable-xhdpi\ic_camera_toggle_on.png" qualifiers="xhdpi-v4" type="drawable"/><generated-file path="C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\build\generated\res\pngs\debug\drawable-anydpi-v24\ic_camera_toggle_on.xml" qualifiers="anydpi-v24" type="drawable"/></file></source></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="main" generated-set="main$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\src\main\res"><file name="ic_call_end_24" path="C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\src\main\res\drawable\ic_call_end_24.xml" qualifiers="" type="drawable"/><file name="ic_mic_24" path="C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\src\main\res\drawable\ic_mic_24.xml" qualifiers="" type="drawable"/><file name="ic_mic_off_24" path="C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\src\main\res\drawable\ic_mic_off_24.xml" qualifiers="" type="drawable"/><file name="hms_view" path="C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\src\main\res\layout\hms_view.xml" qualifiers="" type="layout"/><file name="player_view" path="C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\src\main\res\layout\player_view.xml" qualifiers="" type="layout"/></source></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="debug$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\src\debug\res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="debug" generated-set="debug$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\src\debug\res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="generated$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\build\generated\res\resValues\debug"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="generated" generated-set="generated$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\build\generated\res\resValues\debug"/></dataSet><mergedItems/></merger>
+\ No newline at end of file
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/incremental/mergeDebugJniLibFolders/merger.xml b/node_modules/@100mslive/react-native-hms/android/build/intermediates/incremental/mergeDebugJniLibFolders/merger.xml
+new file mode 100644
+index 0000000..8aba885
+--- /dev/null
++++ b/node_modules/@100mslive/react-native-hms/android/build/intermediates/incremental/mergeDebugJniLibFolders/merger.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<merger version="3"><dataSet config="main" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="C:\Users\jnass\Projects\dreams-ksa\node_modules\@100mslive\react-native-hms\android\src\main\jniLibs"/></dataSet><dataSet config="debug" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="C:\Users\jnass\Projects\dreams-ksa\node_modules\@100mslive\react-native-hms\android\src\debug\jniLibs"/></dataSet></merger>
+\ No newline at end of file
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/incremental/mergeDebugShaders/merger.xml b/node_modules/@100mslive/react-native-hms/android/build/intermediates/incremental/mergeDebugShaders/merger.xml
+new file mode 100644
+index 0000000..27e7d5f
+--- /dev/null
++++ b/node_modules/@100mslive/react-native-hms/android/build/intermediates/incremental/mergeDebugShaders/merger.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<merger version="3"><dataSet config="main" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="C:\Users\jnass\Projects\dreams-ksa\node_modules\@100mslive\react-native-hms\android\src\main\shaders"/></dataSet><dataSet config="debug" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="C:\Users\jnass\Projects\dreams-ksa\node_modules\@100mslive\react-native-hms\android\src\debug\shaders"/></dataSet></merger>
+\ No newline at end of file
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/incremental/packageDebugAssets/merger.xml b/node_modules/@100mslive/react-native-hms/android/build/intermediates/incremental/packageDebugAssets/merger.xml
+new file mode 100644
+index 0000000..de8b089
+--- /dev/null
++++ b/node_modules/@100mslive/react-native-hms/android/build/intermediates/incremental/packageDebugAssets/merger.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<merger version="3"><dataSet config="main" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="C:\Users\jnass\Projects\dreams-ksa\node_modules\@100mslive\react-native-hms\android\src\main\assets"/></dataSet><dataSet config="debug" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="C:\Users\jnass\Projects\dreams-ksa\node_modules\@100mslive\react-native-hms\android\src\debug\assets"/></dataSet><dataSet config="generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="C:\Users\jnass\Projects\dreams-ksa\node_modules\@100mslive\react-native-hms\android\build\intermediates\shader_assets\debug\compileDebugShaders\out"/></dataSet></merger>
+\ No newline at end of file
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/java_res/debug/processDebugJavaRes/out/META-INF/100mslive_react-native-hms_debug.kotlin_module b/node_modules/@100mslive/react-native-hms/android/build/intermediates/java_res/debug/processDebugJavaRes/out/META-INF/100mslive_react-native-hms_debug.kotlin_module
+new file mode 100644
+index 0000000..c998a4c
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/intermediates/java_res/debug/processDebugJavaRes/out/META-INF/100mslive_react-native-hms_debug.kotlin_module differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/reactnativehmssdk/BuildConfig.class b/node_modules/@100mslive/react-native-hms/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/reactnativehmssdk/BuildConfig.class
+new file mode 100644
+index 0000000..59e64c0
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/reactnativehmssdk/BuildConfig.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/local_only_symbol_list/debug/parseDebugLocalResources/R-def.txt b/node_modules/@100mslive/react-native-hms/android/build/intermediates/local_only_symbol_list/debug/parseDebugLocalResources/R-def.txt
+new file mode 100644
+index 0000000..f19bd1e
+--- /dev/null
++++ b/node_modules/@100mslive/react-native-hms/android/build/intermediates/local_only_symbol_list/debug/parseDebugLocalResources/R-def.txt
+@@ -0,0 +1,11 @@
++R_DEF: Internal format may change without notice
++local
++drawable ic_call_end_24
++drawable ic_camera_toggle_off
++drawable ic_camera_toggle_on
++drawable ic_mic_24
++drawable ic_mic_off_24
++id hls_view
++id hmsVideoView
++layout hms_view
++layout player_view
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/manifest_merge_blame_file/debug/processDebugManifest/manifest-merger-blame-debug-report.txt b/node_modules/@100mslive/react-native-hms/android/build/intermediates/manifest_merge_blame_file/debug/processDebugManifest/manifest-merger-blame-debug-report.txt
+new file mode 100644
+index 0000000..696ce11
+--- /dev/null
++++ b/node_modules/@100mslive/react-native-hms/android/build/intermediates/manifest_merge_blame_file/debug/processDebugManifest/manifest-merger-blame-debug-report.txt
+@@ -0,0 +1,7 @@
++1<?xml version="1.0" encoding="utf-8"?>
++2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
++3    package="com.reactnativehmssdk" >
++4
++5    <uses-sdk android:minSdkVersion="21" />
++6
++7</manifest>
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml b/node_modules/@100mslive/react-native-hms/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml
+new file mode 100644
+index 0000000..46368ee
+--- /dev/null
++++ b/node_modules/@100mslive/react-native-hms/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml
+@@ -0,0 +1,7 @@
++<?xml version="1.0" encoding="utf-8"?>
++<manifest xmlns:android="http://schemas.android.com/apk/res/android"
++    package="com.reactnativehmssdk" >
++
++    <uses-sdk android:minSdkVersion="21" />
++
++</manifest>
+\ No newline at end of file
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/navigation_json/debug/extractDeepLinksDebug/navigation.json b/node_modules/@100mslive/react-native-hms/android/build/intermediates/navigation_json/debug/extractDeepLinksDebug/navigation.json
+new file mode 100644
+index 0000000..0637a08
+--- /dev/null
++++ b/node_modules/@100mslive/react-native-hms/android/build/intermediates/navigation_json/debug/extractDeepLinksDebug/navigation.json
+@@ -0,0 +1 @@
++[]
+\ No newline at end of file
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/nested_resources_validation_report/debug/generateDebugResources/nestedResourcesValidationReport.txt b/node_modules/@100mslive/react-native-hms/android/build/intermediates/nested_resources_validation_report/debug/generateDebugResources/nestedResourcesValidationReport.txt
+new file mode 100644
+index 0000000..08f4ebe
+--- /dev/null
++++ b/node_modules/@100mslive/react-native-hms/android/build/intermediates/nested_resources_validation_report/debug/generateDebugResources/nestedResourcesValidationReport.txt
+@@ -0,0 +1 @@
++0 Warning/Error
+\ No newline at end of file
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-anydpi-v24/ic_camera_toggle_off.xml b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-anydpi-v24/ic_camera_toggle_off.xml
+new file mode 100644
+index 0000000..531ca46
+--- /dev/null
++++ b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-anydpi-v24/ic_camera_toggle_off.xml
+@@ -0,0 +1,11 @@
++<vector xmlns:android="http://schemas.android.com/apk/res/android"
++    android:width="24dp"
++    android:height="24dp"
++    android:viewportWidth="24"
++    android:viewportHeight="24">
++  <path
++      android:pathData="M4.3515,3.2319C4.0423,2.9227 3.541,2.9227 3.2319,3.2319C2.9227,3.541 2.9227,4.0423 3.2319,4.3515L5.067,6.1866C4.5508,6.2541 4.0678,6.49 3.6956,6.8622C3.2502,7.3076 3,7.9117 3,8.5416V16.4583C3,17.0881 3.2502,17.6922 3.6956,18.1376C4.141,18.583 4.7451,18.8333 5.375,18.8333H14.0833C14.7132,18.8333 15.3173,18.583 15.7627,18.1376C15.9799,17.9204 16.1507,17.6655 16.2687,17.3883L20.6485,21.7681C20.9577,22.0773 21.459,22.0773 21.7681,21.7681C22.0773,21.459 22.0773,20.9577 21.7681,20.6485L16.233,15.1134C16.2308,15.1112 16.2287,15.109 16.2265,15.1068L7.5181,6.3985C7.5159,6.3963 7.5137,6.3941 7.5115,6.3919L4.3515,3.2319ZM6.6303,7.7499L14.875,15.9946V16.4583C14.875,16.6682 14.7916,16.8696 14.6431,17.018C14.4947,17.1665 14.2933,17.2499 14.0833,17.2499H5.375C5.165,17.2499 4.9637,17.1665 4.8152,17.018C4.6667,16.8696 4.5833,16.6682 4.5833,16.4583V8.5416C4.5833,8.3316 4.6667,8.1303 4.8152,7.9818C4.9637,7.8333 5.165,7.7499 5.375,7.7499H6.6303ZM11.4392,7.7499H14.0833C14.2933,7.7499 14.4947,7.8333 14.6431,7.9818C14.7916,8.1303 14.875,8.3316 14.875,8.5416V11.1858C14.875,11.3957 14.9584,11.5971 15.1069,11.7455L15.8985,12.5372C16.1735,12.8121 16.6073,12.8467 16.9223,12.6189L20.4167,10.0913V16.4583C20.4167,16.8955 20.7711,17.2499 21.2083,17.2499C21.6456,17.2499 22,16.8955 22,16.4583V8.5416C22,8.2442 21.8333,7.9719 21.5685,7.8366C21.3036,7.7013 20.9853,7.7258 20.7444,7.9001L16.541,10.9405L16.4583,10.8578V8.5416C16.4583,7.9117 16.2081,7.3076 15.7627,6.8622C15.3173,6.4168 14.7132,6.1666 14.0833,6.1666H11.4392C11.0019,6.1666 10.6475,6.521 10.6475,6.9583C10.6475,7.3955 11.0019,7.7499 11.4392,7.7499Z"
++      android:fillColor="#F5F9FF"
++      android:fillAlpha="0.95"
++      android:fillType="evenOdd"/>
++</vector>
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-anydpi-v24/ic_camera_toggle_on.xml b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-anydpi-v24/ic_camera_toggle_on.xml
+new file mode 100644
+index 0000000..c75e22b
+--- /dev/null
++++ b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-anydpi-v24/ic_camera_toggle_on.xml
+@@ -0,0 +1,10 @@
++<vector xmlns:android="http://schemas.android.com/apk/res/android"
++    android:width="24dp"
++    android:height="24dp"
++    android:viewportWidth="24"
++    android:viewportHeight="24">
++  <path
++      android:pathData="M16.4583,10.7951V8.375C16.4583,7.0633 15.395,6 14.0833,6H5.375C4.0633,6 3,7.0633 3,8.375V16.2917C3,17.6033 4.0633,18.6667 5.375,18.6667H14.0833C15.395,18.6667 16.4583,17.6033 16.4583,16.2917V13.8718L20.7482,16.936C20.9895,17.1083 21.3069,17.1314 21.5706,16.9957C21.8343,16.86 22,16.5883 22,16.2917V8.3751C22,8.0785 21.8343,7.8068 21.5706,7.6712C21.3069,7.5355 20.9895,7.5585 20.7482,7.7309L16.4583,10.7951ZM4.5833,8.375C4.5833,7.9378 4.9378,7.5833 5.375,7.5833H14.0833C14.5206,7.5833 14.875,7.9378 14.875,8.375V16.2917C14.875,16.7289 14.5206,17.0833 14.0833,17.0833H5.375C4.9378,17.0833 4.5833,16.7289 4.5833,16.2917V8.375ZM20.4167,14.7534L17.0287,12.3334L20.4167,9.9134V14.7534Z"
++      android:fillColor="#ffffff"
++      android:fillType="evenOdd"/>
++</vector>
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-hdpi-v4/ic_camera_toggle_off.png b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-hdpi-v4/ic_camera_toggle_off.png
+new file mode 100644
+index 0000000..e1138c0
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-hdpi-v4/ic_camera_toggle_off.png differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-hdpi-v4/ic_camera_toggle_on.png b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-hdpi-v4/ic_camera_toggle_on.png
+new file mode 100644
+index 0000000..0bd3968
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-hdpi-v4/ic_camera_toggle_on.png differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-ldpi-v4/ic_camera_toggle_off.png b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-ldpi-v4/ic_camera_toggle_off.png
+new file mode 100644
+index 0000000..33c2175
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-ldpi-v4/ic_camera_toggle_off.png differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-ldpi-v4/ic_camera_toggle_on.png b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-ldpi-v4/ic_camera_toggle_on.png
+new file mode 100644
+index 0000000..d6c57b2
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-ldpi-v4/ic_camera_toggle_on.png differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-mdpi-v4/ic_camera_toggle_off.png b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-mdpi-v4/ic_camera_toggle_off.png
+new file mode 100644
+index 0000000..07adfe2
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-mdpi-v4/ic_camera_toggle_off.png differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-mdpi-v4/ic_camera_toggle_on.png b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-mdpi-v4/ic_camera_toggle_on.png
+new file mode 100644
+index 0000000..abb68fb
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-mdpi-v4/ic_camera_toggle_on.png differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-xhdpi-v4/ic_camera_toggle_off.png b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-xhdpi-v4/ic_camera_toggle_off.png
+new file mode 100644
+index 0000000..c7296d3
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-xhdpi-v4/ic_camera_toggle_off.png differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-xhdpi-v4/ic_camera_toggle_on.png b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-xhdpi-v4/ic_camera_toggle_on.png
+new file mode 100644
+index 0000000..4ae1eb9
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-xhdpi-v4/ic_camera_toggle_on.png differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-xxhdpi-v4/ic_camera_toggle_off.png b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-xxhdpi-v4/ic_camera_toggle_off.png
+new file mode 100644
+index 0000000..decb74f
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-xxhdpi-v4/ic_camera_toggle_off.png differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-xxhdpi-v4/ic_camera_toggle_on.png b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-xxhdpi-v4/ic_camera_toggle_on.png
+new file mode 100644
+index 0000000..260eeec
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-xxhdpi-v4/ic_camera_toggle_on.png differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-xxxhdpi-v4/ic_camera_toggle_off.png b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-xxxhdpi-v4/ic_camera_toggle_off.png
+new file mode 100644
+index 0000000..184abf6
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-xxxhdpi-v4/ic_camera_toggle_off.png differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-xxxhdpi-v4/ic_camera_toggle_on.png b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-xxxhdpi-v4/ic_camera_toggle_on.png
+new file mode 100644
+index 0000000..14b6589
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable-xxxhdpi-v4/ic_camera_toggle_on.png differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable/ic_call_end_24.xml b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable/ic_call_end_24.xml
+new file mode 100644
+index 0000000..d11e6dd
+--- /dev/null
++++ b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable/ic_call_end_24.xml
+@@ -0,0 +1,10 @@
++<vector xmlns:android="http://schemas.android.com/apk/res/android"
++    android:width="24dp"
++    android:height="24dp"
++    android:tint="?attr/colorControlNormal"
++    android:viewportWidth="24"
++    android:viewportHeight="24">
++    <path
++        android:fillColor="#D22B2B"
++        android:pathData="M12,9c-1.6,0 -3.15,0.25 -4.6,0.72v3.1c0,0.39 -0.23,0.74 -0.56,0.9 -0.98,0.49 -1.87,1.12 -2.66,1.85 -0.18,0.18 -0.43,0.28 -0.7,0.28 -0.28,0 -0.53,-0.11 -0.71,-0.29L0.29,13.08c-0.18,-0.17 -0.29,-0.42 -0.29,-0.7 0,-0.28 0.11,-0.53 0.29,-0.71C3.34,8.78 7.46,7 12,7s8.66,1.78 11.71,4.67c0.18,0.18 0.29,0.43 0.29,0.71 0,0.28 -0.11,0.53 -0.29,0.71l-2.48,2.48c-0.18,0.18 -0.43,0.29 -0.71,0.29 -0.27,0 -0.52,-0.11 -0.7,-0.28 -0.79,-0.74 -1.69,-1.36 -2.67,-1.85 -0.33,-0.16 -0.56,-0.5 -0.56,-0.9v-3.1C15.15,9.25 13.6,9 12,9z" />
++</vector>
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable/ic_mic_24.xml b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable/ic_mic_24.xml
+new file mode 100644
+index 0000000..791b475
+--- /dev/null
++++ b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable/ic_mic_24.xml
+@@ -0,0 +1,10 @@
++<vector xmlns:android="http://schemas.android.com/apk/res/android"
++    android:width="24dp"
++    android:height="24dp"
++    android:viewportWidth="24"
++    android:viewportHeight="24"
++    android:tint="?attr/colorControlNormal">
++  <path
++      android:fillColor="@android:color/white"
++      android:pathData="M12,14c1.66,0 2.99,-1.34 2.99,-3L15,5c0,-1.66 -1.34,-3 -3,-3S9,3.34 9,5v6c0,1.66 1.34,3 3,3zM17.3,11c0,3 -2.54,5.1 -5.3,5.1S6.7,14 6.7,11L5,11c0,3.41 2.72,6.23 6,6.72L11,21h2v-3.28c3.28,-0.48 6,-3.3 6,-6.72h-1.7z"/>
++</vector>
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable/ic_mic_off_24.xml b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable/ic_mic_off_24.xml
+new file mode 100644
+index 0000000..8e199f1
+--- /dev/null
++++ b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/drawable/ic_mic_off_24.xml
+@@ -0,0 +1,10 @@
++<vector xmlns:android="http://schemas.android.com/apk/res/android"
++    android:width="24dp"
++    android:height="24dp"
++    android:viewportWidth="24"
++    android:viewportHeight="24"
++    android:tint="?attr/colorControlNormal">
++  <path
++      android:fillColor="@android:color/white"
++      android:pathData="M19,11h-1.7c0,0.74 -0.16,1.43 -0.43,2.05l1.23,1.23c0.56,-0.98 0.9,-2.09 0.9,-3.28zM14.98,11.17c0,-0.06 0.02,-0.11 0.02,-0.17L15,5c0,-1.66 -1.34,-3 -3,-3S9,3.34 9,5v0.18l5.98,5.99zM4.27,3L3,4.27l6.01,6.01L9.01,11c0,1.66 1.33,3 2.99,3 0.22,0 0.44,-0.03 0.65,-0.08l1.66,1.66c-0.71,0.33 -1.5,0.52 -2.31,0.52 -2.76,0 -5.3,-2.1 -5.3,-5.1L5,11c0,3.41 2.72,6.23 6,6.72L11,21h2v-3.28c0.91,-0.13 1.77,-0.45 2.54,-0.9L19.73,21 21,19.73 4.27,3z"/>
++</vector>
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/layout/hms_view.xml b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/layout/hms_view.xml
+new file mode 100644
+index 0000000..7ba5955
+--- /dev/null
++++ b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/layout/hms_view.xml
+@@ -0,0 +1,19 @@
++<?xml version="1.0" encoding="utf-8"?>
++<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
++  xmlns:app="http://schemas.android.com/apk/res-auto"
++  xmlns:tools="http://schemas.android.com/tools"
++  android:layout_width="match_parent"
++  android:layout_height="match_parent"
++  android:background="#000">
++
++  <live.hms.videoview.HMSVideoView
++    android:id="@+id/hmsVideoView"
++    android:layout_width="wrap_content"
++    android:layout_height="wrap_content"
++    android:layout_gravity="center"
++    app:layout_constraintBottom_toBottomOf="parent"
++    app:layout_constraintEnd_toEndOf="parent"
++    app:layout_constraintStart_toStartOf="parent"
++    app:layout_constraintTop_toTopOf="parent" />
++
++</FrameLayout>
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/layout/player_view.xml b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/layout/player_view.xml
+new file mode 100644
+index 0000000..da457a4
+--- /dev/null
++++ b/node_modules/@100mslive/react-native-hms/android/build/intermediates/packaged_res/debug/packageDebugResources/layout/player_view.xml
+@@ -0,0 +1,10 @@
++<?xml version="1.0" encoding="utf-8"?>
++
++<androidx.media3.ui.PlayerView xmlns:android="http://schemas.android.com/apk/res/android"
++  xmlns:tools="http://schemas.android.com/tools"
++  xmlns:app="http://schemas.android.com/apk/res-auto"
++  android:id="@+id/hls_view"
++  android:layout_width="match_parent"
++  app:resize_mode="zoom"
++  android:layout_height="match_parent"
++  />
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/runtime_library_classes_jar/debug/bundleLibRuntimeToJarDebug/classes.jar b/node_modules/@100mslive/react-native-hms/android/build/intermediates/runtime_library_classes_jar/debug/bundleLibRuntimeToJarDebug/classes.jar
+new file mode 100644
+index 0000000..e60a67d
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/intermediates/runtime_library_classes_jar/debug/bundleLibRuntimeToJarDebug/classes.jar differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/intermediates/symbol_list_with_package_name/debug/generateDebugRFile/package-aware-r.txt b/node_modules/@100mslive/react-native-hms/android/build/intermediates/symbol_list_with_package_name/debug/generateDebugRFile/package-aware-r.txt
+new file mode 100644
+index 0000000..87c61d2
+--- /dev/null
++++ b/node_modules/@100mslive/react-native-hms/android/build/intermediates/symbol_list_with_package_name/debug/generateDebugRFile/package-aware-r.txt
+@@ -0,0 +1,10 @@
++com.reactnativehmssdk
++drawable ic_call_end_24
++drawable ic_camera_toggle_off
++drawable ic_camera_toggle_on
++drawable ic_mic_24
++drawable ic_mic_off_24
++id hls_view
++id hmsVideoView
++layout hms_view
++layout player_view
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab
+new file mode 100644
+index 0000000..e1ca5ff
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.keystream b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.keystream
+new file mode 100644
+index 0000000..611ec58
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.keystream differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.keystream.len b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.keystream.len
+new file mode 100644
+index 0000000..1807d70
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.keystream.len differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.len b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.len
+new file mode 100644
+index 0000000..cf8a30a
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.len differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.values.at b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.values.at
+new file mode 100644
+index 0000000..fc61bd9
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.values.at differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab_i b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab_i
+new file mode 100644
+index 0000000..95dc0c7
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab_i differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab_i.len b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab_i.len
+new file mode 100644
+index 0000000..131e265
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab_i.len differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab
+new file mode 100644
+index 0000000..403ba2e
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.keystream b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.keystream
+new file mode 100644
+index 0000000..92325c3
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.keystream differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.keystream.len b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.keystream.len
+new file mode 100644
+index 0000000..1523168
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.keystream.len differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.len b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.len
+new file mode 100644
+index 0000000..6a294aa
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.len differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.values.at b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.values.at
+new file mode 100644
+index 0000000..f60b549
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.values.at differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab_i b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab_i
+new file mode 100644
+index 0000000..78ddc01
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab_i differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab_i.len b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab_i.len
+new file mode 100644
+index 0000000..131e265
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab_i.len differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab
+new file mode 100644
+index 0000000..5a7a099
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.keystream b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.keystream
+new file mode 100644
+index 0000000..92325c3
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.keystream differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.keystream.len b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.keystream.len
+new file mode 100644
+index 0000000..1523168
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.keystream.len differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.len b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.len
+new file mode 100644
+index 0000000..6a294aa
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.len differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.values.at b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.values.at
+new file mode 100644
+index 0000000..8ceae76
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.values.at differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab_i b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab_i
+new file mode 100644
+index 0000000..78ddc01
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab_i differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab_i.len b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab_i.len
+new file mode 100644
+index 0000000..131e265
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab_i.len differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab
+new file mode 100644
+index 0000000..a2875bb
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab.keystream b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab.keystream
+new file mode 100644
+index 0000000..f2c2979
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab.keystream differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab.keystream.len b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab.keystream.len
+new file mode 100644
+index 0000000..b8872cd
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab.keystream.len differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab.len b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab.len
+new file mode 100644
+index 0000000..ec8f944
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab.len differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab.values.at b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab.values.at
+new file mode 100644
+index 0000000..909c1bd
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab.values.at differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab_i b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab_i
+new file mode 100644
+index 0000000..ae7eca9
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab_i differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab_i.len b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab_i.len
+new file mode 100644
+index 0000000..131e265
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab_i.len differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab
+new file mode 100644
+index 0000000..b224a89
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.keystream b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.keystream
+new file mode 100644
+index 0000000..ef823ed
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.keystream differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.keystream.len b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.keystream.len
+new file mode 100644
+index 0000000..5f92fea
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.keystream.len differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.len b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.len
+new file mode 100644
+index 0000000..be2ce70
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.len differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.values.at b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.values.at
+new file mode 100644
+index 0000000..c864547
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.values.at differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab_i b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab_i
+new file mode 100644
+index 0000000..2b6c4a6
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab_i differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab_i.len b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab_i.len
+new file mode 100644
+index 0000000..131e265
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab_i.len differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab
+new file mode 100644
+index 0000000..932505a
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.keystream b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.keystream
+new file mode 100644
+index 0000000..81b9c8e
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.keystream differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.keystream.len b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.keystream.len
+new file mode 100644
+index 0000000..602e6af
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.keystream.len differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.len b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.len
+new file mode 100644
+index 0000000..42df8b9
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.len differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.values b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.values
+new file mode 100644
+index 0000000..836b5a5
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.values differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.values.at b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.values.at
+new file mode 100644
+index 0000000..6210871
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.values.at differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.values.s b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.values.s
+new file mode 100644
+index 0000000..d80b962
+--- /dev/null
++++ b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.values.s
+@@ -0,0 +1 @@
++Á‘
+\ No newline at end of file
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab_i b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab_i
+new file mode 100644
+index 0000000..5f3389e
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab_i differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab_i.len b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab_i.len
+new file mode 100644
+index 0000000..131e265
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab_i.len differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab
+new file mode 100644
+index 0000000..3dbf2e5
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.keystream b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.keystream
+new file mode 100644
+index 0000000..611ec58
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.keystream differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.keystream.len b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.keystream.len
+new file mode 100644
+index 0000000..1807d70
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.keystream.len differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.len b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.len
+new file mode 100644
+index 0000000..cf8a30a
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.len differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.values.at b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.values.at
+new file mode 100644
+index 0000000..ad99014
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.values.at differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab_i b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab_i
+new file mode 100644
+index 0000000..95dc0c7
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab_i differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab_i.len b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab_i.len
+new file mode 100644
+index 0000000..131e265
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab_i.len differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab
+new file mode 100644
+index 0000000..1f65c42
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.keystream b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.keystream
+new file mode 100644
+index 0000000..1ad3d0c
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.keystream differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.keystream.len b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.keystream.len
+new file mode 100644
+index 0000000..5ca716f
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.keystream.len differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.len b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.len
+new file mode 100644
+index 0000000..fa606b6
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.len differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.values.at b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.values.at
+new file mode 100644
+index 0000000..6be7268
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.values.at differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab_i b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab_i
+new file mode 100644
+index 0000000..249f1c0
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab_i differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab_i.len b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab_i.len
+new file mode 100644
+index 0000000..131e265
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab_i.len differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab
+new file mode 100644
+index 0000000..8525e83
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.keystream b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.keystream
+new file mode 100644
+index 0000000..1f02c00
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.keystream differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.keystream.len b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.keystream.len
+new file mode 100644
+index 0000000..acfd4ac
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.keystream.len differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.len b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.len
+new file mode 100644
+index 0000000..fd5292d
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.len differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.values.at b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.values.at
+new file mode 100644
+index 0000000..1edbed5
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.values.at differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab_i b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab_i
+new file mode 100644
+index 0000000..b4b1c78
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab_i differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab_i.len b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab_i.len
+new file mode 100644
+index 0000000..131e265
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab_i.len differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/counters.tab b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/counters.tab
+new file mode 100644
+index 0000000..4fef5ef
+--- /dev/null
++++ b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/counters.tab
+@@ -0,0 +1,2 @@
++15
++0
+\ No newline at end of file
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab
+new file mode 100644
+index 0000000..19e128a
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.keystream b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.keystream
+new file mode 100644
+index 0000000..611ec58
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.keystream differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.keystream.len b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.keystream.len
+new file mode 100644
+index 0000000..1807d70
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.keystream.len differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.len b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.len
+new file mode 100644
+index 0000000..cf8a30a
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.len differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.values.at b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.values.at
+new file mode 100644
+index 0000000..3763557
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.values.at differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab_i b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab_i
+new file mode 100644
+index 0000000..95dc0c7
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab_i differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab_i.len b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab_i.len
+new file mode 100644
+index 0000000..131e265
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab_i.len differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab
+new file mode 100644
+index 0000000..96a2d08
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.keystream b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.keystream
+new file mode 100644
+index 0000000..fbebe84
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.keystream differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.keystream.len b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.keystream.len
+new file mode 100644
+index 0000000..933d553
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.keystream.len differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.len b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.len
+new file mode 100644
+index 0000000..cf8a30a
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.len differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.values.at b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.values.at
+new file mode 100644
+index 0000000..b6957ee
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.values.at differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab_i b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab_i
+new file mode 100644
+index 0000000..0c98456
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab_i differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab_i.len b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab_i.len
+new file mode 100644
+index 0000000..131e265
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab_i.len differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab
+new file mode 100644
+index 0000000..bafe003
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.keystream b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.keystream
+new file mode 100644
+index 0000000..58fe2a1
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.keystream differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.keystream.len b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.keystream.len
+new file mode 100644
+index 0000000..63c82a8
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.keystream.len differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.len b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.len
+new file mode 100644
+index 0000000..ace7984
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.len differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.values b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.values
+new file mode 100644
+index 0000000..ff0b8a2
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.values differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.values.at b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.values.at
+new file mode 100644
+index 0000000..e9edd12
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.values.at differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.values.s b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.values.s
+new file mode 100644
+index 0000000..93b0aef
+--- /dev/null
++++ b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.values.s
+@@ -0,0 +1 @@
++…Ö
+\ No newline at end of file
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab_i b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab_i
+new file mode 100644
+index 0000000..cf70b06
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab_i differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab_i.len b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab_i.len
+new file mode 100644
+index 0000000..4424406
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab_i.len differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/last-build.bin b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/last-build.bin
+new file mode 100644
+index 0000000..22391ec
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/cacheable/last-build.bin differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/classpath-snapshot/shrunk-classpath-snapshot.bin b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/classpath-snapshot/shrunk-classpath-snapshot.bin
+new file mode 100644
+index 0000000..050c134
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/kotlin/compileDebugKotlin/classpath-snapshot/shrunk-classpath-snapshot.bin differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/outputs/logs/manifest-merger-debug-report.txt b/node_modules/@100mslive/react-native-hms/android/build/outputs/logs/manifest-merger-debug-report.txt
+new file mode 100644
+index 0000000..ad99fb4
+--- /dev/null
++++ b/node_modules/@100mslive/react-native-hms/android/build/outputs/logs/manifest-merger-debug-report.txt
+@@ -0,0 +1,17 @@
++-- Merging decision tree log ---
++manifest
++ADDED from C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\src\main\AndroidManifest.xml:1:1-4:12
++INJECTED from C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\src\main\AndroidManifest.xml:1:1-4:12
++	package
++		ADDED from C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\src\main\AndroidManifest.xml:2:11-42
++		INJECTED from C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\src\main\AndroidManifest.xml
++	xmlns:android
++		ADDED from C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\src\main\AndroidManifest.xml:1:11-69
++uses-sdk
++INJECTED from C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\src\main\AndroidManifest.xml reason: use-sdk injection requested
++INJECTED from C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\src\main\AndroidManifest.xml
++INJECTED from C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\src\main\AndroidManifest.xml
++	android:targetSdkVersion
++		INJECTED from C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\src\main\AndroidManifest.xml
++	android:minSdkVersion
++		INJECTED from C:\Users\jnass\Downloads\Projects\voice-chat-app\node_modules\@100mslive\react-native-hms\android\src\main\AndroidManifest.xml
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/compileDebugJavaWithJavac/previous-compilation-data.bin b/node_modules/@100mslive/react-native-hms/android/build/tmp/compileDebugJavaWithJavac/previous-compilation-data.bin
+new file mode 100644
+index 0000000..b0869d0
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/compileDebugJavaWithJavac/previous-compilation-data.bin differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/META-INF/100mslive_react-native-hms_debug.kotlin_module b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/META-INF/100mslive_react-native-hms_debug.kotlin_module
+new file mode 100644
+index 0000000..c998a4c
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/META-INF/100mslive_react-native-hms_debug.kotlin_module differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSAudioshareActivity$resultLauncher$1$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSAudioshareActivity$resultLauncher$1$1.class
+new file mode 100644
+index 0000000..32facf9
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSAudioshareActivity$resultLauncher$1$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSAudioshareActivity.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSAudioshareActivity.class
+new file mode 100644
+index 0000000..c0c73f9
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSAudioshareActivity.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSDecoder$WhenMappings.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSDecoder$WhenMappings.class
+new file mode 100644
+index 0000000..6502163
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSDecoder$WhenMappings.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSDecoder.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSDecoder.class
+new file mode 100644
+index 0000000..f7733a3
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSDecoder.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSHLSPlayer$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSHLSPlayer$1.class
+new file mode 100644
+index 0000000..fb59d3b
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSHLSPlayer$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSHLSPlayer$hmsHlsPlaybackEventsObject$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSHLSPlayer$hmsHlsPlaybackEventsObject$1.class
+new file mode 100644
+index 0000000..2a42142
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSHLSPlayer$hmsHlsPlaybackEventsObject$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSHLSPlayer$hmsHlsPlayerStatsListenerObject$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSHLSPlayer$hmsHlsPlayerStatsListenerObject$1.class
+new file mode 100644
+index 0000000..2e8dc41
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSHLSPlayer$hmsHlsPlayerStatsListenerObject$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSHLSPlayer.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSHLSPlayer.class
+new file mode 100644
+index 0000000..30e9bce
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSHLSPlayer.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSHLSPlayerConstants.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSHLSPlayerConstants.class
+new file mode 100644
+index 0000000..ad4c48c
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSHLSPlayerConstants.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSHLSPlayerManager$Companion.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSHLSPlayerManager$Companion.class
+new file mode 100644
+index 0000000..0091c54
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSHLSPlayerManager$Companion.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSHLSPlayerManager.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSHLSPlayerManager.class
+new file mode 100644
+index 0000000..cf89245
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSHLSPlayerManager.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSHelper$getRemotePeerFromPeerId$2$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSHelper$getRemotePeerFromPeerId$2$1.class
+new file mode 100644
+index 0000000..51c4d3f
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSHelper$getRemotePeerFromPeerId$2$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSHelper.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSHelper.class
+new file mode 100644
+index 0000000..9796294
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSHelper.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSInteractivityHelper$WhenMappings.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSInteractivityHelper$WhenMappings.class
+new file mode 100644
+index 0000000..bce367e
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSInteractivityHelper$WhenMappings.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSInteractivityHelper.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSInteractivityHelper.class
+new file mode 100644
+index 0000000..4d30cf2
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSInteractivityHelper.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSManager$Companion.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSManager$Companion.class
+new file mode 100644
+index 0000000..c66014b
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSManager$Companion.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSManager$PipParamConfig.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSManager$PipParamConfig.class
+new file mode 100644
+index 0000000..60bd117
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSManager$PipParamConfig.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSManager$disableNoiseCancellationPlugin$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSManager$disableNoiseCancellationPlugin$1.class
+new file mode 100644
+index 0000000..94d8875
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSManager$disableNoiseCancellationPlugin$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSManager$enableNoiseCancellationPlugin$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSManager$enableNoiseCancellationPlugin$1.class
+new file mode 100644
+index 0000000..75f5a08
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSManager$enableNoiseCancellationPlugin$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSManager.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSManager.class
+new file mode 100644
+index 0000000..4c42f1f
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSManager.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNInteractivityCenter$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNInteractivityCenter$1.class
+new file mode 100644
+index 0000000..26bb0e3
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNInteractivityCenter$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNInteractivityCenter$2.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNInteractivityCenter$2.class
+new file mode 100644
+index 0000000..d461c7f
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNInteractivityCenter$2.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNInteractivityCenter$addResponseOnPollQuestion$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNInteractivityCenter$addResponseOnPollQuestion$1.class
+new file mode 100644
+index 0000000..17cb6d1
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNInteractivityCenter$addResponseOnPollQuestion$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNInteractivityCenter$fetchLeaderboard$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNInteractivityCenter$fetchLeaderboard$1.class
+new file mode 100644
+index 0000000..db11353
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNInteractivityCenter$fetchLeaderboard$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNInteractivityCenter$quickStartPoll$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNInteractivityCenter$quickStartPoll$1.class
+new file mode 100644
+index 0000000..4f2f737
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNInteractivityCenter$quickStartPoll$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNInteractivityCenter$startWhiteboard$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNInteractivityCenter$startWhiteboard$1.class
+new file mode 100644
+index 0000000..a1ce1bd
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNInteractivityCenter$startWhiteboard$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNInteractivityCenter$stop$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNInteractivityCenter$stop$1.class
+new file mode 100644
+index 0000000..cb059a1
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNInteractivityCenter$stop$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNInteractivityCenter$stopWhiteboard$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNInteractivityCenter$stopWhiteboard$1.class
+new file mode 100644
+index 0000000..b3f136f
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNInteractivityCenter$stopWhiteboard$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNInteractivityCenter.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNInteractivityCenter.class
+new file mode 100644
+index 0000000..045540e
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNInteractivityCenter.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$WhenMappings.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$WhenMappings.class
+new file mode 100644
+index 0000000..449bd71
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$WhenMappings.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$acceptRoleChange$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$acceptRoleChange$1.class
+new file mode 100644
+index 0000000..53ef718
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$acceptRoleChange$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$addKeyChangeListener$1$actionResultListener$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$addKeyChangeListener$1$actionResultListener$1.class
+new file mode 100644
+index 0000000..25f9146
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$addKeyChangeListener$1$actionResultListener$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$addKeyChangeListener$1$keyChangeListener$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$addKeyChangeListener$1$keyChangeListener$1.class
+new file mode 100644
+index 0000000..a835812
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$addKeyChangeListener$1$keyChangeListener$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$changeMetadata$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$changeMetadata$1.class
+new file mode 100644
+index 0000000..ec101b4
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$changeMetadata$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$changeName$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$changeName$1.class
+new file mode 100644
+index 0000000..687c626
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$changeName$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$changeRole$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$changeRole$1.class
+new file mode 100644
+index 0000000..d0c3f21
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$changeRole$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$changeRoleOfPeer$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$changeRoleOfPeer$1.class
+new file mode 100644
+index 0000000..596e956
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$changeRoleOfPeer$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$changeRoleOfPeersWithRoles$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$changeRoleOfPeersWithRoles$1.class
+new file mode 100644
+index 0000000..e885b2d
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$changeRoleOfPeersWithRoles$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$changeTrackState$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$changeTrackState$1.class
+new file mode 100644
+index 0000000..e6dcc97
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$changeTrackState$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$changeTrackStateForRoles$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$changeTrackStateForRoles$1.class
+new file mode 100644
+index 0000000..da0add2
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$changeTrackStateForRoles$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$endRoom$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$endRoom$1.class
+new file mode 100644
+index 0000000..5bf8a66
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$endRoom$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$getAuthTokenByRoomCode$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$getAuthTokenByRoomCode$1.class
+new file mode 100644
+index 0000000..54fea02
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$getAuthTokenByRoomCode$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$getRoomLayout$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$getRoomLayout$1.class
+new file mode 100644
+index 0000000..bc1ae5e
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$getRoomLayout$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$getSessionMetadataForKey$1$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$getSessionMetadataForKey$1$1.class
+new file mode 100644
+index 0000000..ee2235c
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$getSessionMetadataForKey$1$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$join$1$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$join$1$1.class
+new file mode 100644
+index 0000000..158b31c
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$join$1$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$join$1$2.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$join$1$2.class
+new file mode 100644
+index 0000000..40d0a91
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$join$1$2.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$join$1$3.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$join$1$3.class
+new file mode 100644
+index 0000000..de7efce
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$join$1$3.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$join$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$join$1.class
+new file mode 100644
+index 0000000..4642e78
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$join$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$leave$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$leave$1.class
+new file mode 100644
+index 0000000..861b419
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$leave$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$lowerLocalPeerHand$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$lowerLocalPeerHand$1.class
+new file mode 100644
+index 0000000..4f0de7a
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$lowerLocalPeerHand$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$lowerRemotePeerHand$1$1$1$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$lowerRemotePeerHand$1$1$1$1.class
+new file mode 100644
+index 0000000..22aa190
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$lowerRemotePeerHand$1$1$1$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$peerListIteratorNext$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$peerListIteratorNext$1.class
+new file mode 100644
+index 0000000..b613306
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$peerListIteratorNext$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$preview$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$preview$1.class
+new file mode 100644
+index 0000000..0d25396
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$preview$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$previewForRole$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$previewForRole$1.class
+new file mode 100644
+index 0000000..1d7b50a
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$previewForRole$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$raiseLocalPeerHand$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$raiseLocalPeerHand$1.class
+new file mode 100644
+index 0000000..1aad225
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$raiseLocalPeerHand$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$remoteMuteAllAudio$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$remoteMuteAllAudio$1.class
+new file mode 100644
+index 0000000..8aff1e5
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$remoteMuteAllAudio$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$removePeer$1$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$removePeer$1$1.class
+new file mode 100644
+index 0000000..7b5d518
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$removePeer$1$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$removePeer$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$removePeer$1.class
+new file mode 100644
+index 0000000..2bd2bc9
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$removePeer$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$sendBroadcastMessage$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$sendBroadcastMessage$1.class
+new file mode 100644
+index 0000000..7dabcee
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$sendBroadcastMessage$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$sendDirectMessage$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$sendDirectMessage$1.class
+new file mode 100644
+index 0000000..e3ba2e9
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$sendDirectMessage$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$sendGroupMessage$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$sendGroupMessage$1.class
+new file mode 100644
+index 0000000..359e591
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$sendGroupMessage$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$sendHLSTimedMetadata$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$sendHLSTimedMetadata$1.class
+new file mode 100644
+index 0000000..09e25a4
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$sendHLSTimedMetadata$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$setAudioDeviceChangeListener$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$setAudioDeviceChangeListener$1.class
+new file mode 100644
+index 0000000..d56540d
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$setAudioDeviceChangeListener$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$setSessionMetadataForKey$1$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$setSessionMetadataForKey$1$1.class
+new file mode 100644
+index 0000000..8a21728
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$setSessionMetadataForKey$1$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$startHLSStreaming$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$startHLSStreaming$1.class
+new file mode 100644
+index 0000000..d4cd9cf
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$startHLSStreaming$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$startRTMPOrRecording$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$startRTMPOrRecording$1.class
+new file mode 100644
+index 0000000..7373a89
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$startRTMPOrRecording$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$startRealTimeTranscription$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$startRealTimeTranscription$1.class
+new file mode 100644
+index 0000000..f873dba
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$startRealTimeTranscription$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$stopAudioshare$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$stopAudioshare$1.class
+new file mode 100644
+index 0000000..265164b
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$stopAudioshare$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$stopHLSStreaming$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$stopHLSStreaming$1.class
+new file mode 100644
+index 0000000..b2bb195
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$stopHLSStreaming$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$stopRealTimeTranscription$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$stopRealTimeTranscription$1.class
+new file mode 100644
+index 0000000..90bf571
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$stopRealTimeTranscription$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$stopRtmpAndRecording$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$stopRtmpAndRecording$1.class
+new file mode 100644
+index 0000000..3bbab6e
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$stopRtmpAndRecording$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$stopScreenshare$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$stopScreenshare$1.class
+new file mode 100644
+index 0000000..247c122
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$stopScreenshare$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$switchCamera$1$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$switchCamera$1$1.class
+new file mode 100644
+index 0000000..a206023
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK$switchCamera$1$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK.class
+new file mode 100644
+index 0000000..b21c86e
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSRNSDK.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSSDKViewManager$Companion.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSSDKViewManager$Companion.class
+new file mode 100644
+index 0000000..48d2f0a
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSSDKViewManager$Companion.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSSDKViewManager.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSSDKViewManager.class
+new file mode 100644
+index 0000000..5fbb78a
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSSDKViewManager.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSView$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSView$1.class
+new file mode 100644
+index 0000000..ef9e3b0
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSView$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSView.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSView.class
+new file mode 100644
+index 0000000..0e6424d
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HMSView.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HmsScreenshareActivity$resultLauncher$1$1.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HmsScreenshareActivity$resultLauncher$1$1.class
+new file mode 100644
+index 0000000..5be06b4
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HmsScreenshareActivity$resultLauncher$1$1.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HmsScreenshareActivity.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HmsScreenshareActivity.class
+new file mode 100644
+index 0000000..570d6fa
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HmsScreenshareActivity.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HmssdkPackage.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HmssdkPackage.class
+new file mode 100644
+index 0000000..b4b6ec8
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/HmssdkPackage.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/Interactivity/HMSInteractivityDecoder$JSWhiteboardState.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/Interactivity/HMSInteractivityDecoder$JSWhiteboardState.class
+new file mode 100644
+index 0000000..1cbd59e
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/Interactivity/HMSInteractivityDecoder$JSWhiteboardState.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/Interactivity/HMSInteractivityDecoder$WhenMappings.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/Interactivity/HMSInteractivityDecoder$WhenMappings.class
+new file mode 100644
+index 0000000..a9edeef
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/Interactivity/HMSInteractivityDecoder$WhenMappings.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/Interactivity/HMSInteractivityDecoder.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/Interactivity/HMSInteractivityDecoder.class
+new file mode 100644
+index 0000000..ac3c982
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/Interactivity/HMSInteractivityDecoder.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/PIPAction.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/PIPAction.class
+new file mode 100644
+index 0000000..e221206
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/PIPAction.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/PIPActions.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/PIPActions.class
+new file mode 100644
+index 0000000..4bd6c71
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/PIPActions.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/PipActionReceiver$Companion.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/PipActionReceiver$Companion.class
+new file mode 100644
+index 0000000..a2600b0
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/PipActionReceiver$Companion.class differ
+diff --git a/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/PipActionReceiver.class b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/PipActionReceiver.class
+new file mode 100644
+index 0000000..e2c9004
+Binary files /dev/null and b/node_modules/@100mslive/react-native-hms/android/build/tmp/kotlin-classes/debug/com/reactnativehmssdk/PipActionReceiver.class differ
 diff --git a/node_modules/@100mslive/react-native-hms/lib/module/classes/HMSSDK.js b/node_modules/@100mslive/react-native-hms/lib/module/classes/HMSSDK.js
-index abcdef0..1234567 100644
+index 36bb3b8..18a394e 100644
 --- a/node_modules/@100mslive/react-native-hms/lib/module/classes/HMSSDK.js
 +++ b/node_modules/@100mslive/react-native-hms/lib/module/classes/HMSSDK.js
-@@
+@@ -2910,9 +2910,7 @@ export class HMSSDK {
+    * @memberof HMSSDK
+    */
+   static async build(params) {
 -    const {
 -      version
 -    } = require('../../package.json');
-+    // Patch: Metro bundler fails to resolve ../../package.json
-+    const version = { version: '1.11.0' }; // mimic package.json export
++    const version = '0.0.0';
      const {
        major,
        minor,
-       patch
