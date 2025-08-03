@@ -173,10 +173,16 @@ export default function LoginScreen() {
       locations={[0.1, 0.5, 0.9]}
       style={styles.container}
     >
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, justifyContent: 'center' }}>
         {/* Header */}
-        <View style={{ alignItems: 'center', marginTop: 48 }}>
-          <Text style={styles.title}>Dream KSA</Text>
+        <View style={{ alignItems: 'center', marginTop: 80, marginBottom: 12 }}>
+          <View style={styles.logoWrapper}>
+            <Image
+              source={require('../assets/images/logo.png')}
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
+          </View>
           <Text style={styles.subtitle}>غرف الدردشة الصوتية</Text>
           <Text style={styles.desc}>تواصل مع الأصدقاء حول المملكة والعالم</Text>
         </View>
@@ -265,6 +271,23 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
+  logoWrapper: {
+    backgroundColor: '#fff',
+    padding: 2,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.10,
+    shadowRadius: 8,
+    elevation: 6,
+    marginBottom: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logoImage: {
+    width: 160,
+    height: 160,
+  },
   container: {
     flex: 1,
     position: 'relative',
