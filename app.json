@@ -8,6 +8,8 @@
     "scheme": "dream-ksa",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "jsEngine": "jsc",
+    "owner": "jnasser",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.jnass.voicechat",
@@ -16,12 +18,12 @@
       }
     },
     "android": {
+      "package": "app.dreamksa",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
-      "package": "app.dreamksa"
+      "edgeToEdgeEnabled": true
     },
     "web": {
       "bundler": "metro",
@@ -48,9 +50,6 @@
       "eas": {
         "projectId": "8d71da18-3c79-489a-aefa-e3cc55839bb3"
       }
-    },
-    "owner": "jnasser"
-    ,
-    "jsEngine": "jsc"
+    }
   }
 }

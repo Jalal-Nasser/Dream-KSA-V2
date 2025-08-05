@@ -1,15 +1,24 @@
 // app/_layout.tsx
-
-import { Stack } from 'expo-router';
+import { Slot } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, StyleSheet } from 'react-native';
 
 export default function Layout() {
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,       // hide the header on all screens
-        gestureEnabled: true,     // allow swipe gestures on iOS
-        animation: 'fade',        // screen transition animation
-      }}
-    />
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <Slot />
+      </View>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#000', // Optional background
+  },
+  container: {
+    flex: 1,
+  },
+});
