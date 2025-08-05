@@ -30,7 +30,7 @@ import {
 import { supabase } from '../lib/supabase'; // adjust the path if needed
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
-import * as AuthSession from 'expo-auth-session'; // <-- Added this import
+import * as AuthSession from 'expo-auth-session';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -103,14 +103,17 @@ export default function LoginScreen() {
   const router = useRouter();
 
   // Google Auth
-const [request, response, promptAsync] = Google.useAuthRequest({
-  expoClientId: '85207766867-6rgu5nl7rfd3bshqun4k042o0blgbsff.apps.googleusercontent.com',
-  androidClientId: '85207766867-p1d7i5fv9vbj3i33t10ggd4afl45gf58.apps.googleusercontent.com',
-  iosClientId: '85207766867-45puq8ioqs19039tctk6tgqm17cdjqin.apps.googleusercontent.com',
-  webClientId: '85207766867-6rgu5nl7rfd3bshqun4k042o0blgbsff.apps.googleusercontent.com',
-  // You need to explicitly provide the redirectUri that you registered in Google Cloud Console
-  redirectUri: 'https://auth.expo.io/@jnasser/dream-ksa',
-});
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    expoClientId: '85207766867-6rgu5nl7rfd3bshqun4k042o0blgbsff.apps.googleusercontent.com',
+    androidClientId: '85207766867-p1d7i5fv9vbj3i33t10ggd4afl45gf58.apps.googleusercontent.com',
+    iosClientId: '85207766867-45puq8ioqs19039tctk6tgqm17cdjqin.apps.googleusercontent.com',
+    webClientId: '85207766867-6rgu5nl7rfd3bshqun4k042o0blgbsff.apps.googleusercontent.com',
+    // THIS IS THE CORRECT LINE THAT MUST BE USED.
+    // It generates the dynamic redirect URI that Google and Expo expect.
+    redirectUri: AuthSession.makeRedirectUri({
+      useProxy: true,
+    }),
+  });
 
   useEffect(() => {
     const loginWithSupabase = async (accessToken: string) => {
