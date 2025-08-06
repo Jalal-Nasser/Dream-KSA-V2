@@ -104,7 +104,6 @@ export default function LoginScreen() {
 
   // Google Auth
   const [request, response, promptAsync] = Google.useAuthRequest({
-    expoClientId: '85207766867-6rgu5nl7rfd3bshqun4k042o0blgbsff.apps.googleusercontent.com',
     androidClientId: '85207766867-p1d7i5fv9vbj3i33t10ggd4afl45gf58.apps.googleusercontent.com',
     iosClientId: '85207766867-45puq8ioqs19039tctk6tgqm17cdjqin.apps.googleusercontent.com',
     webClientId: '85207766867-6rgu5nl7rfd3bshqun4k042o0blgbsff.apps.googleusercontent.com',
