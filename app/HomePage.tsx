@@ -60,7 +60,7 @@ export default function HomePage() {
         {/* Create Room Button */}
         <View style={homeStyles.createRoomRow}>
           <Text style={homeStyles.roomsCount}>جميع الغرف <Text style={{ color: '#6d28d9' }}>6</Text></Text>
-          <Pressable style={homeStyles.createRoomBtn}>
+          <Pressable style={homeStyles.createRoomBtn} onPress={() => router.push('/voicechat?roomId=new') }>
             <Plus color="#fff" size={18} />
             <Text style={homeStyles.createRoomText}>إنشاء غرفة</Text>
           </Pressable>
@@ -69,7 +69,11 @@ export default function HomePage() {
         {/* Room Cards Grid */}
         <View style={homeStyles.roomsGrid}>
           {[1,2,3,4,5,6].map((i) => (
-            <View key={i} style={homeStyles.roomCard}>
+            <Pressable
+              key={i}
+              style={homeStyles.roomCard}
+              onPress={() => router.push(`/voicechat?roomId=room${i}`)}
+            >
               <Image source={{ uri: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb' }} style={homeStyles.roomImage} />
               <View style={homeStyles.roomOverlay} />
               <View style={homeStyles.roomTopRow}>
@@ -85,7 +89,7 @@ export default function HomePage() {
                 <View style={homeStyles.roomStat}><Text style={homeStyles.roomStatText}>201</Text></View>
                 <View style={homeStyles.roomStat}><Text style={homeStyles.roomStatText}>4</Text></View>
               </View>
-            </View>
+            </Pressable>
           ))}
         </View>
       </ScrollView>
