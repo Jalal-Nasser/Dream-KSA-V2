@@ -50,11 +50,15 @@ export default function CustomizableVoiceChatScreen() {
   // Mock values for features not yet implemented in useHMSRoom
   const isDeafened = false;
   const participants = [
-    { name: 'أنت', isLocal: true, audioTrack: { isMute: isMuted } },
-    ...remotePeers.map((peer: any, index: number) => ({
-      name: peer.name || `مشارك ${index + 1}`,
+    { 
+      name: localPeer?.name || 'أنت', 
+      isLocal: true, 
+      audioTrack: { isMute: localPeer?.audioTrack?.isMute ?? isMuted } 
+    },
+    ...(remotePeers || []).map((peer: any, index: number) => ({
+      name: peer?.name || `مشارك ${index + 1}`,
       isLocal: false,
-      audioTrack: { isMute: peer.isMuted || false }
+      audioTrack: { isMute: peer?.audioTrack?.isMute ?? peer?.isMuted ?? false }
     }))
   ];
 
@@ -215,19 +219,19 @@ export default function CustomizableVoiceChatScreen() {
               <View key={index} style={styles.participantItem}>
                 <View style={[styles.participantAvatar, { backgroundColor: theme }]}>
                   <Text style={styles.participantInitial}>
-                    {participant.name?.[0] || 'م'}
+                    {participant?.name?.[0] || 'م'}
                   </Text>
                 </View>
                 <View style={styles.participantInfo}>
                   <Text style={styles.participantName}>
-                    {participant.name || `مشارك ${index + 1}`}
+                    {participant?.name || `مشارك ${index + 1}`}
                   </Text>
                   <Text style={styles.participantRole}>
-                    {participant.isLocal ? 'أنت' : 'مشارك'}
+                    {participant?.isLocal ? 'أنت' : 'مشارك'}
                   </Text>
                 </View>
                 <View style={styles.participantStatus}>
-                  {participant.audioTrack?.isMute ? (
+                  {participant?.audioTrack?.isMute ? (
                     <MicOff size={16} color="#ef4444" />
                   ) : (
                     <Mic size={16} color="#10b981" />

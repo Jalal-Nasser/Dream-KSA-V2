@@ -3,6 +3,8 @@ import fetch from 'node-fetch';
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import jwt from 'jsonwebtoken';
+import { v4 as uuidv4 } from 'uuid';
 
 dotenv.config();
 
@@ -122,59 +124,50 @@ app.post('/get-token', async (req, res) => {
       return res.status(403).json({ error: 'You are banned from this room.' });
     }
 
-    // Generate token using 100ms API
+    // Generate token using JWT (more reliable than API call)
+    const now = Math.floor(Date.now() / 1000);
     const tokenPayload = {
       access_key: HMS_APP_ID,
-      app_secret: HMS_APP_SECRET, 
       room_id: room_id,
       user_id: user_id,
       role: role,
       type: 'app',
       version: 2,
-      iat: Math.floor(Date.now() / 1000),
-      nbf: Math.floor(Date.now() / 1000),
+      iat: now,
+      nbf: now,
+      exp: now + (24 * 60 * 60), // 24 hours expiry
+      jti: uuidv4() // unique token ID
     };
 
-    console.log('Token payload:', tokenPayload);
+    console.log('Generating JWT token with payload:', tokenPayload);
 
-    const tokenResponse = await fetch('https://prod-in2.100ms.live/api/v2/app-tokens', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${HMS_MANAGEMENT_TOKEN}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(tokenPayload),
-    });
+    try {
+      const authToken = jwt.sign(tokenPayload, HMS_APP_SECRET, { algorithm: 'HS256' });
+      console.log('JWT token generated successfully');
 
-    console.log('Token response status:', tokenResponse.status);
+      // Log user joining room
+      await supabase
+        .from('room_participants')
+        .upsert({
+          user_id: user_id,
+          room_id: room_id,
+          user_name: user_name,
+          role: role,
+          joined_at: new Date().toISOString(),
+          is_active: true
+        });
 
-    if (!tokenResponse.ok) {
-      const errorText = await tokenResponse.text();
-      console.error('HMS token error:', errorText);
-      throw new Error(`HMS token API error: ${tokenResponse.status} - ${errorText}`);
-    }
-
-    const tokenData = await tokenResponse.json();
-    console.log('Token generated successfully');
-
-    // Log user joining room
-    await supabase
-      .from('room_participants')
-      .upsert({
-        user_id: user_id,
+      res.json({ 
+        token: authToken,
         room_id: room_id,
-        user_name: user_name,
-        role: role,
-        joined_at: new Date().toISOString(),
-        is_active: true
+        user_id: user_id,
+        role: role
       });
 
-    res.json({ 
-      token: tokenData.token,
-      room_id: room_id,
-      user_id: user_id,
-      role: role
-    });
+    } catch (jwtError) {
+      console.error('JWT token generation error:', jwtError);
+      res.status(500).json({ error: 'Failed to generate authentication token' });
+    }
 
   } catch (error) {
     console.error('Token generation error:', error);

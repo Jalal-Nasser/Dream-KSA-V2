@@ -90,6 +90,11 @@ export default function CreateRoomScreen() {
             value={roomName}
             onChangeText={setRoomName}
             editable={!loading}
+            multiline={false}
+            returnKeyType="done"
+            autoCapitalize="none"
+            autoCorrect={false}
+            textAlign="right"
           />
 
           {/* Room Description */}
@@ -103,6 +108,9 @@ export default function CreateRoomScreen() {
             multiline
             numberOfLines={3}
             editable={!loading}
+            autoCapitalize="none"
+            autoCorrect={false}
+            textAlign="right"
           />
 
           {/* Theme Selection */}
@@ -194,10 +202,12 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     textAlign: 'right',
+    writingDirection: 'rtl',
   },
   textArea: {
     minHeight: 80,
     textAlignVertical: 'top',
+    writingDirection: 'rtl',
   },
   themeContainer: {
     flexDirection: 'row',

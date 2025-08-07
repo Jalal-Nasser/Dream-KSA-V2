@@ -29,6 +29,7 @@ import {
 
 import { supabase } from '../lib/supabase'; // adjust the path if needed
 import * as Google from 'expo-auth-session/providers/google';
+import * as Facebook from 'expo-auth-session/providers/facebook';
 import * as WebBrowser from 'expo-web-browser';
 import * as AuthSession from 'expo-auth-session';
 
@@ -109,46 +110,64 @@ export default function LoginScreen() {
     webClientId: '85207766867-6rgu5nl7rfd3bshqun4k042o0blgbsff.apps.googleusercontent.com',
   });
 
+  // Facebook Auth
+  const [facebookRequest, facebookResponse, facebookPromptAsync] = Facebook.useAuthRequest({
+    clientId: 'YOUR_FACEBOOK_APP_ID', // Replace with your Facebook App ID
+  });
+
   useEffect(() => {
-    const loginWithSupabase = async (accessToken: string) => {
+    const loginWithSupabase = async (accessToken: string, provider: 'google' | 'facebook') => {
       // Try signInWithIdToken first
       const { data, error } = await supabase.auth.signInWithIdToken({
-        provider: 'google',
+        provider: provider,
         token: accessToken,
       });
 
       if (error) {
-        console.error('❌ Supabase login failed:', error.message);
+        console.error(`❌ Supabase ${provider} login failed:`, error.message);
         // Fallback: try signInWithOAuth if needed
         try {
           const { data: oauthData, error: oauthError } = await supabase.auth.signInWithOAuth({
-            provider: 'google',
+            provider: provider,
           });
           if (oauthError) {
-            console.error('❌ Supabase OAuth fallback failed:', oauthError.message);
+            console.error(`❌ Supabase ${provider} OAuth fallback failed:`, oauthError.message);
           } else {
-            console.log('✅ Supabase OAuth fallback success:', oauthData);
+            console.log(`✅ Supabase ${provider} OAuth fallback success:`, oauthData);
           }
         } catch (fallbackErr) {
-          console.error('❌ Supabase OAuth fallback exception:', fallbackErr);
+          console.error(`❌ Supabase ${provider} OAuth fallback exception:`, fallbackErr);
         }
       } else {
-        console.log('✅ Supabase login success:', data.user);
+        console.log(`✅ Supabase ${provider} login success:`, data.user);
         router.push('/(tabs)');
       }
     };
 
+    // Handle Google Auth Response
     if (response?.type === 'success') {
       const { authentication } = response;
       if (authentication?.accessToken) {
         (async () => {
-          await loginWithSupabase(authentication.accessToken);
+          await loginWithSupabase(authentication.accessToken, 'google');
         })();
       }
     } else if (response?.type === 'error') {
       console.error('❌ Google login error:', response.error);
     }
-  }, [response]);
+
+    // Handle Facebook Auth Response
+    if (facebookResponse?.type === 'success') {
+      const { authentication } = facebookResponse;
+      if (authentication?.accessToken) {
+        (async () => {
+          await loginWithSupabase(authentication.accessToken, 'facebook');
+        })();
+      }
+    } else if (facebookResponse?.type === 'error') {
+      console.error('❌ Facebook login error:', facebookResponse.error);
+    }
+  }, [response, facebookResponse]);
 
   const handleLogin = () => {
     if (phoneNumber.trim()) {
@@ -167,6 +186,14 @@ export default function LoginScreen() {
       promptAsync();
     } else {
       console.error('Google login request not ready');
+    }
+  };
+
+  const handleFacebookLogin = () => {
+    if (facebookRequest) {
+      facebookPromptAsync();
+    } else {
+      console.error('Facebook login request not ready');
     }
   };
 
@@ -224,6 +251,18 @@ export default function LoginScreen() {
             <Text style={styles.googleButtonText}>تسجيل الدخول بـ Google</Text>
           </CustomButton>
 
+          {/* Facebook Login */}
+          <CustomButton
+            onPress={handleFacebookLogin}
+            style={styles.facebookButton}
+            disabled={!facebookRequest}
+          >
+            <View style={styles.facebookIcon}>
+              <Text style={styles.facebookIconText}>f</Text>
+            </View>
+            <Text style={styles.facebookButtonText}>تسجيل الدخول بـ Facebook</Text>
+          </CustomButton>
+
           {/* Divider */}
           <View style={styles.dividerRow}>
             <View style={styles.divider} />
@@ -260,7 +299,7 @@ export default function LoginScreen() {
           <View style={styles.roomsRow}>
             <View style={styles.roomBadge}>
               <Star size={16} color="#facc15" />
-              <Text style={styles.roomBadgeText}>أمسية مصرية</Text>
+              <Text style={styles.roomBadgeText}>أماسي عربية</Text>
             </View>
             <View style={styles.roomBadge}>
               <Sparkles size={16} color="#38bdf8" />
@@ -409,6 +448,36 @@ const styles = StyleSheet.create({
   },
   googleButtonText: {
     color: '#222',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginRight: 8,
+  },
+  facebookButton: {
+    backgroundColor: '#1877f2',
+    borderRadius: 12,
+    height: 48,
+    flexDirection: 'row-reverse',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+    paddingHorizontal: 12,
+  },
+  facebookIcon: {
+    width: 22,
+    height: 22,
+    backgroundColor: '#fff',
+    borderRadius: 11,
+    marginLeft: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  facebookIconText: {
+    color: '#1877f2',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  facebookButtonText: {
+    color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
     marginRight: 8,
