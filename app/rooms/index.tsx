@@ -46,7 +46,7 @@ const RoomScreen = () => {
       for (const role of rolesToTry) {
         try {
           console.log(`📡 Fetching auth token with role: ${role}...`);
-          const res = await fetch('http://192.168.1.9:4000/get-token', {
+          const res = await fetch('http://localhost:3001/get-token', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -84,7 +84,7 @@ const RoomScreen = () => {
         for (const role of templateRoles) {
           try {
             console.log(`📡 Fetching auth token with template ID and role: ${role}...`);
-            const res = await fetch('http://192.168.1.9:4000/get-token', {
+            const res = await fetch('http://localhost:3001/get-token', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -158,7 +158,7 @@ const RoomScreen = () => {
       
       try {
         // GET TOKEN with confirmed room ID from dashboard
-        const res = await fetch('http://192.168.1.9:4000/get-token', {
+        const res = await fetch('http://localhost:3001/get-token', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -204,7 +204,7 @@ const RoomScreen = () => {
         
         <Text style={styles.title}>Voice Chat Room</Text>
         
-        <Pressable style={styles.navButton} onPress={() => router.push('/HomePage')}>
+        <Pressable style={styles.navButton} onPress={() => router.push('/(tabs)')}>
           <Home color="#4f46e5" size={24} />
           <Text style={styles.navText}>Home</Text>
         </Pressable>

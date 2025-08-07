@@ -60,7 +60,7 @@ export default function HomePage() {
         {/* Create Room Button */}
         <View style={homeStyles.createRoomRow}>
           <Text style={homeStyles.roomsCount}>جميع الغرف <Text style={{ color: '#6d28d9' }}>6</Text></Text>
-          <Pressable style={homeStyles.createRoomBtn} onPress={() => router.push('/voicechat?roomId=new') }>
+          <Pressable style={homeStyles.createRoomBtn} onPress={() => router.push('/createroom') }>
             <Plus color="#fff" size={18} />
             <Text style={homeStyles.createRoomText}>إنشاء غرفة</Text>
           </Pressable>

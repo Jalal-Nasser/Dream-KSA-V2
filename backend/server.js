@@ -23,8 +23,10 @@ app.post('/create-room', async (req, res) => {
   const { name, description = 'Voice chat room', type = 'voice' } = req.body;
 
   try {
+    console.log('Creating room with HMS...', { name, description });
+    
     // Create room in 100ms
-    const roomResponse = await fetch('https://prod-in.100ms.live/api/v2/rooms', {
+    const roomResponse = await fetch('https://prod-in2.100ms.live/api/v2/rooms', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${HMS_MANAGEMENT_TOKEN}`,
@@ -38,11 +40,16 @@ app.post('/create-room', async (req, res) => {
       }),
     });
 
-    const roomData = await roomResponse.json();
-
+    console.log('HMS response status:', roomResponse.status);
+    
     if (!roomResponse.ok) {
-      throw new Error(roomData.message || 'Failed to create room');
+      const errorText = await roomResponse.text();
+      console.error('HMS error response:', errorText);
+      throw new Error(`HMS API error: ${roomResponse.status} - ${errorText}`);
     }
+
+    const roomData = await roomResponse.json();
+    console.log('HMS room created:', roomData);
 
     // Store room in Supabase
     const { data: dbRoom, error: dbError } = await supabase
@@ -62,6 +69,8 @@ app.post('/create-room', async (req, res) => {
     if (dbError && dbError.code !== '23505') { // Ignore duplicate key errors
       console.error('Database error:', dbError);
       // Continue anyway as the HMS room was created successfully
+    } else {
+      console.log('Room stored in database:', dbRoom);
     }
 
     res.json({
@@ -82,6 +91,8 @@ app.post('/get-token', async (req, res) => {
   const { user_id, room_id, role = 'listener', user_name = 'Guest' } = req.body;
 
   try {
+    console.log('Generating token for:', { user_id, room_id, role, user_name });
+
     // Check if user is banned
     const { data: banned, error: banError } = await supabase
       .from('banned_users')
@@ -91,7 +102,7 @@ app.post('/get-token', async (req, res) => {
       .single();
 
     if (banError && banError.code !== 'PGRST116') {
-      throw banError;
+      console.error('Ban check error:', banError);
     }
 
     if (banned) {
@@ -99,30 +110,39 @@ app.post('/get-token', async (req, res) => {
     }
 
     // Generate token using 100ms API
-    const tokenResponse = await fetch('https://prod-in.100ms.live/api/v2/app-tokens', {
+    const tokenPayload = {
+      access_key: HMS_APP_ID,
+      app_secret: HMS_APP_SECRET, 
+      room_id: room_id,
+      user_id: user_id,
+      role: role,
+      type: 'app',
+      version: 2,
+      iat: Math.floor(Date.now() / 1000),
+      nbf: Math.floor(Date.now() / 1000),
+    };
+
+    console.log('Token payload:', tokenPayload);
+
+    const tokenResponse = await fetch('https://prod-in2.100ms.live/api/v2/app-tokens', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${HMS_MANAGEMENT_TOKEN}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        access_key: HMS_APP_ID,
-        app_secret: HMS_APP_SECRET,
-        room_id: room_id,
-        user_id: user_id,
-        role: role,
-        type: 'app',
-        version: 2,
-        iat: Math.floor(Date.now() / 1000),
-        nbf: Math.floor(Date.now() / 1000),
-      }),
+      body: JSON.stringify(tokenPayload),
     });
 
-    const tokenData = await tokenResponse.json();
+    console.log('Token response status:', tokenResponse.status);
 
     if (!tokenResponse.ok) {
-      throw new Error(tokenData.message || 'Failed to generate token');
+      const errorText = await tokenResponse.text();
+      console.error('HMS token error:', errorText);
+      throw new Error(`HMS token API error: ${tokenResponse.status} - ${errorText}`);
     }
+
+    const tokenData = await tokenResponse.json();
+    console.log('Token generated successfully');
 
     // Log user joining room
     await supabase

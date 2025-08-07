@@ -22,7 +22,15 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "app.dreamksa"
+      "package": "app.dreamksa",
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.CHANGE_WIFI_STATE",
+        "android.permission.ACCESS_WIFI_STATE",
+        "android.permission.WAKE_LOCK"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -43,9 +51,11 @@
       [
         "react-native-permissions",
         {
-          "ios": {
-            "permissions": ["MICROPHONE"]
-          }
+          "iosPermissions": ["MICROPHONE"],
+          "androidPermissions": [
+            "android.permission.RECORD_AUDIO",
+            "android.permission.MODIFY_AUDIO_SETTINGS"
+          ]
         }
       ]
     ],

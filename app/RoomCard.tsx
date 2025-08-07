@@ -13,8 +13,17 @@ const RoomCard = ({ room }: { room: Room }) => {
   const router = useRouter();
   
   const handleRoomPress = () => {
-    // Navigate to voice chat room
-    router.push(`/voicechat?roomId=${room.id}&roomName=${room?.name || 'نقاش تقني'}`);
+    // Navigate to real voice chat room with HMS integration
+    router.push({
+      pathname: '/voicechat_real',
+      params: {
+        roomId: room.id,
+        roomName: room?.name || 'نقاش تقني',
+        userId: 'user_' + Math.random().toString(36).substr(2, 9),
+        userName: 'مستخدم ضيف',
+        role: 'guest'
+      }
+    });
   };
 
   return (

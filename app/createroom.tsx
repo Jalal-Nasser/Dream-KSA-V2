@@ -19,7 +19,7 @@ export default function CreateRoomScreen() {
     }
     setLoading(true);
     try {
-      const res = await fetch('http://192.168.1.9:4000/create-room', {
+      const res = await fetch('http://localhost:3001/create-room', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: roomName.trim() }),
@@ -29,11 +29,11 @@ export default function CreateRoomScreen() {
         Alert.alert('Room created!', `Room ID: ${data.id}`, [
           {
             text: 'Go to Room',
-            onPress: () => router.push(`/voicechat?roomId=${data.id}&roomName=${roomName.trim()}` as any)
+            onPress: () => router.push(`/voicechat?roomId=${data.id}&roomName=${roomName.trim()}`)
           },
           {
             text: 'Back to Home',
-            onPress: () => router.push('/HomePage')
+            onPress: () => router.push('/(tabs)')
           }
         ]);
       } else {
