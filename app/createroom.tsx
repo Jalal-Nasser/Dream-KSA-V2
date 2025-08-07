@@ -202,12 +202,10 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     textAlign: 'right',
-    writingDirection: 'rtl',
   },
   textArea: {
     minHeight: 80,
     textAlignVertical: 'top',
-    writingDirection: 'rtl',
   },
   themeContainer: {
     flexDirection: 'row',

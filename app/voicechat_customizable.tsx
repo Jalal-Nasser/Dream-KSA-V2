@@ -31,6 +31,7 @@ export default function CustomizableVoiceChatScreen() {
   const { roomId, roomName } = useLocalSearchParams<{ roomId: string; roomName: string }>();
   const [roomData, setRoomData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [joinAttempted, setJoinAttempted] = useState(false);
   
   const {
     isConnected,
@@ -89,7 +90,8 @@ export default function CustomizableVoiceChatScreen() {
   // Auto-join room when component mounts
   useEffect(() => {
     const autoJoinRoom = async () => {
-      if (roomId && !isConnected) {
+      if (roomId && !isConnected && !loading && !joinAttempted) {
+        setJoinAttempted(true);
         try {
           // Get auth token from backend
           const response = await fetch('http://192.168.1.9:3001/get-token', {
@@ -116,12 +118,16 @@ export default function CustomizableVoiceChatScreen() {
         } catch (error) {
           console.error('Auto-join failed:', error);
           Alert.alert('خطأ', 'فشل في الانضمام للغرفة');
+          setJoinAttempted(false); // Reset on error to allow retry
         }
       }
     };
 
-    autoJoinRoom();
-  }, [roomId, roomName, isConnected, joinRoom]);
+    // Only join if we have roomId, not connected, and not loading
+    if (roomId && !loading && !joinAttempted) {
+      autoJoinRoom();
+    }
+  }, [roomId, loading, joinAttempted]); // Remove dependencies that change frequently
 
   const handleLeaveRoom = async () => {
     Alert.alert(

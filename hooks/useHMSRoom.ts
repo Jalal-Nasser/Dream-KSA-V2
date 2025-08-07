@@ -131,6 +131,19 @@ export const useHMSRoom = ({ roomId, userId, userName, role }: UseHMSRoomProps) 
 
   const onError = (error: any) => {
     console.error('❌ REAL HMS Error:', error);
+    
+    // Handle "peer already joined" error gracefully
+    if (error.code === 400 && error.message?.includes('peer already joined')) {
+      console.log('ℹ️ Peer already joined - treating as success');
+      setRoomState(prev => ({
+        ...prev,
+        isConnected: true,
+        isConnecting: false,
+        error: null,
+      }));
+      return;
+    }
+    
     setRoomState(prev => ({
       ...prev,
       error: error.message || 'Connection error',
