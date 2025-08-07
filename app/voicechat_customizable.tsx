@@ -23,6 +23,7 @@ import {
   VolumeX
 } from 'lucide-react-native';
 import { useHMSRoom } from '../hooks/useHMSRoom';
+import { API_BASE_URL } from '../config/api';
 
 const { width, height } = Dimensions.get('window');
 
@@ -71,7 +72,7 @@ export default function CustomizableVoiceChatScreen() {
   useEffect(() => {
     const fetchRoomData = async () => {
       try {
-        const response = await fetch(`http://192.168.1.9:3001/room/${roomId}`);
+        const response = await fetch(`${API_BASE_URL}/room/${roomId}`);
         const data = await response.json();
         setRoomData(data);
       } catch (error) {
@@ -94,7 +95,7 @@ export default function CustomizableVoiceChatScreen() {
         setJoinAttempted(true);
         try {
           // Get auth token from backend
-          const response = await fetch('http://192.168.1.9:3001/get-token', {
+          const response = await fetch(`${API_BASE_URL}/get-token`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

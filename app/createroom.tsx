@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { ArrowLeft, Plus } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { API_BASE_URL } from '../config/api';
 
 export default function CreateRoomScreen() {
   const [roomName, setRoomName] = useState('');
@@ -36,7 +37,7 @@ export default function CreateRoomScreen() {
         theme: selectedTheme,
       };
       
-      const res = await fetch('http://192.168.1.9:3001/create-room', {
+      const res = await fetch(`${API_BASE_URL}/create-room`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(roomData),
