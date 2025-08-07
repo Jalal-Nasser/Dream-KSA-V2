@@ -53,12 +53,12 @@ export default function CustomizableVoiceChatScreen() {
     { 
       name: localPeer?.name || 'أنت', 
       isLocal: true, 
-      audioTrack: { isMute: localPeer?.audioTrack?.isMute ?? isMuted } 
+      audioTrack: { isMute: isMuted } // Use isMuted state directly instead of localPeer.audioTrack
     },
     ...(remotePeers || []).map((peer: any, index: number) => ({
       name: peer?.name || `مشارك ${index + 1}`,
       isLocal: false,
-      audioTrack: { isMute: peer?.audioTrack?.isMute ?? peer?.isMuted ?? false }
+      audioTrack: { isMute: peer?.audioTrack?.isMute?.() ?? peer?.isMuted ?? false }
     }))
   ];
 
@@ -103,6 +103,10 @@ export default function CustomizableVoiceChatScreen() {
             }),
           });
 
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
           const data = await response.json();
           if (data.token) {
             await joinRoom(data.token);
@@ -117,7 +121,7 @@ export default function CustomizableVoiceChatScreen() {
     };
 
     autoJoinRoom();
-  }, [roomId, roomName, isConnected]);
+  }, [roomId, roomName, isConnected, joinRoom]);
 
   const handleLeaveRoom = async () => {
     Alert.alert(
@@ -145,6 +149,17 @@ export default function CustomizableVoiceChatScreen() {
       <SafeAreaView style={styles.container}>
         <LinearGradient colors={['#1F2937', '#111827']} style={styles.loadingContainer}>
           <Text style={styles.loadingText}>جاري تحميل الغرفة...</Text>
+        </LinearGradient>
+      </SafeAreaView>
+    );
+  }
+
+  // Safety check for required data
+  if (!roomId) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <LinearGradient colors={['#1F2937', '#111827']} style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>خطأ: معرف الغرفة مفقود</Text>
         </LinearGradient>
       </SafeAreaView>
     );

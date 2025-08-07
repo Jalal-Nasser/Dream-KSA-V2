@@ -93,22 +93,22 @@ export const useHMSRoom = ({ roomId, userId, userName, role }: UseHMSRoomProps) 
       ...prev,
       isConnected: true,
       isConnecting: false,
-      localPeer: data.localPeer,
-      isMuted: data.localPeer.audioTrack?.isMute() ?? true,
+      localPeer: data?.localPeer || null,
+      isMuted: data?.localPeer?.audioTrack?.isMute?.() ?? true,
     }));
   };
 
   const onPeerUpdate = (data: any) => {
     console.log('👥 REAL peer update:', data);
-    if (data.type === 'PEER_JOINED') {
+    if (data?.type === 'PEER_JOINED' && data?.peer) {
       setRoomState(prev => ({
         ...prev,
         remotePeers: [...prev.remotePeers, data.peer]
       }));
-    } else if (data.type === 'PEER_LEFT') {
+    } else if (data?.type === 'PEER_LEFT' && data?.peer) {
       setRoomState(prev => ({
         ...prev,
-        remotePeers: prev.remotePeers.filter(peer => peer.peerID !== data.peer.peerID)
+        remotePeers: prev.remotePeers.filter(peer => peer?.peerID !== data.peer.peerID)
       }));
     }
   };
@@ -116,14 +116,14 @@ export const useHMSRoom = ({ roomId, userId, userName, role }: UseHMSRoomProps) 
   const onTrackUpdate = (data: any) => {
     console.log('🎵 REAL track update - audio level detected:', data);
     
-    if (data.track && data.track.source === 'regular') {
-      const isSpeaking = !data.track.isMute();
+    if (data?.track && data.track.source === 'regular') {
+      const isSpeaking = !(data.track.isMute?.() ?? true);
       
-      if (data.peer.isLocal) {
+      if (data?.peer?.isLocal) {
         setRoomState(prev => ({
           ...prev,
           isSpeaking,
-          isMuted: data.track.isMute(),
+          isMuted: data.track.isMute?.() ?? true,
         }));
       }
     }
@@ -208,7 +208,7 @@ export const useHMSRoom = ({ roomId, userId, userName, role }: UseHMSRoomProps) 
       if (hmsInstanceRef.current && !hmsInstanceRef.current.simulation) {
         // Real HMS mute/unmute
         const localPeer = await hmsInstanceRef.current.getLocalPeer();
-        const audioTrack = localPeer?.localAudioTrack();
+        const audioTrack = localPeer?.localAudioTrack?.();
         
         if (audioTrack) {
           await audioTrack.setMute(newMutedState);
@@ -262,7 +262,7 @@ export const useHMSRoom = ({ roomId, userId, userName, role }: UseHMSRoomProps) 
   // Admin actions
   const muteRemotePeer = async (peerToMute: any) => {
     try {
-      if (hmsInstanceRef.current && !hmsInstanceRef.current.simulation) {
+      if (hmsInstanceRef.current && !hmsInstanceRef.current.simulation && peerToMute?.audioTrack) {
         await hmsInstanceRef.current.changeTrackState(
           peerToMute.audioTrack,
           true // mute
