@@ -134,7 +134,7 @@ export default function LoginScreen() {
         }
       } else {
         console.log('✅ Supabase login success:', data.user);
-        router.push('/rooms');
+        router.push('/HomePage');
       }
     };
 
@@ -153,7 +153,7 @@ export default function LoginScreen() {
   const handleLogin = () => {
     if (phoneNumber.trim()) {
       console.log('📞 Logging in with phone number:', phoneNumber);
-      router.push('/rooms');
+      router.push('/HomePage');
     }
   };
 

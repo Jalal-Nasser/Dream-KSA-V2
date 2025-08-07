@@ -1,10 +1,24 @@
 import React from 'react';
 import { StyleSheet, Text, View, Image, Pressable } from 'react-native';
 import { Users, Mic, Star, Heart } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
 
-const RoomCard = ({ room }) => {
+interface Room {
+  id: string;
+  name?: string;
+  tags?: string[];
+}
+
+const RoomCard = ({ room }: { room: Room }) => {
+  const router = useRouter();
+  
+  const handleRoomPress = () => {
+    // Navigate to voice chat room
+    router.push(`/voicechat?roomId=${room.id}&roomName=${room?.name || 'نقاش تقني'}`);
+  };
+
   return (
-    <Pressable style={roomCardStyles.cardContainer}>
+    <Pressable style={roomCardStyles.cardContainer} onPress={handleRoomPress}>
       {/* Header */}
       <View style={roomCardStyles.cardHeader}>
         <View style={roomCardStyles.usersCount}>
@@ -47,7 +61,7 @@ const RoomCard = ({ room }) => {
 
 const roomCardStyles = StyleSheet.create({
   cardContainer: {
-    backgroundColor: '#1f2937',
+    backgroundColor: '#1a2232', // Match login screen card color
     width: 160,
     height: 220,
     borderRadius: 24,

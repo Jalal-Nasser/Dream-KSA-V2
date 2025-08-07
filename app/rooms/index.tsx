@@ -1,6 +1,8 @@
 // app/rooms/index.tsx
 import React, { useState, useRef } from 'react';
-import { Button, Alert, SafeAreaView } from 'react-native';
+import { Button, Alert, SafeAreaView, View, Text, Pressable, StyleSheet } from 'react-native';
+import { ArrowLeft, Home } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
 import { 
   HMSSDK, 
   HMSUpdateListenerActions 
@@ -9,6 +11,7 @@ import {
 const RoomScreen = () => {
   const hmsInstanceRef = useRef<any>(null);
   const [isConnecting, setIsConnecting] = useState(false);
+  const router = useRouter();
 
   const joinRoom = async () => {
     try {
@@ -191,16 +194,71 @@ const RoomScreen = () => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, justifyContent: 'center', padding: 24 }}>
-      <Button 
-        title={isConnecting ? "🔄 Connecting..." : "🔊 Join Voice Room"} 
-        onPress={joinRoom} 
-        disabled={isConnecting}
-      />
+    <SafeAreaView style={styles.container}>
+      {/* Header with navigation */}
+      <View style={styles.header}>
+        <Pressable style={styles.navButton} onPress={() => router.back()}>
+          <ArrowLeft color="#4f46e5" size={24} />
+          <Text style={styles.navText}>Back</Text>
+        </Pressable>
+        
+        <Text style={styles.title}>Voice Chat Room</Text>
+        
+        <Pressable style={styles.navButton} onPress={() => router.push('/HomePage')}>
+          <Home color="#4f46e5" size={24} />
+          <Text style={styles.navText}>Home</Text>
+        </Pressable>
+      </View>
+
+      {/* Main content */}
+      <View style={styles.content}>
+        <Button 
+          title={isConnecting ? "🔄 Connecting..." : "🔊 Join Voice Room"} 
+          onPress={joinRoom} 
+          disabled={isConnecting}
+        />
+      </View>
     </SafeAreaView>
   );
-};
+}
 
-export default function () {
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f6fa',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: 'white',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e7eb',
+  },
+  navButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 8,
+  },
+  navText: {
+    marginLeft: 4,
+    color: '#4f46e5',
+    fontWeight: '600',
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1f2937',
+  },
+  content: {
+    flex: 1,
+    justifyContent: 'center',
+    padding: 24,
+  },
+});
+
+export default function VoiceChatScreen() {
   return <RoomScreen />;
 }

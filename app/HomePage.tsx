@@ -1,155 +1,94 @@
 import React from 'react';
 import { StyleSheet, Text, View, Pressable, ScrollView, TextInput, Image } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import {
   Bell,
-  MessageCircle,
   Plus,
-  Compass,
-  Star,
   Search,
+  Star,
+  Music,
+  MessageCircle,
   Users,
-  Settings,
-  Mic,
-  Gift,
-  PlusCircle,
-  Menu,
+  Calendar,
 } from 'lucide-react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-
-// Placeholder for your RoomCard component
-const RoomCard = () => (
-  <View style={homeStyles.roomCard}>
-    <View style={homeStyles.roomCardHeader}>
-      <View style={homeStyles.roomUserCount}>
-        <Users color="white" size={12} />
-        <Text style={homeStyles.roomUserCountText}>+45</Text>
-      </View>
-      <View style={homeStyles.liveBadge}>
-        <View style={homeStyles.liveDot} />
-        <Text style={homeStyles.liveText}>مباشر</Text>
-      </View>
-    </View>
-    <View style={homeStyles.roomProfileImageContainer}>
-      <Image
-        source={{ uri: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face' }}
-        style={homeStyles.roomProfileImage}
-      />
-    </View>
-    <View style={homeStyles.roomCardFooter}>
-      <View style={homeStyles.roomTags}>
-        <Text style={homeStyles.roomTagText}>نقاش</Text>
-        <Text style={homeStyles.roomTagText}>عام</Text>
-      </View>
-      <Text style={homeStyles.roomName}>نقاش تقني</Text>
-    </View>
-  </View>
-);
+import RoomCard from './RoomCard';
 
 export default function HomePage() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
+  
   return (
-    <LinearGradient
-      colors={['#1F2937', '#111827', '#0A0E15']}
-      style={[homeStyles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
-    >
-      {/* Header */}
-      <View style={homeStyles.header}>
-        <Pressable style={homeStyles.headerButton}>
-          <Bell color="white" size={24} />
-        </Pressable>
-        <View style={homeStyles.headerCenter}>
-          <Text style={homeStyles.headerTitle}>الرئيسية</Text>
-        </View>
-        <Pressable style={homeStyles.headerButton}>
-          <Plus color="white" size={24} />
-        </Pressable>
-      </View>
-
-      <ScrollView contentContainerStyle={homeStyles.scrollViewContent}>
-        {/* Search Bar */}
-        <View style={homeStyles.searchBarContainer}>
-          <TextInput
-            placeholder="ابحث عن الغرف أو الأصدقاء"
-            placeholderTextColor="#9ca3af"
-            style={homeStyles.searchBarInput}
-          />
-          <Search color="#9ca3af" size={20} style={homeStyles.searchIcon} />
-        </View>
-
-        {/* Categories */}
-        <View style={homeStyles.categoriesContainer}>
-          <Text style={homeStyles.sectionTitle}>أهم الفئات</Text>
-          <View style={homeStyles.categoriesList}>
-            <View style={homeStyles.categoryCard}>
-              <View style={homeStyles.categoryIcon}>
-                <Compass color="#4f46e5" size={20} />
-              </View>
-              <Text style={homeStyles.categoryText}>استكشف</Text>
-            </View>
-            <View style={homeStyles.categoryCard}>
-              <View style={homeStyles.categoryIcon}>
-                <Star color="#f59e0b" size={20} />
-              </View>
-              <Text style={homeStyles.categoryText}>النجوم</Text>
-            </View>
-            <View style={homeStyles.categoryCard}>
-              <View style={homeStyles.categoryIcon}>
-                <Music color="#ef4444" size={20} />
-              </View>
-              <Text style={homeStyles.categoryText}>الموسيقى</Text>
-            </View>
-            <View style={homeStyles.categoryCard}>
-              <View style={homeStyles.categoryIcon}>
-                <MessageCircle color="#3b82f6" size={20} />
-              </View>
-              <Text style={homeStyles.categoryText}>النقاشات</Text>
-            </View>
+    <LinearGradient colors={["#e664fa", "#4d9ef6"]} style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 32 }} showsVerticalScrollIndicator={false}>
+        {/* Gradient Header */}
+        <View style={[homeStyles.header, { paddingTop: insets.top + 10 }]}> 
+          <View style={homeStyles.headerLeft}>
+            <Image source={{ uri: 'https://randomuser.me/api/portraits/men/32.jpg' }} style={homeStyles.avatar} />
+            <Bell color="#fff" size={22} style={{ marginLeft: 8 }} />
           </View>
-        </View>
-
-        {/* Live Rooms Section */}
-        <View style={homeStyles.section}>
-          <View style={homeStyles.sectionHeader}>
-            <Text style={homeStyles.sectionTitle}>غرف مباشرة</Text>
-            <Pressable>
-              <Text style={homeStyles.viewAllText}>عرض الكل</Text>
+          <View style={homeStyles.headerCenter}>
+            <Text style={homeStyles.headerTitle}>Dream KSA</Text>
+            <Text style={homeStyles.headerSubtitle}>غرف الدردشة الصوتية</Text>
+          </View>
+          <View style={homeStyles.headerRight}>
+            <Pressable style={homeStyles.headerButton}>
+              <Plus color="#fff" size={22} />
             </Pressable>
           </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={homeStyles.roomsList}>
-            <RoomCard />
-            <RoomCard />
-            <RoomCard />
-          </ScrollView>
+        </View>
+
+        {/* Search Bar */}
+        <View style={homeStyles.searchContainer}>
+          <TextInput
+            style={homeStyles.searchInput}
+            placeholder="ابحث عن غرفة أو موضوع"
+            placeholderTextColor="#fff"
+          />
+        </View>
+
+        {/* Category Chips */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={homeStyles.chipsScroll} contentContainerStyle={homeStyles.chipsContainer}>
+          {['الكل', 'مشهور', 'تقنية', 'موسيقى', 'تعليم'].map((cat, i) => (
+            <Pressable key={cat} style={[homeStyles.chip, i === 0 && homeStyles.chipActive]}>
+              <Text style={[homeStyles.chipText, i === 0 && homeStyles.chipTextActive]}>{cat}</Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+
+        {/* Create Room Button */}
+        <View style={homeStyles.createRoomRow}>
+          <Text style={homeStyles.roomsCount}>جميع الغرف <Text style={{ color: '#6d28d9' }}>6</Text></Text>
+          <Pressable style={homeStyles.createRoomBtn}>
+            <Plus color="#fff" size={18} />
+            <Text style={homeStyles.createRoomText}>إنشاء غرفة</Text>
+          </Pressable>
+        </View>
+
+        {/* Room Cards Grid */}
+        <View style={homeStyles.roomsGrid}>
+          {[1,2,3,4,5,6].map((i) => (
+            <View key={i} style={homeStyles.roomCard}>
+              <Image source={{ uri: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb' }} style={homeStyles.roomImage} />
+              <View style={homeStyles.roomOverlay} />
+              <View style={homeStyles.roomTopRow}>
+                <View style={homeStyles.roomLiveBadge}><Text style={homeStyles.roomLiveText}>مباشر</Text></View>
+                <View style={homeStyles.roomTypeBadge}><Text style={homeStyles.roomTypeText}>شائع</Text></View>
+              </View>
+              <View style={homeStyles.roomInfoRow}>
+                <Image source={{ uri: 'https://randomuser.me/api/portraits/men/32.jpg' }} style={homeStyles.roomAvatar} />
+                <Text style={homeStyles.roomName}>غرفة دردشة</Text>
+              </View>
+              <Text style={homeStyles.roomDesc}>لحظات جميلة وذكريات رائعة</Text>
+              <View style={homeStyles.roomStatsRow}>
+                <View style={homeStyles.roomStat}><Text style={homeStyles.roomStatText}>201</Text></View>
+                <View style={homeStyles.roomStat}><Text style={homeStyles.roomStatText}>4</Text></View>
+              </View>
+            </View>
+          ))}
         </View>
       </ScrollView>
-
-      {/* Footer Navigation */}
-      <View style={homeStyles.footer}>
-        <Pressable style={homeStyles.footerButton}>
-          <Menu color="white" size={24} />
-          <Text style={homeStyles.footerText}>الرئيسية</Text>
-        </Pressable>
-        <Pressable style={homeStyles.footerButton}>
-          <Mic color="#9ca3af" size={24} />
-          <Text style={homeStyles.footerTextInactive}>غرفي</Text>
-        </Pressable>
-        <Pressable style={homeStyles.footerButton}>
-          <Gift color="#9ca3af" size={24} />
-          <Text style={homeStyles.footerTextInactive}>المتجر</Text>
-        </Pressable>
-        <Pressable style={homeStyles.footerButton}>
-          <Settings color="#9ca3af" size={24} />
-          <Text style={homeStyles.footerTextInactive}>الإعدادات</Text>
-        </Pressable>
-        <Pressable style={homeStyles.footerButton}>
-          <Image
-            source={{ uri: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=32&h=32&fit=crop&crop=face' }}
-            style={homeStyles.footerProfileImage}
-          />
-          <Text style={homeStyles.footerTextInactive}>حسابي</Text>
-        </Pressable>
-      </View>
     </LinearGradient>
   );
 }
@@ -158,192 +97,233 @@ const homeStyles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  scrollViewContent: {
-    paddingHorizontal: 16,
-  },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    justifyContent: 'space-between',
+    paddingHorizontal: 18,
+    paddingBottom: 10,
+    marginTop: 8,
   },
-  headerButton: {
-    padding: 8,
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  avatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 2,
+    borderColor: '#fff',
   },
   headerCenter: {
     flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   headerTitle: {
-    color: 'white',
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  searchBarContainer: {
-    flexDirection: 'row-reverse',
-    alignItems: 'center',
-    backgroundColor: '#374151',
-    borderRadius: 24,
-    paddingHorizontal: 16,
-    marginVertical: 16,
-  },
-  searchBarInput: {
-    flex: 1,
-    color: 'white',
-    paddingVertical: 12,
-    textAlign: 'right',
-  },
-  searchIcon: {
-    marginRight: 8,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
-    textAlign: 'right',
+    color: '#fff',
+    marginBottom: 2,
   },
-  viewAllText: {
-    color: '#9ca3af',
-    fontSize: 14,
+  headerSubtitle: {
+    fontSize: 12,
+    color: '#e0e7ff',
   },
-  categoriesContainer: {
-    marginBottom: 24,
-  },
-  categoriesList: {
+  headerRight: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 12,
-  },
-  categoryCard: {
     alignItems: 'center',
   },
-  categoryIcon: {
-    width: 60,
-    height: 60,
+  headerButton: {
+    padding: 8,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 12,
+  },
+  searchContainer: {
+    backgroundColor: 'rgba(255,255,255,0.15)',
     borderRadius: 16,
-    backgroundColor: '#374151',
+    marginHorizontal: 18,
+    marginTop: 12,
+    marginBottom: 10,
+    paddingHorizontal: 16,
+    height: 44,
     justifyContent: 'center',
+  },
+  searchInput: {
+    color: '#fff',
+    fontSize: 15,
+    textAlign: 'right',
+    width: '100%',
+  },
+  chipsScroll: {
+    marginTop: 8,
+    marginBottom: 8,
+    paddingHorizontal: 8,
+  },
+  chipsContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 10,
+  },
+  chip: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    paddingHorizontal: 18,
+    paddingVertical: 7,
+    marginRight: 8,
+  },
+  chipActive: {
+    backgroundColor: '#4d9ef6',
+  },
+  chipText: {
+    color: '#4d9ef6',
+    fontWeight: 'bold',
+    fontSize: 13,
+  },
+  chipTextActive: {
+    color: '#fff',
+  },
+  createRoomRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginHorizontal: 18,
+    marginTop: 8,
     marginBottom: 8,
   },
-  categoryText: {
-    color: 'white',
-    fontSize: 12,
+  roomsCount: {
+    fontSize: 15,
+    color: '#222',
+    fontWeight: 'bold',
   },
-  roomsList: {
-    paddingBottom: 8,
-    paddingRight: 16,
+  createRoomBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#4d9ef6',
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+  },
+  createRoomText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 13,
+    marginLeft: 6,
+  },
+  roomsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginHorizontal: 18,
+    marginTop: 8,
+    gap: 12,
   },
   roomCard: {
-    backgroundColor: '#374151',
-    width: 150,
-    height: 200,
-    borderRadius: 16,
-    padding: 12,
-    marginRight: 12,
-    justifyContent: 'space-between',
+    width: '47%',
+    aspectRatio: 1.2,
+    backgroundColor: '#fff',
+    borderRadius: 18,
+    marginBottom: 12,
+    overflow: 'hidden',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
   },
-  roomCardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  roomUserCount: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    borderRadius: 12,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-  },
-  roomUserCountText: {
-    color: 'white',
-    fontSize: 10,
-    marginLeft: 4,
-  },
-  liveBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ef4444',
-    borderRadius: 12,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-  },
-  liveDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: 'white',
-    marginRight: 4,
-  },
-  liveText: {
-    color: 'white',
-    fontSize: 10,
-  },
-  roomProfileImageContainer: {
-    alignItems: 'center',
-  },
-  roomProfileImage: {
-    width: 80,
+  roomImage: {
+    width: '100%',
     height: 80,
-    borderRadius: 40,
-    borderWidth: 2,
-    borderColor: 'white',
+    borderTopLeftRadius: 18,
+    borderTopRightRadius: 18,
   },
-  roomCardFooter: {
+  roomOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 80,
+    backgroundColor: 'rgba(0,0,0,0.25)',
+    borderTopLeftRadius: 18,
+    borderTopRightRadius: 18,
+  },
+  roomTopRow: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    right: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
-  roomTags: {
-    flexDirection: 'row-reverse',
-    marginBottom: 4,
+  roomLiveBadge: {
+    backgroundColor: '#f43f5e',
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
   },
-  roomTagText: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    color: 'white',
-    fontSize: 10,
+  roomLiveText: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: 'bold',
+  },
+  roomTypeBadge: {
+    backgroundColor: '#fbbf24',
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  roomTypeText: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: 'bold',
+  },
+  roomInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 6,
+    marginHorizontal: 8,
+    gap: 8,
+  },
+  roomAvatar: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 2,
+    borderColor: '#fff',
+  },
+  roomName: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    color: '#222',
+  },
+  roomDesc: {
+    fontSize: 11,
+    color: '#555',
+    marginHorizontal: 8,
+    marginTop: 2,
+    marginBottom: 2,
+    textAlign: 'right',
+  },
+  roomStatsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: 8,
+    marginHorizontal: 8,
+    marginBottom: 6,
+  },
+  roomStat: {
+    backgroundColor: '#e0e7ff',
     borderRadius: 10,
     paddingHorizontal: 8,
     paddingVertical: 2,
-    marginHorizontal: 2,
   },
-  roomName: {
-    color: 'white',
-    fontSize: 14,
+  roomStatText: {
+    color: '#4d9ef6',
+    fontSize: 11,
     fontWeight: 'bold',
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    backgroundColor: '#1F2937',
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#374151',
-  },
-  footerButton: {
-    alignItems: 'center',
-  },
-  footerText: {
-    color: 'white',
-    fontSize: 10,
-    marginTop: 4,
-  },
-  footerTextInactive: {
-    color: '#9ca3af',
-    fontSize: 10,
-    marginTop: 4,
-  },
-  footerProfileImage: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
   },
 });
