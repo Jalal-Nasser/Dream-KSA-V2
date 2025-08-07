@@ -1,6 +1,6 @@
 // app/createroom.tsx
 import React, { useState } from 'react';
-import { View, TextInput, Text, Alert, StyleSheet, Pressable } from 'react-native';
+import { View, TextInput, Text, Alert, StyleSheet, Pressable, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { ArrowLeft, Plus } from 'lucide-react-native';
@@ -9,38 +9,55 @@ import { LinearGradient } from 'expo-linear-gradient';
 export default function CreateRoomScreen() {
   const [roomName, setRoomName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [roomDescription, setRoomDescription] = useState('');
+  const [selectedTheme, setSelectedTheme] = useState('#4f46e5');
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
+  const themes = [
+    { name: 'بنفسجي', color: '#4f46e5' },
+    { name: 'أزرق', color: '#0ea5e9' },
+    { name: 'أخضر', color: '#10b981' },
+    { name: 'أحمر', color: '#ef4444' },
+    { name: 'برتقالي', color: '#f97316' },
+    { name: 'وردي', color: '#ec4899' },
+  ];
+
   const createRoom = async () => {
     if (!roomName.trim()) {
-      Alert.alert('Please enter a room name');
+      Alert.alert('يرجى إدخال اسم الغرفة');
       return;
     }
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:3001/create-room', {
+      const roomData = {
+        name: roomName.trim(),
+        description: roomDescription.trim(),
+        theme: selectedTheme,
+      };
+      
+      const res = await fetch('http://192.168.1.9:3001/create-room', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: roomName.trim() }),
+        body: JSON.stringify(roomData),
       });
       const data = await res.json();
       if (data.id) {
-        Alert.alert('Room created!', `Room ID: ${data.id}`, [
+        Alert.alert('تم إنشاء الغرفة!', `معرف الغرفة: ${data.id}`, [
           {
-            text: 'Go to Room',
-            onPress: () => router.push(`/voicechat?roomId=${data.id}&roomName=${roomName.trim()}`)
+            text: 'الذهاب للغرفة',
+            onPress: () => router.push(`/voicechat_customizable?roomId=${data.id}&roomName=${roomName.trim()}`)
           },
           {
-            text: 'Back to Home',
+            text: 'العودة للرئيسية',
             onPress: () => router.push('/(tabs)')
           }
         ]);
       } else {
-        throw new Error(data.error || 'Unknown error');
+        throw new Error(data.error || 'خطأ غير معروف');
       }
     } catch (err: any) {
-      Alert.alert('Error', err.message);
+      Alert.alert('خطأ', err.message);
     }
     setLoading(false);
   };
@@ -62,8 +79,9 @@ export default function CreateRoomScreen() {
       </View>
 
       {/* Content */}
-      <View style={styles.content}>
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.formContainer}>
+          {/* Room Name */}
           <Text style={styles.label}>اسم الغرفة</Text>
           <TextInput
             style={styles.input}
@@ -73,9 +91,44 @@ export default function CreateRoomScreen() {
             onChangeText={setRoomName}
             editable={!loading}
           />
+
+          {/* Room Description */}
+          <Text style={styles.label}>وصف الغرفة (اختياري)</Text>
+          <TextInput
+            style={[styles.input, styles.textArea]}
+            placeholder="أدخل وصف الغرفة"
+            placeholderTextColor="#9ca3af"
+            value={roomDescription}
+            onChangeText={setRoomDescription}
+            multiline
+            numberOfLines={3}
+            editable={!loading}
+          />
+
+          {/* Theme Selection */}
+          <Text style={styles.label}>لون المظهر</Text>
+          <View style={styles.themeContainer}>
+            {themes.map((theme) => (
+              <Pressable
+                key={theme.color}
+                style={[
+                  styles.themeButton,
+                  { backgroundColor: theme.color },
+                  selectedTheme === theme.color && styles.selectedTheme
+                ]}
+                onPress={() => setSelectedTheme(theme.color)}
+              >
+                <Text style={styles.themeText}>{theme.name}</Text>
+              </Pressable>
+            ))}
+          </View>
           
           <Pressable 
-            style={[styles.createButton, loading && styles.createButtonDisabled]} 
+            style={[
+              styles.createButton, 
+              { backgroundColor: selectedTheme },
+              loading && styles.createButtonDisabled
+            ]} 
             onPress={createRoom} 
             disabled={loading}
           >
@@ -85,7 +138,7 @@ export default function CreateRoomScreen() {
             </Text>
           </Pressable>
         </View>
-      </View>
+      </ScrollView>
     </LinearGradient>
   );
 }
@@ -117,12 +170,12 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 16,
-    justifyContent: 'center',
   },
   formContainer: {
     backgroundColor: '#374151',
     borderRadius: 16,
     padding: 24,
+    marginBottom: 20,
   },
   label: {
     color: 'white',
@@ -141,6 +194,32 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     textAlign: 'right',
+  },
+  textArea: {
+    minHeight: 80,
+    textAlignVertical: 'top',
+  },
+  themeContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 24,
+    gap: 8,
+  },
+  themeButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  selectedTheme: {
+    borderWidth: 3,
+    borderColor: 'white',
+  },
+  themeText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '600',
   },
   createButton: {
     backgroundColor: '#4f46e5',

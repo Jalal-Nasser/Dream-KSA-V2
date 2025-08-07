@@ -20,10 +20,17 @@ const HMS_APP_SECRET = process.env.HMS_APP_SECRET;
 
 // Create a new room
 app.post('/create-room', async (req, res) => {
-  const { name, description = 'Voice chat room', type = 'voice' } = req.body;
+  const { 
+    name, 
+    description = 'Voice chat room', 
+    type = 'voice',
+    theme = '#4f46e5',
+    bannerImage = null,
+    backgroundImage = null
+  } = req.body;
 
   try {
-    console.log('Creating room with HMS...', { name, description });
+    console.log('Creating room with HMS...', { name, description, theme, bannerImage, backgroundImage });
     
     // Create room in 100ms
     const roomResponse = await fetch('https://prod-in2.100ms.live/api/v2/rooms', {
@@ -51,7 +58,7 @@ app.post('/create-room', async (req, res) => {
     const roomData = await roomResponse.json();
     console.log('HMS room created:', roomData);
 
-    // Store room in Supabase
+    // Store room in Supabase with customization data
     const { data: dbRoom, error: dbError } = await supabase
       .from('rooms')
       .insert({
@@ -59,6 +66,9 @@ app.post('/create-room', async (req, res) => {
         name: name,
         description: description,
         type: type,
+        theme: theme,
+        banner_image: bannerImage,
+        background_image: backgroundImage,
         hms_room_id: roomData.id,
         created_at: new Date().toISOString(),
         is_active: true
@@ -77,6 +87,9 @@ app.post('/create-room', async (req, res) => {
       id: roomData.id,
       name: name,
       description: description,
+      theme: theme,
+      bannerImage: bannerImage,
+      backgroundImage: backgroundImage,
       hms_room_id: roomData.id
     });
 

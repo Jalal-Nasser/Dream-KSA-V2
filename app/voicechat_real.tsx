@@ -53,7 +53,7 @@ export default function RealVoiceChatScreen() {
       try {
         setIsGettingToken(true);
         
-        const response = await fetch('http://localhost:3001/get-token', {
+        const response = await fetch('http://192.168.1.9:3001/get-token', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
