@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as ImagePicker from 'expo-image-picker';
 import {
   ArrowLeft,
   User,
@@ -36,6 +37,10 @@ export default function ProfileScreen() {
     name: 'محمد أحمد',
     username: '@mohammed_ahmed',
     email: 'mohammed@example.com',
+    mobile: '0500000000',
+    age: '30',
+    nationality: 'السعودية',
+    gender: 'ذكر',
     avatar: null,
     bio: 'مرحباً، أحب المشاركة في الأماسي الصوتية!',
   });
@@ -68,7 +73,16 @@ export default function ProfileScreen() {
 
   const [editingProfile, setEditingProfile] = useState(false);
   const [tempProfile, setTempProfile] = useState(userProfile);
-  const [showAvatarModal, setShowAvatarModal] = useState(false);
+
+  const pickAvatar = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 1,
+    });
+    if (!result.canceled) {
+      setTempProfile(prev => ({ ...prev, avatar: result.assets[0].uri }));
+    }
+  };
 
   const handleSaveProfile = () => {
     setUserProfile(tempProfile);
@@ -136,7 +150,7 @@ export default function ProfileScreen() {
             <View style={styles.avatarSection}>
               <Pressable
                 style={styles.avatarContainer}
-                onPress={() => setShowAvatarModal(true)}
+                onPress={pickAvatar}
               >
                 {tempProfile.avatar ? (
                   <Image source={{ uri: tempProfile.avatar }} style={styles.avatar} />
@@ -181,6 +195,48 @@ export default function ProfileScreen() {
                 placeholder="أدخل البريد الإلكتروني"
                 placeholderTextColor="#9ca3af"
                 keyboardType="email-address"
+                textAlign="right"
+              />
+
+              <Text style={styles.fieldLabel}>رقم الجوال</Text>
+              <TextInput
+                style={styles.textInput}
+                value={tempProfile.mobile}
+                onChangeText={(text) => setTempProfile(prev => ({ ...prev, mobile: text }))}
+                placeholder="أدخل رقم الجوال"
+                placeholderTextColor="#9ca3af"
+                keyboardType="phone-pad"
+                textAlign="right"
+              />
+
+              <Text style={styles.fieldLabel}>العمر</Text>
+              <TextInput
+                style={styles.textInput}
+                value={tempProfile.age}
+                onChangeText={(text) => setTempProfile(prev => ({ ...prev, age: text }))}
+                placeholder="أدخل عمرك"
+                placeholderTextColor="#9ca3af"
+                keyboardType="numeric"
+                textAlign="right"
+              />
+
+              <Text style={styles.fieldLabel}>الجنسية</Text>
+              <TextInput
+                style={styles.textInput}
+                value={tempProfile.nationality}
+                onChangeText={(text) => setTempProfile(prev => ({ ...prev, nationality: text }))}
+                placeholder="أدخل جنسيتك"
+                placeholderTextColor="#9ca3af"
+                textAlign="right"
+              />
+
+              <Text style={styles.fieldLabel}>الجنس</Text>
+              <TextInput
+                style={styles.textInput}
+                value={tempProfile.gender}
+                onChangeText={(text) => setTempProfile(prev => ({ ...prev, gender: text }))}
+                placeholder="ذكر أو أنثى"
+                placeholderTextColor="#9ca3af"
                 textAlign="right"
               />
 
@@ -232,6 +288,11 @@ export default function ProfileScreen() {
             <Text style={styles.userName}>{userProfile.name}</Text>
             <Text style={styles.userHandle}>{userProfile.username}</Text>
             <Text style={styles.userBio}>{userProfile.bio}</Text>
+            <Text style={styles.userDetail}>رقم الجوال: {userProfile.mobile}</Text>
+            <Text style={styles.userDetail}>البريد الإلكتروني: {userProfile.email}</Text>
+            <Text style={styles.userDetail}>العمر: {userProfile.age}</Text>
+            <Text style={styles.userDetail}>الجنسية: {userProfile.nationality}</Text>
+            <Text style={styles.userDetail}>الجنس: {userProfile.gender}</Text>
           </View>
 
           {/* Notifications Settings */}
@@ -387,7 +448,7 @@ export default function ProfileScreen() {
               onPress={() => router.push('/profile/settings')}
             >
               <Settings color="#6b7280" size={24} />
-              <Text style={styles.actionText}>إعدادات متقدمة</Text>
+              <Text style={styles.actionText}>الإعدادات</Text>
             </Pressable>
 
             <Pressable style={[styles.actionItem, styles.logoutItem]} onPress={handleLogout}>
@@ -486,6 +547,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 20,
     maxWidth: 280,
+  },
+  userDetail: {
+    color: '#d1d5db',
+    fontSize: 13,
+    textAlign: 'center',
+    marginTop: 2,
   },
   settingsSection: {
     backgroundColor: 'rgba(255,255,255,0.05)',

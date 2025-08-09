@@ -49,7 +49,6 @@ const SidebarContent = ({ navigation }: DrawerContentComponentProps) => {
       <SidebarMenu>
         <SidebarMenuItem label="Home" onPress={() => { /* Navigate... */ }} />
         <SidebarMenuItem label="Dashboard" onPress={() => { /* Navigate... */ }} isActive />
-        <SidebarMenuItem label="Settings" onPress={() => { /* Navigate... */ }} />
       </SidebarMenu>
       <SidebarFooter>
         <Text style={styles.footerText}>© 2025</Text>
@@ -116,7 +115,6 @@ export function Sidebar() {
                  <SidebarMenu>
                     <SidebarMenuItem label="Home" />
                     <SidebarMenuItem label="Dashboard" isActive/>
-                    <SidebarMenuItem label="Settings" />
                 </SidebarMenu>
             </View>
             <DummyScreen />
