@@ -382,7 +382,10 @@ export default function ProfileScreen() {
               <Text style={styles.actionText}>المساعدة والدعم</Text>
             </Pressable>
 
-            <Pressable style={styles.actionItem}>
+            <Pressable
+              style={styles.actionItem}
+              onPress={() => router.push('/profile/settings')}
+            >
               <Settings color="#6b7280" size={24} />
               <Text style={styles.actionText}>إعدادات متقدمة</Text>
             </Pressable>
