@@ -5,7 +5,6 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
 
 import LoginScreen from './LoginScreen';
-import AuthScreen from './AuthScreen';
 import RoomsScreen from './RoomsScreen';
 import VoiceChatScreen from './VoiceChatScreen';
 import AdminControlsScreen from './AdminControlsScreen';
@@ -30,9 +29,6 @@ function MainTabs() {
             case 'Chat':
               iconName = 'chatbubbles-outline';
               break;
-            case 'Profile':
-              iconName = 'person-outline';
-              break;
             default:
               iconName = 'ellipse-outline';
           }
@@ -43,7 +39,6 @@ function MainTabs() {
       <Tab.Screen name="Room" component={RoomsScreen} />
       <Tab.Screen name="Discover" component={VoiceChatScreen} />
       <Tab.Screen name="Chat" component={AdminControlsScreen} />
-      <Tab.Screen name="Profile" component={AuthScreen} />
     </Tab.Navigator>
   );
 }
