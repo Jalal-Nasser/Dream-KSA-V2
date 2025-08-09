@@ -12,9 +12,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Verify package.json test script
+        run: |
+          echo "Checking package.json test script:"
+          node -e "console.log('Test script:', JSON.parse(require('fs').readFileSync('package.json', 'utf8')).scripts.test)"
       - run: npm ci
       - run: npm test
 
@@ -26,6 +32,8 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 20
