@@ -291,6 +291,10 @@ app.get('/rooms', async (_req, res) => {
 
 // Alias path for clients behind proxies where /rooms might be intercepted
 app.get('/api/rooms', async (req, res) => app._router.handle({ ...req, url: '/rooms', method: 'GET' }, res));
+app.post('/api/create-room', async (req, res) => app._router.handle({ ...req, url: '/create-room', method: 'POST' }, res));
+app.post('/api/get-token', async (req, res) => app._router.handle({ ...req, url: '/get-token', method: 'POST' }, res));
+app.get('/api/room/:roomId', async (req, res) => app._router.handle({ ...req, url: `/room/${req.params.roomId}`, method: 'GET' }, res));
+app.post('/api/leave-room', async (req, res) => app._router.handle({ ...req, url: '/leave-room', method: 'POST' }, res));
 
 // Leave room
 app.post('/leave-room', async (req, res) => {
