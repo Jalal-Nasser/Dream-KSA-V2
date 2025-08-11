@@ -1,17 +1,38 @@
 // app/createroom.tsx
 import React, { useState } from 'react';
-import { View, TextInput, Text, Alert, StyleSheet, Pressable, ScrollView } from 'react-native';
+import { View, TextInput, Text, Alert, StyleSheet, Pressable, ScrollView, Image, I18nManager, Platform } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { ArrowLeft, Plus } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { API_BASE_URL } from '../config/api';
+import { Brand, BrandGradient } from '../lib/theme';
 
 export default function CreateRoomScreen() {
   const [roomName, setRoomName] = useState('');
   const [loading, setLoading] = useState(false);
   const [roomDescription, setRoomDescription] = useState('');
-  const [selectedTheme, setSelectedTheme] = useState('#4f46e5');
+  const [selectedTheme, setSelectedTheme] = useState('#8b5cf6');
+  const [bannerUrl, setBannerUrl] = useState('');
+  const [logoUrl, setLogoUrl] = useState('');
+  const [typingDirection, setTypingDirection] = useState<'rtl' | 'ltr'>(I18nManager.isRTL ? 'rtl' : 'rtl');
+
+  const pickImage = async (setter: (uri: string) => void) => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('صلاحيات مرفوضة', 'يرجى السماح بالوصول للصور لاختيار بانر/شعار');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 0.8,
+    });
+    if (!result.canceled && result.assets?.length) {
+      setter(result.assets[0].uri);
+    }
+  };
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
@@ -35,9 +56,11 @@ export default function CreateRoomScreen() {
         name: roomName.trim(),
         description: roomDescription.trim(),
         theme: selectedTheme,
+        bannerImage: bannerUrl.trim() || null,
+        backgroundImage: logoUrl.trim() || null,
       };
       
-      const res = await fetch(`${API_BASE_URL}/create-room`, {
+      const res = await fetch(`${API_BASE_URL}/api/create-room`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(roomData),
@@ -47,7 +70,7 @@ export default function CreateRoomScreen() {
         Alert.alert('تم إنشاء الغرفة!', `معرف الغرفة: ${data.id}`, [
           {
             text: 'الذهاب للغرفة',
-            onPress: () => router.push(`/voicechat_customizable?roomId=${data.id}&roomName=${roomName.trim()}`)
+            onPress: () => router.push(`/voicechat?roomId=${data.id}&roomName=${roomName.trim()}`)
           },
           {
             text: 'العودة للرئيسية',
@@ -65,7 +88,8 @@ export default function CreateRoomScreen() {
 
   return (
     <LinearGradient
-      colors={['#1F2937', '#111827', '#0A0E15']}
+      colors={BrandGradient.colors}
+      locations={BrandGradient.locations}
       style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
     >
       {/* Header */}
@@ -110,9 +134,53 @@ export default function CreateRoomScreen() {
             numberOfLines={3}
             editable={!loading}
             autoCapitalize="none"
-            autoCorrect={false}
+            autoCorrect={true}
             textAlign="right"
           />
+
+          {/* Banner URL (optional) */}
+          <Text style={styles.label}>البانر (اختياري)</Text>
+          <View style={{ gap: 8 }}>
+            <TextInput
+              style={styles.input}
+              placeholder="رابط صورة البانر (اختياري)"
+              placeholderTextColor="#9ca3af"
+              value={bannerUrl}
+              onChangeText={setBannerUrl}
+              editable={!loading}
+              autoCapitalize="none"
+              keyboardType="url"
+              textAlign="right"
+            />
+            <Pressable style={[styles.uploadBtn, { borderColor: selectedTheme, backgroundColor: '#fff' }]} onPress={() => pickImage(setBannerUrl)}>
+              <Text style={[styles.uploadBtnText, { color: selectedTheme }]}>رفع صورة من الهاتف</Text>
+            </Pressable>
+          </View>
+          {!!bannerUrl && (
+            <Image source={{ uri: bannerUrl }} style={styles.previewBanner} />
+          )}
+
+          {/* Logo/Background URL (optional) */}
+          <Text style={styles.label}>الشعار/الخلفية (اختياري)</Text>
+          <View style={{ gap: 8 }}>
+            <TextInput
+              style={styles.input}
+              placeholder="رابط صورة الشعار (اختياري)"
+              placeholderTextColor="#9ca3af"
+              value={logoUrl}
+              onChangeText={setLogoUrl}
+              editable={!loading}
+              autoCapitalize="none"
+              keyboardType="url"
+              textAlign="right"
+            />
+            <Pressable style={[styles.uploadBtn, { borderColor: selectedTheme, backgroundColor: '#fff' }]} onPress={() => pickImage(setLogoUrl)}>
+              <Text style={[styles.uploadBtnText, { color: selectedTheme }]}>رفع صورة من الهاتف</Text>
+            </Pressable>
+          </View>
+          {!!logoUrl && (
+            <Image source={{ uri: logoUrl }} style={styles.previewLogo} />
+          )}
 
           {/* Theme Selection */}
           <Text style={styles.label}>لون المظهر</Text>
@@ -181,7 +249,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   formContainer: {
-    backgroundColor: '#374151',
+    backgroundColor: 'rgba(255,255,255,0.10)',
     borderRadius: 16,
     padding: 24,
     marginBottom: 20,
@@ -195,12 +263,12 @@ const styles = StyleSheet.create({
   },
   input: { 
     borderWidth: 1, 
-    borderColor: '#6b7280', 
+    borderColor: '#e5e7eb', 
     borderRadius: 12, 
-    padding: 16, 
-    marginBottom: 24,
-    backgroundColor: '#1f2937',
-    color: 'white',
+    padding: 14, 
+    marginBottom: 16,
+    backgroundColor: '#ffffff',
+    color: '#111827',
     fontSize: 16,
     textAlign: 'right',
   },
@@ -226,12 +294,12 @@ const styles = StyleSheet.create({
     borderColor: 'white',
   },
   themeText: {
-    color: 'white',
+    color: '#fff',
     fontSize: 14,
     fontWeight: '600',
   },
   createButton: {
-    backgroundColor: '#4f46e5',
+    backgroundColor: '#8b5cf6',
     borderRadius: 12,
     padding: 16,
     flexDirection: 'row',
@@ -242,9 +310,39 @@ const styles = StyleSheet.create({
     backgroundColor: '#6b7280',
   },
   createButtonText: {
-    color: 'white',
+    color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
     marginLeft: 8,
+  },
+  previewBanner: {
+    width: '100%',
+    height: 120,
+    borderRadius: 12,
+    marginBottom: 16,
+  },
+  previewLogo: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    alignSelf: 'center',
+    marginBottom: 16,
+    borderWidth: 2,
+    borderColor: '#8b5cf6',
+  },
+  uploadBtn: {
+    borderWidth: 2,
+    borderRadius: 14,
+    paddingVertical: 14,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  uploadBtnText: {
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
