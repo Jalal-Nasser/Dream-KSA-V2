@@ -32,14 +32,21 @@ app.get('/routes', (_req, res) => {
     routes: [
       'GET /',
       'GET /health',
+      'GET /routes',
       'POST /create-room',
       'POST /get-token',
       'GET /room/:roomId',
       'GET /rooms',
-      'GET /api/rooms',
       'POST /leave-room',
       'POST /admin/mute',
-      'POST /admin/kick'
+      'POST /admin/kick',
+      'GET /api/rooms',
+      'POST /api/create-room',
+      'POST /api/get-token',
+      'GET /api/room/:roomId',
+      'POST /api/leave-room',
+      'POST /api/admin/mute',
+      'POST /api/admin/kick'
     ]
   });
 });
@@ -289,15 +296,239 @@ app.get('/rooms', async (_req, res) => {
   }
 });
 
-// Alias path for clients behind proxies where /rooms might be intercepted
-app.get('/api/rooms', async (req, res) => app._router.handle({ ...req, url: '/rooms', method: 'GET' }, res));
-app.post('/api/create-room', async (req, res) => app._router.handle({ ...req, url: '/create-room', method: 'POST' }, res));
-app.post('/api/get-token', async (req, res) => app._router.handle({ ...req, url: '/get-token', method: 'POST' }, res));
-app.get('/api/room/:roomId', async (req, res) => app._router.handle({ ...req, url: `/room/${req.params.roomId}`, method: 'GET' }, res));
-app.post('/api/leave-room', async (req, res) => app._router.handle({ ...req, url: '/leave-room', method: 'POST' }, res));
+// API route aliases for clients behind proxies where root paths might be intercepted
+app.get('/api/rooms', async (_req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('rooms')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(50);
 
-// Leave room
-app.post('/leave-room', async (req, res) => {
+    if (error) throw error;
+
+    res.json({ rooms: data ?? [] });
+  } catch (err) {
+    console.error('List rooms error:', err);
+    res.status(500).json({ error: 'Failed to fetch rooms' });
+  }
+});
+
+app.post('/api/create-room', async (req, res) => {
+  const {
+    name,
+    description = 'Voice chat room',
+    type = 'voice',
+    theme = '#4f46e5',
+    bannerImage = null,
+    backgroundImage = null,
+  } = req.body;
+
+  try {
+    if (!name || String(name).trim().length === 0) {
+      return res.status(400).json({ error: 'Missing required field: name' });
+    }
+
+    console.log('Create-room request received', {
+      name,
+      description,
+      theme,
+      bannerImage,
+      backgroundImage,
+    });
+
+    let createdRoomId = null;
+    let hmsRoomId = null;
+
+    const canUseHMS = Boolean(HMS_MANAGEMENT_TOKEN && HMS_APP_ID && HMS_APP_SECRET && process.env.HMS_ROOM_TEMPLATE_ID);
+
+    if (canUseHMS) {
+      try {
+        console.log('Creating room via 100ms…');
+        const roomResponse = await fetch('https://prod-in2.100ms.live/api/v2/rooms', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${HMS_MANAGEMENT_TOKEN}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: String(name).substring(0, 48), // HMS name limit safety
+            description,
+            template_id: process.env.HMS_ROOM_TEMPLATE_ID,
+            region: 'in',
+          }),
+        });
+
+        if (!roomResponse.ok) {
+          const errorText = await roomResponse.text();
+          console.error('100ms room creation failed:', errorText);
+          throw new Error(`100ms API error: ${roomResponse.status} ${errorText}`);
+        }
+
+        const roomData = await roomResponse.json();
+        hmsRoomId = roomData.id;
+        console.log('100ms room created:', hmsRoomId);
+      } catch (hmsError) {
+        console.error('100ms room creation error:', hmsError);
+        // Continue without HMS room - we'll create a database record anyway
+      }
+    }
+
+    // Create room in Supabase
+    const { data: room, error: roomError } = await supabase
+      .from('rooms')
+      .insert({
+        name: String(name).trim(),
+        description: String(description).trim(),
+        type,
+        theme,
+        banner_image: bannerImage,
+        background_image: backgroundImage,
+        hms_room_id: hmsRoomId,
+        is_live: false,
+        owner_id: req.body.owner_id || null,
+        country: req.body.country || 'SA'
+      })
+      .select()
+      .single();
+
+    if (roomError) {
+      console.error('Supabase room creation error:', roomError);
+      throw roomError;
+    }
+
+    createdRoomId = room.id;
+    console.log('Room created in database:', createdRoomId);
+
+    res.json({
+      success: true,
+      room: {
+        id: createdRoomId,
+        name: room.name,
+        description: room.description,
+        type: room.type,
+        theme: room.theme,
+        banner_image: room.banner_image,
+        background_image: room.background_image,
+        hms_room_id: hmsRoomId,
+        is_live: room.is_live,
+        owner_id: room.owner_id,
+        country: room.country,
+        created_at: room.created_at
+      }
+    });
+
+  } catch (error) {
+    console.error('Create room error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/get-token', async (req, res) => {
+  const { room_id, user_id, user_name, role = 'guest' } = req.body;
+
+  try {
+    if (!room_id || !user_id || !user_name) {
+      return res.status(400).json({ error: 'Missing required fields: room_id, user_id, user_name' });
+    }
+
+    if (!HMS_APP_SECRET) {
+      return res.status(500).json({ error: 'HMS app secret not configured' });
+    }
+
+    // Verify room exists
+    const { data: room, error: roomError } = await supabase
+      .from('rooms')
+      .select('id, hms_room_id')
+      .eq('id', room_id)
+      .single();
+
+    if (roomError || !room) {
+      return res.status(404).json({ error: 'Room not found' });
+    }
+
+    // Use HMS room ID if available, otherwise use our room ID
+    const hmsRoomId = room.hms_room_id || room_id;
+
+    const now = Math.floor(Date.now() / 1000);
+    const tokenPayload = {
+      room_id: hmsRoomId,
+      user_id,
+      role,
+      exp: now + (24 * 60 * 60), // 24 hours expiry
+      jti: uuidv4() // unique token ID
+    };
+
+    console.log('Generating JWT token with payload:', tokenPayload);
+
+    try {
+      const authToken = jwt.sign(tokenPayload, HMS_APP_SECRET, { algorithm: 'HS256' });
+      console.log('JWT token generated successfully');
+
+      // Log user joining room
+      await supabase
+        .from('room_participants')
+        .upsert({
+          user_id: user_id,
+          room_id: room_id,
+          user_name: user_name,
+          role: role,
+          joined_at: new Date().toISOString(),
+          is_active: true
+        });
+
+      res.json({ 
+        token: authToken,
+        room_id: room_id,
+        user_id: user_id,
+        role: role
+      });
+
+    } catch (jwtError) {
+      console.error('JWT token generation error:', jwtError);
+      res.status(500).json({ error: 'Failed to generate authentication token' });
+    }
+
+  } catch (error) {
+    console.error('Token generation error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/room/:roomId', async (req, res) => {
+  const { roomId } = req.params;
+
+  try {
+    // Get room from Supabase
+    const { data: room, error } = await supabase
+      .from('rooms')
+      .select('*')
+      .eq('id', roomId)
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    // Get active participants
+    const { data: participants } = await supabase
+      .from('room_participants')
+      .select('*')
+      .eq('room_id', roomId)
+      .eq('is_active', true);
+
+    res.json({
+      ...room,
+      participants: participants || []
+    });
+
+  } catch (error) {
+    console.error('Get room error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/leave-room', async (req, res) => {
   const { user_id, room_id } = req.body;
 
   try {
@@ -315,8 +546,7 @@ app.post('/leave-room', async (req, res) => {
   }
 });
 
-// Admin: Mute participant
-app.post('/admin/mute', async (req, res) => {
+app.post('/api/admin/mute', async (req, res) => {
   const { admin_user_id, target_user_id, room_id } = req.body;
 
   try {
@@ -349,8 +579,7 @@ app.post('/admin/mute', async (req, res) => {
   }
 });
 
-// Admin: Kick participant
-app.post('/admin/kick', async (req, res) => {
+app.post('/api/admin/kick', async (req, res) => {
   const { admin_user_id, target_user_id, room_id } = req.body;
 
   try {

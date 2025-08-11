@@ -1,12 +1,13 @@
 // app/rooms/index.tsx
 import React, { useState, useRef } from 'react';
-import { Button, Alert, SafeAreaView, View, Text, Pressable, StyleSheet } from 'react-native';
+import { Button, Alert, SafeAreaView, View, Text, Pressable, StyleSheet, Platform } from 'react-native';
 import { ArrowLeft, Home } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
-import { 
-  HMSSDK, 
-  HMSUpdateListenerActions 
-} from '@100mslive/react-native-hms';
+import { TOKEN_SERVER_URL, TOKEN_SERVER_URL_DEVICE } from '../../lib/config';
+// import { 
+//   HMSSDK, 
+//   HMSUpdateListenerActions 
+// } from '@100mslive/react-native-hms';
 
 const RoomScreen = () => {
   const hmsInstanceRef = useRef<any>(null);
@@ -16,20 +17,20 @@ const RoomScreen = () => {
   const joinRoom = async () => {
     try {
       setIsConnecting(true);
-      const hmsInstance = await HMSSDK.build();
-      hmsInstanceRef.current = hmsInstance;
+      // const hmsInstance = await HMSSDK.build();
+      // hmsInstanceRef.current = hmsInstance;
 
       // Event Listeners
-      hmsInstance.addEventListener(HMSUpdateListenerActions.ON_JOIN, () => {
-        console.log('✅ Successfully joined room');
-        setIsConnecting(false);
-        Alert.alert('Success', 'Joined voice room successfully!');
-      });
-      hmsInstance.addEventListener(HMSUpdateListenerActions.ON_ERROR, (error: any) => {
-        console.error('❌ HMS Error:', error);
-        setIsConnecting(false);
-        Alert.alert('Error', `HMS Error: ${error.description || error.message}`);
-      });
+      // hmsInstance.addEventListener(HMSUpdateListenerActions.ON_JOIN, () => {
+      //   console.log('✅ Successfully joined room');
+      //   setIsConnecting(false);
+      //   Alert.alert('Success', 'Joined voice room successfully!');
+      // });
+      // hmsInstance.addEventListener(HMSUpdateListenerActions.ON_ERROR, (error: any) => {
+      //   console.error('❌ HMS Error:', error);
+      //   setIsConnecting(false);
+      //   Alert.alert('Error', `HMS Error: ${error.description || error.message}`);
+      // });
 
       // Try different HMS joining approaches
       console.log('🔗 Attempting to join with room ID...');
@@ -46,7 +47,7 @@ const RoomScreen = () => {
       for (const role of rolesToTry) {
         try {
           console.log(`📡 Fetching auth token with role: ${role}...`);
-          const res = await fetch('http://192.168.1.9:3001/get-token', {
+          const res = await fetch(`${Platform.OS === 'web' ? TOKEN_SERVER_URL : TOKEN_SERVER_URL_DEVICE}/api/get-token`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -82,17 +83,17 @@ const RoomScreen = () => {
         const templateRoles = ['listener', 'speaker', 'viewer', 'participant', 'user'];
         
         for (const role of templateRoles) {
-          try {
-            console.log(`📡 Fetching auth token with template ID and role: ${role}...`);
-            const res = await fetch('http://192.168.1.9:3001/get-token', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                user_id: 'dream-user-001',
-                role: role,
-                room_id: '687656df03390326e61710d4', // Template ID instead
-              }),
-            });
+                  try {
+          console.log(`📡 Fetching auth token with template ID and role: ${role}...`);
+          const res = await fetch(`${Platform.OS === 'web' ? TOKEN_SERVER_URL : TOKEN_SERVER_URL_DEVICE}/api/get-token`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              user_id: 'dream-user-001',
+              role: role,
+              room_id: '687656df03390326e61710d4', // Template ID instead
+            }),
+          });
             
             if (res.ok) {
               const data = await res.json();
@@ -113,52 +114,52 @@ const RoomScreen = () => {
       }
       
       // Method 1: Try with ROOM ID + AUTH TOKEN + USERNAME
-      try {
-        await hmsInstance.join({ 
-          roomCode: '687656dfa48ca61c46475db8',
-          username: 'Dream User',
-          authToken: authToken
-        } as any);
-        console.log('✅ Joined successfully with room ID + auth token');
-        return;
-      } catch (roomIdError) {
-        console.log('❌ Room ID + auth token failed:', roomIdError);
-      }
+      // try {
+      //   await hmsInstance.join({ 
+      //     roomCode: '687656dfa48ca61c46475db8',
+      //     username: 'Dream User',
+      //     authToken: authToken
+      //   } as any);
+      //   console.log('✅ Joined successfully with room ID + auth token');
+      //   return;
+      // } catch (roomIdError) {
+      //   console.log('❌ Room ID + auth token failed:', roomIdError);
+      // }
       
       // Method 2: Try with TEMPLATE ID + AUTH TOKEN + USERNAME
-      console.log('🔗 Attempting to join with template ID...');
-      try {
-        await hmsInstance.join({ 
-          roomCode: '687656df03390326e61710d4',
-          username: 'Dream User',
-          authToken: authToken
-        } as any);
-        console.log('✅ Joined successfully with template ID + auth token');
-        return;
-      } catch (templateError) {
-        console.log('❌ Template ID + auth token failed:', templateError);
-      }
+      // console.log('🔗 Attempting to join with template ID...');
+      // try {
+      //   await hmsInstance.join({ 
+      //     roomCode: '687656df03390326e61710d4',
+      //     username: 'Dream User',
+      //     authToken: authToken
+      //   } as any);
+      //   console.log('✅ Joined successfully with template ID + auth token');
+      //   return;
+      // } catch (templateError) {
+      //   console.log('❌ Template ID + auth token failed:', templateError);
+      // }
       
       // Method 3: Try with ROOM NAME + AUTH TOKEN + USERNAME
-      console.log('🔗 Attempting to join with room name...');
-      try {
-        await hmsInstance.join({ 
-          roomCode: '976e2839-825f-4cbf-be92-e6c22174348',
-          username: 'Dream User',
-          authToken: authToken
-        } as any);
-        console.log('✅ Joined successfully with room name + auth token');
-        return;
-      } catch (roomNameError) {
-        console.log('❌ Room name + auth token failed:', roomNameError);
-      }
+      // console.log('🔗 Attempting to join with room name...');
+      // try {
+      //   await hmsInstance.join({ 
+      //     roomCode: '976e2839-825f-4cbf-be92-e6c22174348',
+      //     username: 'Dream User',
+      //     authToken: authToken
+      //   } as any);
+      //   console.log('✅ Joined successfully with room name + auth token');
+      //   return;
+      // } catch (roomNameError) {
+      //   console.log('❌ Room name + auth token failed:', roomNameError);
+      // }
       
       // If all room code methods fail, try with auth token
       console.log('🔗 Attempting to join with auth token as fallback...');
       
       try {
         // GET TOKEN with confirmed room ID from dashboard
-        const res = await fetch('http://192.168.1.9:3001/get-token', {
+        const res = await fetch(`${Platform.OS === 'web' ? TOKEN_SERVER_URL : TOKEN_SERVER_URL_DEVICE}/get-token`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -171,14 +172,15 @@ const RoomScreen = () => {
         console.log('TOKEN RESPONSE:', data);
 
         const authToken = String(data.token);
-        const HMSConfig = (await import('@100mslive/react-native-hms')).HMSConfig;
-        const hmsConfig = new HMSConfig({ 
-          authToken: authToken,
-          username: 'Dream User' 
-        });
+        // const HMSConfig = (await import('@100mslive/react-native-hms')).HMSConfig;
+        // const hmsConfig = new HMSConfig({ 
+        //   authToken: authToken,
+        //   username: 'Dream User' 
+        // });
         
-        await hmsInstance.join(hmsConfig);
-        console.log('✅ Joined successfully with auth token');
+        // await hmsInstance.join(hmsConfig);
+        console.log('✅ Auth token received, but HMS SDK is temporarily disabled');
+        Alert.alert('Success', 'Auth token received! HMS SDK is temporarily disabled for testing.');
         return;
         
       } catch (tokenError) {
