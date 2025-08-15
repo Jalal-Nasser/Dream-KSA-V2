@@ -1,20 +1,25 @@
 // hooks/useHMSRoom.ts - Real 100ms integration
 import { useState, useEffect, useRef } from 'react';
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 
-// Import HMS SDK
+// Import HMS SDK only for mobile platforms
 let HMSSDK: any;
 let HMSConfig: any;
 let HMSUpdateListenerActions: any;
 
-try {
-  const hms = require('@100mslive/react-native-hms');
-  HMSSDK = hms.HMSSDK;
-  HMSConfig = hms.HMSConfig;
-  HMSUpdateListenerActions = hms.HMSUpdateListenerActions;
-} catch (error) {
-  console.log('HMS SDK not available, using simulation mode');
-}
+// Only import HMS SDK on mobile platforms with native builds
+// if (Platform.OS !== 'web') {
+//   try {
+//     const hms = require('@100mslive/react-native-hms');
+//     HMSSDK = hms.HMSSDK;
+//     HMSConfig = hms.HMSConfig;
+//     HMSUpdateListenerActions = hms.HMSUpdateListenerActions;
+//     console.log('✅ HMS SDK loaded successfully');
+//   } catch (error) {
+//     console.log('📱 HMS SDK not available in Expo Go - using simulation mode');
+//     // This is expected in Expo Go - HMS needs native compilation
+//   }
+// }
 
 interface UseHMSRoomProps {
   roomId: string;

@@ -4,7 +4,7 @@ const testAPI = async () => {
     console.log('🧪 Testing create room API...');
     
     // Test create room
-    const createResponse = await fetch('http://localhost:3001/create-room', {
+    const createResponse = await fetch('https://dreamsksa.online/create-room', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: 'Test Room' }),
@@ -17,7 +17,7 @@ const testAPI = async () => {
     if (createData.id) {
       // Test get token
       console.log('🧪 Testing get token API...');
-      const tokenResponse = await fetch('http://localhost:3001/get-token', {
+      const tokenResponse = await fetch('https://dreamsksa.online/get-token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

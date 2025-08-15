@@ -1,0 +1,163 @@
+import React from 'react';
+import { StyleSheet, Text, View, Image, Pressable } from 'react-native';
+import { Users, Mic, Star, Heart } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
+
+interface Room {
+  id: string;
+  name?: string;
+  tags?: string[];
+}
+
+const RoomCard = ({ room }: { room: Room }) => {
+  const router = useRouter();
+  
+  const handleRoomPress = () => {
+    // Navigate to real voice chat room with HMS integration
+    router.push({
+      pathname: '/voicechat_real',
+      params: {
+        roomId: room.id,
+        roomName: room?.name || 'نقاش تقني',
+        userId: 'user_' + Math.random().toString(36).substr(2, 9),
+        userName: 'مستخدم ضيف',
+        role: 'guest'
+      }
+    });
+  };
+
+  return (
+    <Pressable style={roomCardStyles.cardContainer} onPress={handleRoomPress}>
+      {/* Header */}
+      <View style={roomCardStyles.cardHeader}>
+        <View style={roomCardStyles.usersCount}>
+          <Users size={12} color="#fff" />
+          <Text style={roomCardStyles.usersCountText}>+45</Text>
+        </View>
+        <View style={roomCardStyles.liveBadge}>
+          <View style={roomCardStyles.liveDot} />
+          <Text style={roomCardStyles.liveText}>مباشر</Text>
+        </View>
+      </View>
+
+      {/* Profile Image */}
+      <View style={roomCardStyles.profileImageContainer}>
+        {/*
+          Note: This assumes 'image' is a property of the room object.
+          Replace the uri with the correct image URL from your data.
+        */}
+        <Image
+          source={{ uri: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face' }}
+          style={roomCardStyles.profileImage}
+        />
+      </View>
+      
+      {/* Footer */}
+      <View style={roomCardStyles.cardFooter}>
+        <Text style={roomCardStyles.roomName}>{room?.name || 'نقاش تقني'}</Text>
+        <View style={roomCardStyles.tagsContainer}>
+          <View style={roomCardStyles.tag}>
+            <Text style={roomCardStyles.tagText}>نقاش</Text>
+          </View>
+          <View style={roomCardStyles.tag}>
+            <Text style={roomCardStyles.tagText}>عام</Text>
+          </View>
+        </View>
+      </View>
+    </Pressable>
+  );
+};
+
+const roomCardStyles = StyleSheet.create({
+  cardContainer: {
+    backgroundColor: '#1a2232', // Match login screen card color
+    width: 160,
+    height: 220,
+    borderRadius: 24,
+    padding: 12,
+    marginHorizontal: 8,
+    justifyContent: 'space-between',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 8,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  usersCount: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 16,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  usersCountText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
+    marginLeft: 4,
+  },
+  liveBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ef4444',
+    borderRadius: 16,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  liveDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#fff',
+    marginRight: 4,
+  },
+  liveText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  profileImageContainer: {
+    alignItems: 'center',
+    marginVertical: 8,
+  },
+  profileImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: 3,
+    borderColor: '#3b82f6',
+  },
+  cardFooter: {
+    alignItems: 'center',
+  },
+  roomName: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  tagsContainer: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  tag: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  tagText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '500',
+  },
+});
+
+export default RoomCard;

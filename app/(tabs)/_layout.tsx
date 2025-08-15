@@ -1,17 +1,20 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Home, Search, Mic, Gift, User } from 'lucide-react-native';
+import { Home, MessageCircle, Gift, Users, User } from 'lucide-react-native';
+import { BrandGradient, TabColors } from '../../lib/theme';
+import { useTheme } from '../../lib/ThemeProvider';
 
 export default function TabLayout() {
+  const { theme } = useTheme();
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#ffffff',
-        tabBarInactiveTintColor: '#94a3b8',
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveTintColor: theme.colors.tabInactive,
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#2f1e3bff',
-          borderTopColor: 'transparent',
+          backgroundColor: theme.colors.tabBackground,
+          borderTopColor: theme.colors.border,
           borderTopWidth: 0,
           paddingBottom: 10,
           paddingTop: 10,
@@ -35,9 +38,18 @@ export default function TabLayout() {
       <Tabs.Screen
         name="explore"
         options={{
-          title: 'ميكس',
+          title: 'دردشة',
           tabBarIcon: ({ color, size }) => (
-            <Mic color={color} size={size} />
+            <MessageCircle color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="friends"
+        options={{
+          title: 'الأصدقاء',
+          tabBarIcon: ({ color, size }) => (
+            <Users color={color} size={size} />
           ),
         }}
       />

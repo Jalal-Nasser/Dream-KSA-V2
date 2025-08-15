@@ -55,6 +55,7 @@ interface TrendingRoom extends Room {
 export default function HomeScreen() {
   const { theme } = useTheme();
   const router = useRouter();
+  const isDark = theme.scheme === 'dark';
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [trendingRooms, setTrendingRooms] = useState<TrendingRoom[]>([]);
@@ -230,7 +231,7 @@ export default function HomeScreen() {
             style={styles.hostAvatar}
           />
           <View style={styles.hostDetails}>
-            <Text style={styles.hostName}>{item.host_name}</Text>
+            <Text style={[styles.hostName, { color: theme.colors.text }]}>{item.host_name}</Text>
             <View style={styles.liveIndicator}>
               <View style={styles.liveDot} />
               <Text style={styles.liveText}>مباشر</Text>
@@ -239,30 +240,36 @@ export default function HomeScreen() {
         </View>
 
         {/* Room Info */}
-        <Text style={styles.roomName}>{item.name}</Text>
-        <Text style={styles.roomDescription}>{item.description}</Text>
+        <Text style={[styles.roomName, { color: theme.colors.text }]}>{item.name}</Text>
+        <Text style={[styles.roomDescription, { color: theme.colors.textSecondary }]}>{item.description}</Text>
 
         {/* Stats */}
         <View style={styles.roomStats}>
           <View style={styles.statItem}>
             <Users size={16} color="#94a3b8" />
-            <Text style={styles.statText}>{item.participant_count}</Text>
+            <Text style={[styles.statText, { color: theme.colors.textSecondary }]}>{item.participant_count}</Text>
           </View>
           <View style={styles.statItem}>
             <Mic size={16} color="#22c55e" />
-            <Text style={styles.statText}>{item.speakers}</Text>
+            <Text style={[styles.statText, { color: theme.colors.textSecondary }]}>{item.speakers}</Text>
           </View>
           <View style={styles.statItem}>
             <Star size={16} color="#fbbf24" />
-            <Text style={styles.statText}>{item.trending_score}</Text>
+            <Text style={[styles.statText, { color: theme.colors.textSecondary }]}>{item.trending_score}</Text>
           </View>
         </View>
 
         {/* Tags */}
         <View style={styles.tagsContainer}>
           {item.tags.slice(0, 3).map((tag, tagIndex) => (
-            <View key={tagIndex} style={styles.tag}>
-              <Text style={styles.tagText}>{tag}</Text>
+            <View
+              key={tagIndex}
+              style={[
+                styles.tag,
+                { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : '#f1f5f9' }
+              ]}
+            >
+              <Text style={[styles.tagText, { color: theme.colors.textSecondary }]}>{tag}</Text>
             </View>
           ))}
         </View>
@@ -272,7 +279,10 @@ export default function HomeScreen() {
 
   const renderRecentRoom = ({ item }: { item: Room }) => (
     <TouchableOpacity 
-      style={styles.recentRoomCard}
+      style={[
+        styles.recentRoomCard,
+        { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc' }
+      ]}
       onPress={() => navigateToRoom(item)}
     >
       <View style={styles.recentRoomHeader}>
@@ -281,15 +291,15 @@ export default function HomeScreen() {
           style={styles.recentHostAvatar}
         />
         <View style={styles.recentRoomInfo}>
-          <Text style={styles.recentRoomName}>{item.name}</Text>
-          <Text style={styles.recentHostName}>{item.host_name}</Text>
+          <Text style={[styles.recentRoomName, { color: theme.colors.text }]}>{item.name}</Text>
+          <Text style={[styles.recentHostName, { color: theme.colors.textSecondary }]}>{item.host_name}</Text>
         </View>
         <View style={styles.recentRoomStats}>
           <View style={styles.liveIndicator}>
             <View style={styles.liveDot} />
             <Text style={styles.liveText}>مباشر</Text>
           </View>
-          <Text style={styles.participantCount}>{item.participant_count} مشارك</Text>
+          <Text style={[styles.participantCount, { color: theme.colors.textSecondary }]}>{item.participant_count} مشارك</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -301,8 +311,8 @@ export default function HomeScreen() {
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
-            <Text style={styles.greeting}>مرحباً بك في</Text>
-            <Text style={styles.appName}>Dreams KSA</Text>
+            <Text style={[styles.greeting, { color: theme.colors.textSecondary }]}>مرحباً بك في</Text>
+            <Text style={[styles.appName, { color: theme.colors.text }]}>Dreams KSA</Text>
           </View>
           <TouchableOpacity style={styles.profileButton}>
             <Image 
@@ -313,12 +323,17 @@ export default function HomeScreen() {
         </View>
 
         {/* Search Bar */}
-        <View style={styles.searchContainer}>
+        <View
+          style={[
+            styles.searchContainer,
+            { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : '#f3f4f6' }
+          ]}
+        >
           <Search size={20} color="#94a3b8" />
           <TextInput
-            style={styles.searchInput}
+            style={[styles.searchInput, { color: theme.colors.text }]}
             placeholder="ابحث عن غرف أو مواضيع..."
-            placeholderTextColor="#94a3b8"
+            placeholderTextColor={theme.colors.textSecondary}
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
@@ -338,15 +353,19 @@ export default function HomeScreen() {
               key={category.id}
               style={[
                 styles.categoryButton,
+                { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : '#f3f4f6' },
                 selectedCategory === category.id && styles.selectedCategory
               ]}
               onPress={() => setSelectedCategory(category.id)}
             >
               <Text style={styles.categoryIcon}>{category.icon}</Text>
-              <Text style={[
-                styles.categoryText,
-                selectedCategory === category.id && styles.selectedCategoryText
-              ]}>
+              <Text
+                style={[
+                  styles.categoryText,
+                  { color: theme.colors.textSecondary },
+                  selectedCategory === category.id && styles.selectedCategoryText
+                ]}
+              >
                 {category.name}
               </Text>
             </TouchableOpacity>
@@ -356,7 +375,7 @@ export default function HomeScreen() {
         {/* Trending Rooms */}
         <View style={styles.sectionHeader}>
           <TrendingUp size={24} color="#fbbf24" />
-          <Text style={styles.sectionTitle}>الغرف الرائجة</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>الغرف الرائجة</Text>
         </View>
         
         <FlatList
@@ -372,7 +391,7 @@ export default function HomeScreen() {
         {/* Recent Rooms */}
         <View style={styles.sectionHeader}>
           <Clock size={24} color="#8b5cf6" />
-          <Text style={styles.sectionTitle}>أحدث الغرف</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>أحدث الغرف</Text>
         </View>
 
         <FlatList

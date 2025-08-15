@@ -5,14 +5,14 @@ import { View, Text, Button, Alert } from 'react-native';
 let HMSSDK: any;
 let hmsAvailable = false;
 
-try {
-  const hms = require('@100mslive/react-native-hms');
-  HMSSDK = hms.HMSSDK;
-  hmsAvailable = true;
-  console.log('✅ HMS SDK is available!');
-} catch (error) {
-  console.log('❌ HMS SDK not found:', error);
-}
+// try {
+//   const hms = require('@100mslive/react-native-hms');
+//   HMSSDK = hms.HMSSDK;
+//   hmsAvailable = true;
+//   console.log('✅ HMS SDK is available!');
+// } catch (error) {
+//   console.log('❌ HMS SDK not found:', error);
+// }
 
 export default function TestMicScreen() {
   const [hmsStatus, setHmsStatus] = useState('Checking...');

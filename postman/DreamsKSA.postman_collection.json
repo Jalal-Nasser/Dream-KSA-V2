@@ -1,0 +1,581 @@
+{
+  "info": {
+    "name": "Dreams KSA - Agency System & Voice Chat",
+    "description": "Complete Postman collection for testing Dreams KSA Supabase Edge Functions",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Get User Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/rest/v1/profiles?select=*&id=eq.{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["rest", "v1", "profiles"],
+              "query": [
+                {
+                  "key": "select",
+                  "value": "*"
+                },
+                {
+                  "key": "id",
+                  "value": "eq.{{userId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "100ms Voice Chat",
+      "item": [
+        {
+          "name": "Generate HMS Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"user_name\": \"{{userName}}\",\n  \"role\": \"listener\",\n  \"room_id\": \"{{roomId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/functions/v1/hms-token",
+              "host": ["{{baseUrl}}"],
+              "path": ["functions", "v1", "hms-token"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has ok: true\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.ok).to.be.true;",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains token\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.token).to.be.a('string');",
+                  "    pm.expect(response.token.length).to.be.greaterThan(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Agency Management",
+      "item": [
+        {
+          "name": "Create Agency",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test Agency\",\n  \"owner_id\": \"{{agencyOwnerId}}\",\n  \"payout_split\": 30,\n  \"description\": \"Test agency for development\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/functions/v1/create-agency",
+              "host": ["{{baseUrl}}"],
+              "path": ["functions", "v1", "create-agency"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has ok: true\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.ok).to.be.true;",
+                  "});",
+                  "",
+                  "pm.test(\"Agency created successfully\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.agency).to.be.an('object');",
+                  "    pm.expect(response.agency.name).to.eql('Test Agency');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Invite Host",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"agency_id\": \"{{agencyId}}\",\n  \"invitee_id\": \"{{inviteeId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/functions/v1/invite-host",
+              "host": ["{{baseUrl}}"],
+              "path": ["functions", "v1", "invite-host"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has ok: true\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.ok).to.be.true;",
+                  "});",
+                  "",
+                  "pm.test(\"Invitation created successfully\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.invitation).to.be.an('object');",
+                  "    pm.expect(response.invitation.status).to.eql('pending');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Accept Host Invite",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"invite_id\": \"{{inviteId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/functions/v1/accept-invite",
+              "host": ["{{baseUrl}}"],
+              "path": ["functions", "v1", "accept-invite"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has ok: true\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.ok).to.be.true;",
+                  "});",
+                  "",
+                  "pm.test(\"Host record created successfully\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.host).to.be.an('object');",
+                  "    pm.expect(response.host.user_id).to.eql(pm.environment.get('userId'));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Voice Room Management",
+      "item": [
+        {
+          "name": "Approve Microphone",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"room_id\": \"{{roomId}}\",\n  \"target_user_id\": \"{{targetUserId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/functions/v1/approve-mic",
+              "host": ["{{baseUrl}}"],
+              "path": ["functions", "v1", "approve-mic"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has ok: true\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.ok).to.be.true;",
+                  "});",
+                  "",
+                  "pm.test(\"Microphone approved successfully\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.new_role).to.eql('speaker');",
+                  "    pm.expect(response.current_speakers).to.be.greaterThan(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Revoke Microphone",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"room_id\": \"{{roomId}}\",\n  \"target_user_id\": \"{{targetUserId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/functions/v1/revoke-mic",
+              "host": ["{{baseUrl}}"],
+              "path": ["functions", "v1", "revoke-mic"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has ok: true\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.ok).to.be.true;",
+                  "});",
+                  "",
+                  "pm.test(\"Microphone revoked successfully\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.new_role).to.eql('listener');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Gift System",
+      "item": [
+        {
+          "name": "Send Gift",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"room_id\": \"{{roomId}}\",\n  \"receiver_host_id\": \"{{receiverHostId}}\",\n  \"gift_id\": \"{{giftId}}\",\n  \"message\": \"Great show!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/functions/v1/send-gift",
+              "host": ["{{baseUrl}}"],
+              "path": ["functions", "v1", "send-gift"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has ok: true\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.ok).to.be.true;",
+                  "});",
+                  "",
+                  "pm.test(\"Gift sent successfully\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.gift).to.be.an('object');",
+                  "    pm.expect(response.gift.room_id).to.eql(pm.environment.get('roomId'));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Monthly Operations",
+      "item": [
+        {
+          "name": "Close Month",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"month\": \"{{currentMonth}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/functions/v1/close-month",
+              "host": ["{{baseUrl}}"],
+              "path": ["functions", "v1", "close-month"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has ok: true\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.ok).to.be.true;",
+                  "});",
+                  "",
+                  "pm.test(\"Month closed successfully\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.message).to.include('closed successfully');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Finalize Month",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"month\": \"{{currentMonth}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/functions/v1/finalize-month",
+              "host": ["{{baseUrl}}"],
+              "path": ["functions", "v1", "finalize-month"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has ok: true\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.ok).to.be.true;",
+                  "});",
+                  "",
+                  "pm.test(\"Month finalized successfully\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.message).to.include('finalized successfully');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Request Payout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"month\": \"{{currentMonth}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/functions/v1/request-payout",
+              "host": ["{{baseUrl}}"],
+              "path": ["functions", "v1", "request-payout"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has ok: true\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.ok).to.be.true;",
+                  "});",
+                  "",
+                  "pm.test(\"Payout requested successfully\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.message).to.include('processed successfully');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://your-project-ref.functions.supabase.co"
+    }
+  ]
+}
+

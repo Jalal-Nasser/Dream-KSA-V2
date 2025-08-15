@@ -1,7 +1,7 @@
 // config/api.js
 // Single unified server configuration
-const API_BASE_URL = __DEV__ 
-  ? 'http://192.168.1.9:3001'  // Development - local server
-  : 'https://dreams-ksa-backend-production.up.railway.app'; // Production - Railway deployment
+// Always point to the deployed backend to avoid local network issues on devices
+// Domain provided by user: dreamsksa.online
+const API_BASE_URL = 'https://dreamsksa.online';
 
 export { API_BASE_URL };

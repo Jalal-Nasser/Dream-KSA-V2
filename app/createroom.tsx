@@ -58,6 +58,7 @@ export default function CreateRoomScreen() {
         theme: selectedTheme,
         bannerImage: bannerUrl.trim() || null,
         backgroundImage: logoUrl.trim() || null,
+        country: 'SA',
       };
       
       const res = await fetch(`${API_BASE_URL}/api/create-room`, {
@@ -66,11 +67,23 @@ export default function CreateRoomScreen() {
         body: JSON.stringify(roomData),
       });
       const data = await res.json();
-      if (data.id) {
-        Alert.alert('تم إنشاء الغرفة!', `معرف الغرفة: ${data.id}`, [
+      console.log('Create room response:', data);
+      
+      const createdId = data?.room?.id || data?.id;
+      if (createdId) {
+        Alert.alert('تم إنشاء الغرفة!', `معرف الغرفة: ${createdId}`, [
           {
             text: 'الذهاب للغرفة',
-            onPress: () => router.push(`/voicechat?roomId=${data.id}&roomName=${roomName.trim()}`)
+            onPress: () => {
+              console.log('Navigating to room:', { roomId: createdId, roomName: roomName.trim() });
+              router.push({
+                pathname: '/voicechat',
+                params: { 
+                  roomId: createdId, 
+                  roomName: roomName.trim() 
+                }
+              });
+            }
           },
           {
             text: 'العودة للرئيسية',
@@ -78,7 +91,8 @@ export default function CreateRoomScreen() {
           }
         ]);
       } else {
-        throw new Error(data.error || 'خطأ غير معروف');
+        console.error('Create room failed:', data);
+        throw new Error(data?.error || 'خطأ غير معروف');
       }
     } catch (err: any) {
       Alert.alert('خطأ', err.message);

@@ -1,0 +1,11 @@
+{
+  "files.associations": {
+    "*.postgresql.sql": "sql",
+    "*.psql": "sql"
+  },
+  "mssql.intelliSense.enableIntelliSense": false,
+  "mssql.format.alignColumnDefinitionsInColumns": false,
+  "[sql]": {
+    "editor.defaultFormatter": "mtxr.sqltools"
+  }
+}

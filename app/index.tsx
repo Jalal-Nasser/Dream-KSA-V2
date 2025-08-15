@@ -1,6 +1,5 @@
 import { Redirect } from 'expo-router';
 
 export default function Index() {
-  // Redirect to login screen
-  return <Redirect href="/index-login" />;
+  return <Redirect href="/join" />;
 }

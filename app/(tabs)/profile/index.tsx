@@ -1,108 +1,356 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  Alert,
-  SafeAreaView,
-  ScrollView,
-  TextInput,
+import React, { useState, useEffect } from 'react';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  SafeAreaView, 
+  ScrollView, 
+  TouchableOpacity, 
+  Image, 
   Switch,
-  Modal,
-  Image,
+  Alert,
+  Dimensions,
+  TextInput
 } from 'react-native';
-import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import * as ImagePicker from 'expo-image-picker';
-import {
-  ArrowLeft,
-  User,
-  Settings,
+import { useRouter } from 'expo-router';
+import { 
+  Settings, 
+  Edit, 
+  Crown, 
+  Star, 
+  Users, 
+  Mic, 
+  Gift, 
+  Heart,
   Bell,
-  Mic,
-  Volume2,
   Shield,
-  HelpCircle,
+  Moon,
+  Sun,
   LogOut,
-  Edit,
+  ChevronRight,
   Camera,
-  Check,
-  X,
+  Trash2,
+  HelpCircle,
+  Info,
+  Share2,
+  Download,
+  Lock,
+  Globe,
+  Volume2,
+  VolumeX,
+  Wifi,
+  WifiOff,
+  Smartphone,
+  Monitor,
+  Trophy
 } from 'lucide-react-native';
+import { supabase } from '../../../lib/supabase';
+
+const { width } = Dimensions.get('window');
+
+interface User {
+  id: string;
+  name: string;
+  username: string;
+  email: string;
+  avatar: string;
+  bio: string;
+  level: number;
+  experience: number;
+  coins: number;
+  followers: number;
+  following: number;
+  roomsCreated: number;
+  totalTimeSpent: number;
+  joinDate: string;
+  isVerified: boolean;
+  isPremium: boolean;
+}
+
+interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  isUnlocked: boolean;
+  progress: number;
+  maxProgress: number;
+  unlockedAt?: string;
+}
+
+interface Setting {
+  id: string;
+  name: string;
+  description: string;
+  icon: React.ReactNode;
+  type: 'toggle' | 'select' | 'action';
+  value?: boolean | string;
+  options?: string[];
+}
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const [userProfile, setUserProfile] = useState({
-    name: 'محمد أحمد',
-    username: '@mohammed_ahmed',
-    email: 'mohammed@example.com',
-    mobile: '0500000000',
-    age: '30',
-    nationality: 'السعودية',
-    gender: 'ذكر',
-    avatar: null,
-    bio: 'مرحباً، أحب المشاركة في الأماسي الصوتية!',
-  });
+  const [user, setUser] = useState<User | null>(null);
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [settings, setSettings] = useState<Setting[]>([]);
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  
+  // WhatsApp verification state
+  const [whatsappPhone, setWhatsappPhone] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
+  const [showCodeInput, setShowCodeInput] = useState(false);
+  const [whatsappLoading, setWhatsappLoading] = useState(false);
+  const [codeChecking, setCodeChecking] = useState(false);
+  const [whatsappStatus, setWhatsappStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
 
-  const [settings, setSettings] = useState({
-    notifications: {
-      roomInvites: true,
-      mentions: true,
-      newMessages: true,
-      roomStart: false,
-    },
-    audio: {
-      autoMute: false,
-      noiseReduction: true,
-      echoCancellation: true,
-      voiceLevel: 75,
-    },
-    privacy: {
-      showOnlineStatus: true,
-      allowDirectMessages: true,
-      showInSearch: true,
-      profileVisibility: 'public', // public, friends, private
-    },
-    appearance: {
-      darkMode: true,
-      arabicLanguage: true,
-      fontSize: 'medium', // small, medium, large
-    },
-  });
+  // Sample user data
+  useEffect(() => {
+    const sampleUser: User = {
+      id: '1',
+      name: 'أحمد محمد',
+      username: '@ahmed_mohamed',
+      email: 'ahmed@example.com',
+      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face',
+      bio: 'مطور تطبيقات ومحب للتقنية. أحب مشاركة المعرفة مع الآخرين.',
+      level: 15,
+      experience: 1250,
+      coins: 1250,
+      followers: 234,
+      following: 156,
+      roomsCreated: 8,
+      totalTimeSpent: 45, // hours
+      joinDate: '2023-01-15',
+      isVerified: true,
+      isPremium: true
+    };
+    setUser(sampleUser);
 
-  const [editingProfile, setEditingProfile] = useState(false);
-  const [tempProfile, setTempProfile] = useState(userProfile);
+    const sampleAchievements: Achievement[] = [
+      {
+        id: '1',
+        name: 'المضيف الأول',
+        description: 'أنشأت أول غرفة صوتية',
+        icon: '🎤',
+        isUnlocked: true,
+        progress: 1,
+        maxProgress: 1,
+        unlockedAt: '2023-01-20'
+      },
+      {
+        id: '2',
+        name: 'المتحدث النشط',
+        description: 'تحدثت في 10 غرف مختلفة',
+        icon: '💬',
+        isUnlocked: true,
+        progress: 10,
+        maxProgress: 10,
+        unlockedAt: '2023-02-15'
+      },
+      {
+        id: '3',
+        name: 'صانع الأصدقاء',
+        description: 'حصلت على 100 متابع',
+        icon: '👥',
+        isUnlocked: true,
+        progress: 100,
+        maxProgress: 100,
+        unlockedAt: '2023-03-10'
+      },
+      {
+        id: '4',
+        name: 'المحسن',
+        description: 'أرسلت 50 هدية',
+        icon: '🎁',
+        isUnlocked: false,
+        progress: 32,
+        maxProgress: 50
+      },
+      {
+        id: '5',
+        name: 'المستمع المخلص',
+        description: 'استمعت لمدة 100 ساعة',
+        icon: '🎧',
+        isUnlocked: false,
+        progress: 45,
+        maxProgress: 100
+      }
+    ];
+    setAchievements(sampleAchievements);
 
-  const pickAvatar = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 1,
-    });
-    if (!result.canceled) {
-      setTempProfile(prev => ({ ...prev, avatar: result.assets[0].uri }));
+                      const sampleSettings: Setting[] = [
+            {
+              id: 'settings',
+              name: 'الإعدادات المتقدمة',
+              description: 'إدارة جميع إعدادات التطبيق',
+              icon: <Settings size={20} color="#8b5cf6" />,
+              type: 'action'
+            },
+            {
+              id: 'leaderboard',
+              name: 'المتصدرين',
+              description: 'عرض قائمة أفضل المستخدمين والغرف',
+              icon: <Trophy size={20} color="#8b5cf6" />,
+              type: 'action'
+            },
+            {
+              id: 'notifications',
+              name: 'الإشعارات',
+              description: 'استقبال إشعارات من التطبيق',
+              icon: <Bell size={20} color="#8b5cf6" />,
+              type: 'toggle',
+              value: true
+            },
+            {
+              id: 'notifications_screen',
+              name: 'عرض الإشعارات',
+              description: 'عرض جميع الإشعارات والطلبات',
+              icon: <Bell size={20} color="#8b5cf6" />,
+              type: 'action'
+            },
+          {
+            id: 'darkMode',
+            name: 'الوضع المظلم',
+            description: 'تفعيل المظهر المظلم',
+            icon: <Moon size={20} color="#8b5cf6" />,
+            type: 'toggle',
+            value: true
+          },
+          {
+            id: 'sound',
+            name: 'الأصوات',
+            description: 'تشغيل أصوات التطبيق',
+            icon: <Volume2 size={20} color="#8b5cf6" />,
+            type: 'toggle',
+            value: true
+          }
+        ];
+    setSettings(sampleSettings);
+  }, []);
+
+  const handleSettingChange = (settingId: string, value: boolean | string) => {
+    setSettings(prev => 
+      prev.map(setting => 
+        setting.id === settingId 
+          ? { ...setting, value } 
+          : setting
+      )
+    );
+  };
+
+  const handleSettingAction = (settingId: string) => {
+    switch (settingId) {
+      case 'settings':
+        router.push('/profile/settings');
+        break;
+      case 'leaderboard':
+        router.push('/leaderboard');
+        break;
+      case 'notifications_screen':
+        router.push('/notifications');
+        break;
+      case 'privacy':
+        Alert.alert('الخصوصية', 'سيتم فتح إعدادات الخصوصية');
+        break;
+      case 'help':
+        Alert.alert('المساعدة', 'سيتم فتح صفحة المساعدة');
+        break;
+      case 'about':
+        Alert.alert('حول التطبيق', 'إصدار 1.0.0 - تطبيق غرف الدردشة الصوتية');
+        break;
     }
   };
 
-  const handleSaveProfile = () => {
-    setUserProfile(tempProfile);
-    setEditingProfile(false);
-    Alert.alert('تم الحفظ', 'تم تحديث الملف الشخصي بنجاح');
+  const handleWhatsappVerification = async () => {
+    if (!whatsappPhone.trim() || !whatsappPhone.startsWith('+')) {
+      setWhatsappStatus({ type: 'error', message: 'يرجى إدخال رقم هاتف صحيح يبدأ بـ +' });
+      return;
+    }
+
+    try {
+      setWhatsappLoading(true);
+      setWhatsappStatus(null);
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        setWhatsappStatus({ type: 'error', message: 'جلسة غير صالحة، يرجى تسجيل الدخول مرة أخرى' });
+        return;
+      }
+
+      const response = await fetch(`${process.env.EXPO_PUBLIC_FUNCTIONS_BASE_URL}/wa-start`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ phone: whatsappPhone.trim() }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.ok) {
+        setShowCodeInput(true);
+        setWhatsappStatus({ type: 'success', message: 'تم إرسال رمز التحقق إلى واتساب' });
+      } else {
+        setWhatsappStatus({ 
+          type: 'error', 
+          message: `فشل التحقق: ${result.reason || result.error || 'خطأ غير معروف'}` 
+        });
+      }
+    } catch (error: any) {
+      setWhatsappStatus({ type: 'error', message: `خطأ في الاتصال: ${error.message}` });
+    } finally {
+      setWhatsappLoading(false);
+    }
   };
 
-  const handleCancelEdit = () => {
-    setTempProfile(userProfile);
-    setEditingProfile(false);
-  };
+  const handleCodeVerification = async () => {
+    if (!verificationCode.trim() || verificationCode.length !== 6) {
+      setWhatsappStatus({ type: 'error', message: 'يرجى إدخال رمز التحقق المكون من 6 أرقام' });
+      return;
+    }
 
-  const handleSettingChange = (category: keyof typeof settings, setting: string, value: any) => {
-    setSettings(prev => ({
-      ...prev,
-      [category]: {
-        ...prev[category],
-        [setting]: value,
-      },
-    }));
+    try {
+      setCodeChecking(true);
+      setWhatsappStatus(null);
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        setWhatsappStatus({ type: 'error', message: 'جلسة غير صالحة، يرجى تسجيل الدخول مرة أخرى' });
+        return;
+      }
+
+      const response = await fetch(`${process.env.EXPO_PUBLIC_FUNCTIONS_BASE_URL}/wa-check`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ 
+          phone: whatsappPhone.trim(), 
+          code: verificationCode.trim() 
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.ok) {
+        setWhatsappStatus({ type: 'success', message: 'تم التحقق بنجاح' });
+        setShowCodeInput(false);
+        setVerificationCode('');
+        setWhatsappPhone('');
+        // Refresh profile data if needed
+      } else {
+        setWhatsappStatus({ 
+          type: 'error', 
+          message: `فشل التحقق: ${result.reason || result.error || 'خطأ غير معروف'}` 
+        });
+      }
+    } catch (error: any) {
+      setWhatsappStatus({ type: 'error', message: `خطأ في الاتصال: ${error.message}` });
+    } finally {
+      setCodeChecking(false);
+    }
   };
 
   const handleLogout = () => {
@@ -111,356 +359,351 @@ export default function ProfileScreen() {
       'هل أنت متأكد من تسجيل الخروج؟',
       [
         { text: 'إلغاء', style: 'cancel' },
-        {
-          text: 'تسجيل الخروج',
+        { 
+          text: 'تسجيل الخروج', 
           style: 'destructive',
           onPress: () => {
-            // Clear user data and navigate to login
-            router.replace('/index-login');
-          },
-        },
+            // Handle logout logic
+            router.replace('/login');
+          }
+        }
       ]
     );
   };
 
-  const ProfileEditModal = () => (
-    <Modal
-      visible={editingProfile}
-      animationType="slide"
-      presentationStyle="pageSheet"
-    >
-      <LinearGradient
-        colors={['#1F2937', '#111827']}
-        style={styles.modalContainer}
-      >
-        <SafeAreaView style={styles.modalContent}>
-          {/* Modal Header */}
-          <View style={styles.modalHeader}>
-            <Pressable onPress={handleCancelEdit}>
-              <X color="white" size={24} />
-            </Pressable>
-            <Text style={styles.modalTitle}>تعديل الملف الشخصي</Text>
-            <Pressable onPress={handleSaveProfile}>
-              <Check color="#10b981" size={24} />
-            </Pressable>
+  const getLevelProgress = () => {
+    if (!user) return 0;
+    const currentLevelExp = user.experience % 100;
+    return (currentLevelExp / 100) * 100;
+  };
+
+  const renderAchievement = (achievement: Achievement) => (
+    <View key={achievement.id} style={styles.achievementItem}>
+      <View style={[
+        styles.achievementIcon,
+        achievement.isUnlocked ? styles.unlockedAchievement : styles.lockedAchievement
+      ]}>
+        <Text style={styles.achievementIconText}>{achievement.icon}</Text>
+      </View>
+      
+      <View style={styles.achievementInfo}>
+        <Text style={[
+          styles.achievementName,
+          achievement.isUnlocked ? styles.unlockedText : styles.lockedText
+        ]}>
+          {achievement.name}
+        </Text>
+        <Text style={styles.achievementDescription}>{achievement.description}</Text>
+        
+        <View style={styles.achievementProgress}>
+          <View style={styles.progressBar}>
+            <View 
+              style={[
+                styles.progressFill, 
+                { width: `${(achievement.progress / achievement.maxProgress) * 100}%` }
+              ]} 
+            />
           </View>
-
-          <ScrollView style={styles.modalBody}>
-            {/* Avatar Section */}
-            <View style={styles.avatarSection}>
-              <Pressable
-                style={styles.avatarContainer}
-                onPress={pickAvatar}
-              >
-                {tempProfile.avatar ? (
-                  <Image source={{ uri: tempProfile.avatar }} style={styles.avatar} />
-                ) : (
-                  <View style={styles.avatarPlaceholder}>
-                    <User color="white" size={40} />
-                  </View>
-                )}
-                <View style={styles.avatarEditButton}>
-                  <Camera color="white" size={16} />
-                </View>
-              </Pressable>
-            </View>
-
-            {/* Profile Fields */}
-            <View style={styles.formSection}>
-              <Text style={styles.fieldLabel}>الاسم</Text>
-              <TextInput
-                style={styles.textInput}
-                value={tempProfile.name}
-                onChangeText={(text) => setTempProfile(prev => ({ ...prev, name: text }))}
-                placeholder="أدخل اسمك"
-                placeholderTextColor="#9ca3af"
-                textAlign="right"
-              />
-
-              <Text style={styles.fieldLabel}>اسم المستخدم</Text>
-              <TextInput
-                style={styles.textInput}
-                value={tempProfile.username}
-                onChangeText={(text) => setTempProfile(prev => ({ ...prev, username: text }))}
-                placeholder="أدخل اسم المستخدم"
-                placeholderTextColor="#9ca3af"
-                textAlign="right"
-              />
-
-              <Text style={styles.fieldLabel}>البريد الإلكتروني</Text>
-              <TextInput
-                style={styles.textInput}
-                value={tempProfile.email}
-                onChangeText={(text) => setTempProfile(prev => ({ ...prev, email: text }))}
-                placeholder="أدخل البريد الإلكتروني"
-                placeholderTextColor="#9ca3af"
-                keyboardType="email-address"
-                textAlign="right"
-              />
-
-              <Text style={styles.fieldLabel}>رقم الجوال</Text>
-              <TextInput
-                style={styles.textInput}
-                value={tempProfile.mobile}
-                onChangeText={(text) => setTempProfile(prev => ({ ...prev, mobile: text }))}
-                placeholder="أدخل رقم الجوال"
-                placeholderTextColor="#9ca3af"
-                keyboardType="phone-pad"
-                textAlign="right"
-              />
-
-              <Text style={styles.fieldLabel}>العمر</Text>
-              <TextInput
-                style={styles.textInput}
-                value={tempProfile.age}
-                onChangeText={(text) => setTempProfile(prev => ({ ...prev, age: text }))}
-                placeholder="أدخل عمرك"
-                placeholderTextColor="#9ca3af"
-                keyboardType="numeric"
-                textAlign="right"
-              />
-
-              <Text style={styles.fieldLabel}>الجنسية</Text>
-              <TextInput
-                style={styles.textInput}
-                value={tempProfile.nationality}
-                onChangeText={(text) => setTempProfile(prev => ({ ...prev, nationality: text }))}
-                placeholder="أدخل جنسيتك"
-                placeholderTextColor="#9ca3af"
-                textAlign="right"
-              />
-
-              <Text style={styles.fieldLabel}>الجنس</Text>
-              <TextInput
-                style={styles.textInput}
-                value={tempProfile.gender}
-                onChangeText={(text) => setTempProfile(prev => ({ ...prev, gender: text }))}
-                placeholder="ذكر أو أنثى"
-                placeholderTextColor="#9ca3af"
-                textAlign="right"
-              />
-
-              <Text style={styles.fieldLabel}>النبذة الشخصية</Text>
-              <TextInput
-                style={[styles.textInput, styles.bioInput]}
-                value={tempProfile.bio}
-                onChangeText={(text) => setTempProfile(prev => ({ ...prev, bio: text }))}
-                placeholder="أخبرنا عن نفسك"
-                placeholderTextColor="#9ca3af"
-                multiline
-                numberOfLines={3}
-                textAlign="right"
-                textAlignVertical="top"
-              />
-            </View>
-          </ScrollView>
-        </SafeAreaView>
-      </LinearGradient>
-    </Modal>
+          <Text style={styles.progressText}>
+            {achievement.progress}/{achievement.maxProgress}
+          </Text>
+        </View>
+        
+        {achievement.isUnlocked && achievement.unlockedAt && (
+          <Text style={styles.unlockedDate}>
+            تم إنجازه في {new Date(achievement.unlockedAt).toLocaleDateString('ar-SA')}
+          </Text>
+        )}
+      </View>
+    </View>
   );
 
-  return (
-    <LinearGradient colors={['#1F2937', '#111827', '#0A0E15']} style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Pressable style={styles.headerButton} onPress={() => router.back()}>
-            <ArrowLeft color="white" size={24} />
-          </Pressable>
-          <Text style={styles.headerTitle}>الملف الشخصي</Text>
-          <Pressable style={styles.headerButton} onPress={() => setEditingProfile(true)}>
-            <Edit color="white" size={24} />
-          </Pressable>
+  const renderSetting = (setting: Setting) => (
+    <TouchableOpacity 
+      key={setting.id} 
+      style={styles.settingItem}
+      onPress={() => {
+        if (setting.type === 'action') {
+          handleSettingAction(setting.id);
+        }
+      }}
+    >
+      <View style={styles.settingIcon}>
+        {setting.icon}
+      </View>
+      
+      <View style={styles.settingInfo}>
+        <Text style={styles.settingName}>{setting.name}</Text>
+        <Text style={styles.settingDescription}>{setting.description}</Text>
+      </View>
+      
+      {setting.type === 'toggle' && (
+        <Switch
+          value={setting.value as boolean}
+          onValueChange={(value) => handleSettingChange(setting.id, value)}
+          trackColor={{ false: '#374151', true: '#8b5cf6' }}
+          thumbColor={setting.value ? '#fff' : '#9ca3af'}
+        />
+      )}
+      
+      {setting.type === 'select' && (
+        <View style={styles.settingValue}>
+          <Text style={styles.settingValueText}>{setting.value}</Text>
+          <ChevronRight size={16} color="#9ca3af" />
         </View>
+      )}
+      
+      {setting.type === 'action' && (
+        <ChevronRight size={20} color="#9ca3af" />
+      )}
+    </TouchableOpacity>
+  );
 
-        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-          {/* Profile Section */}
-          <View style={styles.profileSection}>
+  if (!user) return null;
+
+  return (
+    <LinearGradient
+      colors={["#0f172a", "#1e293b"]}
+      style={styles.container}
+    >
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          {/* Profile Header */}
+          <View style={styles.profileHeader}>
             <View style={styles.avatarContainer}>
-              {userProfile.avatar ? (
-                <Image source={{ uri: userProfile.avatar }} style={styles.avatar} />
-              ) : (
-                <View style={styles.avatarPlaceholder}>
-                  <User color="white" size={50} />
+              <Image source={{ uri: user.avatar }} style={styles.avatar} />
+              {user.isVerified && (
+                <View style={styles.verifiedBadge}>
+                  <Text style={styles.verifiedText}>✓</Text>
                 </View>
               )}
-            </View>
-            <Text style={styles.userName}>{userProfile.name}</Text>
-            <Text style={styles.userHandle}>{userProfile.username}</Text>
-            <Text style={styles.userBio}>{userProfile.bio}</Text>
-            <Text style={styles.userDetail}>رقم الجوال: {userProfile.mobile}</Text>
-            <Text style={styles.userDetail}>البريد الإلكتروني: {userProfile.email}</Text>
-            <Text style={styles.userDetail}>العمر: {userProfile.age}</Text>
-            <Text style={styles.userDetail}>الجنسية: {userProfile.nationality}</Text>
-            <Text style={styles.userDetail}>الجنس: {userProfile.gender}</Text>
-          </View>
-
-          {/* Notifications Settings */}
-          <View style={styles.settingsSection}>
-            <View style={styles.sectionHeader}>
-              <Bell color="#4f46e5" size={24} />
-              <Text style={styles.sectionTitle}>الإشعارات</Text>
+              <TouchableOpacity style={styles.editAvatarButton}>
+                <Camera size={16} color="#fff" />
+              </TouchableOpacity>
             </View>
             
-            <View style={styles.settingItem}>
-              <View style={styles.settingInfo}>
-                <Text style={styles.settingTitle}>دعوات الغرف</Text>
-                <Text style={styles.settingDescription}>تلقي إشعارات عند دعوتك لغرفة</Text>
+            <View style={styles.profileInfo}>
+              <View style={styles.nameRow}>
+                <Text style={styles.userName}>{user.name}</Text>
+                {user.isPremium && (
+                  <View style={styles.premiumBadge}>
+                    <Crown size={16} color="#fbbf24" />
+                  </View>
+                )}
               </View>
-              <Switch
-                value={settings.notifications.roomInvites}
-                onValueChange={(value) => handleSettingChange('notifications', 'roomInvites', value)}
-                trackColor={{ false: '#374151', true: '#4f46e5' }}
-                thumbColor={settings.notifications.roomInvites ? '#ffffff' : '#9ca3af'}
-              />
-            </View>
-
-            <View style={styles.settingItem}>
-              <View style={styles.settingInfo}>
-                <Text style={styles.settingTitle}>الإشارات</Text>
-                <Text style={styles.settingDescription}>تلقي إشعارات عند الإشارة إليك</Text>
+              
+              <Text style={styles.username}>{user.username}</Text>
+              <Text style={styles.bio}>{user.bio}</Text>
+              
+              <View style={styles.profileStats}>
+                <View style={styles.statItem}>
+                  <Text style={styles.statNumber}>{user.followers}</Text>
+                  <Text style={styles.statLabel}>متابع</Text>
+                </View>
+                <View style={styles.statDivider} />
+                <View style={styles.statItem}>
+                  <Text style={styles.statNumber}>{user.following}</Text>
+                  <Text style={styles.statLabel}>متابَع</Text>
+                </View>
+                <View style={styles.statDivider} />
+                <View style={styles.statItem}>
+                  <Text style={styles.statNumber}>{user.roomsCreated}</Text>
+                  <Text style={styles.statLabel}>غرفة</Text>
+                </View>
               </View>
-              <Switch
-                value={settings.notifications.mentions}
-                onValueChange={(value) => handleSettingChange('notifications', 'mentions', value)}
-                trackColor={{ false: '#374151', true: '#4f46e5' }}
-                thumbColor={settings.notifications.mentions ? '#ffffff' : '#9ca3af'}
-              />
             </View>
-
-            <View style={styles.settingItem}>
-              <View style={styles.settingInfo}>
-                <Text style={styles.settingTitle}>الرسائل الجديدة</Text>
-                <Text style={styles.settingDescription}>تلقي إشعارات للرسائل الجديدة</Text>
-              </View>
-              <Switch
-                value={settings.notifications.newMessages}
-                onValueChange={(value) => handleSettingChange('notifications', 'newMessages', value)}
-                trackColor={{ false: '#374151', true: '#4f46e5' }}
-                thumbColor={settings.notifications.newMessages ? '#ffffff' : '#9ca3af'}
-              />
-            </View>
-          </View>
-
-          {/* Audio Settings */}
-          <View style={styles.settingsSection}>
-            <View style={styles.sectionHeader}>
-              <Mic color="#10b981" size={24} />
-              <Text style={styles.sectionTitle}>إعدادات الصوت</Text>
-            </View>
-
-            <View style={styles.settingItem}>
-              <View style={styles.settingInfo}>
-                <Text style={styles.settingTitle}>كتم تلقائي عند الدخول</Text>
-                <Text style={styles.settingDescription}>كتم الميكروفون تلقائياً عند دخول الغرف</Text>
-              </View>
-              <Switch
-                value={settings.audio.autoMute}
-                onValueChange={(value) => handleSettingChange('audio', 'autoMute', value)}
-                trackColor={{ false: '#374151', true: '#10b981' }}
-                thumbColor={settings.audio.autoMute ? '#ffffff' : '#9ca3af'}
-              />
-            </View>
-
-            <View style={styles.settingItem}>
-              <View style={styles.settingInfo}>
-                <Text style={styles.settingTitle}>تقليل الضوضاء</Text>
-                <Text style={styles.settingDescription}>تقليل الضوضاء في الخلفية</Text>
-              </View>
-              <Switch
-                value={settings.audio.noiseReduction}
-                onValueChange={(value) => handleSettingChange('audio', 'noiseReduction', value)}
-                trackColor={{ false: '#374151', true: '#10b981' }}
-                thumbColor={settings.audio.noiseReduction ? '#ffffff' : '#9ca3af'}
-              />
-            </View>
-
-            <View style={styles.settingItem}>
-              <View style={styles.settingInfo}>
-                <Text style={styles.settingTitle}>إلغاء الصدى</Text>
-                <Text style={styles.settingDescription}>إلغاء صدى الصوت أثناء المحادثة</Text>
-              </View>
-              <Switch
-                value={settings.audio.echoCancellation}
-                onValueChange={(value) => handleSettingChange('audio', 'echoCancellation', value)}
-                trackColor={{ false: '#374151', true: '#10b981' }}
-                thumbColor={settings.audio.echoCancellation ? '#ffffff' : '#9ca3af'}
-              />
-            </View>
-          </View>
-
-          {/* Privacy Settings */}
-          <View style={styles.settingsSection}>
-            <View style={styles.sectionHeader}>
-              <Shield color="#f59e0b" size={24} />
-              <Text style={styles.sectionTitle}>الخصوصية</Text>
-            </View>
-
-            <View style={styles.settingItem}>
-              <View style={styles.settingInfo}>
-                <Text style={styles.settingTitle}>إظهار الحالة</Text>
-                <Text style={styles.settingDescription}>إظهار حالتك متصل/غير متصل للآخرين</Text>
-              </View>
-              <Switch
-                value={settings.privacy.showOnlineStatus}
-                onValueChange={(value) => handleSettingChange('privacy', 'showOnlineStatus', value)}
-                trackColor={{ false: '#374151', true: '#f59e0b' }}
-                thumbColor={settings.privacy.showOnlineStatus ? '#ffffff' : '#9ca3af'}
-              />
-            </View>
-
-            <View style={styles.settingItem}>
-              <View style={styles.settingInfo}>
-                <Text style={styles.settingTitle}>السماح بالرسائل المباشرة</Text>
-                <Text style={styles.settingDescription}>السماح للآخرين بإرسال رسائل مباشرة</Text>
-              </View>
-              <Switch
-                value={settings.privacy.allowDirectMessages}
-                onValueChange={(value) => handleSettingChange('privacy', 'allowDirectMessages', value)}
-                trackColor={{ false: '#374151', true: '#f59e0b' }}
-                thumbColor={settings.privacy.allowDirectMessages ? '#ffffff' : '#9ca3af'}
-              />
-            </View>
-
-            <View style={styles.settingItem}>
-              <View style={styles.settingInfo}>
-                <Text style={styles.settingTitle}>إظهار في البحث</Text>
-                <Text style={styles.settingDescription}>السماح للآخرين بالعثور عليك في البحث</Text>
-              </View>
-              <Switch
-                value={settings.privacy.showInSearch}
-                onValueChange={(value) => handleSettingChange('privacy', 'showInSearch', value)}
-                trackColor={{ false: '#374151', true: '#f59e0b' }}
-                thumbColor={settings.privacy.showInSearch ? '#ffffff' : '#9ca3af'}
-              />
-            </View>
-          </View>
-
-          {/* Action Items */}
-          <View style={styles.actionsSection}>
-            <Pressable style={styles.actionItem}>
-              <HelpCircle color="#6b7280" size={24} />
-              <Text style={styles.actionText}>المساعدة والدعم</Text>
-            </Pressable>
-
-            <Pressable
-              style={styles.actionItem}
-              onPress={() => router.push('/profile/settings')}
+            
+            <TouchableOpacity 
+              style={styles.editProfileButton}
+              onPress={() => setShowEditProfile(true)}
             >
-              <Settings color="#6b7280" size={24} />
-              <Text style={styles.actionText}>الإعدادات</Text>
-            </Pressable>
-
-            <Pressable style={[styles.actionItem, styles.logoutItem]} onPress={handleLogout}>
-              <LogOut color="#ef4444" size={24} />
-              <Text style={[styles.actionText, styles.logoutText]}>تسجيل الخروج</Text>
-            </Pressable>
+              <Edit size={16} color="#8b5cf6" />
+              <Text style={styles.editProfileText}>تعديل</Text>
+            </TouchableOpacity>
           </View>
 
-          <View style={styles.bottomSpacer} />
-        </ScrollView>
+          {/* Level Progress */}
+          <View style={styles.levelSection}>
+            <View style={styles.levelHeader}>
+              <View style={styles.levelInfo}>
+                <Text style={styles.levelText}>المستوى {user.level}</Text>
+                <Text style={styles.experienceText}>{user.experience} نقطة خبرة</Text>
+              </View>
+              <View style={styles.coinDisplay}>
+                <Text style={styles.coinIcon}>🪙</Text>
+                <Text style={styles.coinAmount}>{user.coins}</Text>
+              </View>
+            </View>
+            
+            <View style={styles.progressContainer}>
+              <View style={styles.progressBar}>
+                <View 
+                  style={[styles.progressFill, { width: `${getLevelProgress()}%` }]} 
+                />
+              </View>
+              <Text style={styles.progressText}>
+                {user.experience % 100}/100 للوصول للمستوى التالي
+              </Text>
+            </View>
+          </View>
 
-        <ProfileEditModal />
+          {/* Quick Stats */}
+          <View style={styles.statsSection}>
+            <Text style={styles.sectionTitle}>إحصائيات سريعة</Text>
+            <View style={styles.statsGrid}>
+              <View style={styles.statCard}>
+                <Mic size={24} color="#8b5cf6" />
+                <Text style={styles.statCardNumber}>{user.totalTimeSpent}</Text>
+                <Text style={styles.statCardLabel}>ساعة استماع</Text>
+              </View>
+              
+              <View style={styles.statCard}>
+                <Users size={24} color="#10b981" />
+                <Text style={styles.statCardNumber}>{user.followers}</Text>
+                <Text style={styles.statCardLabel}>متابع</Text>
+              </View>
+              
+              <View style={styles.statCard}>
+                <Gift size={24} color="#f59e0b" />
+                <Text style={styles.statCardNumber}>32</Text>
+                <Text style={styles.statCardLabel}>هدية مرسلة</Text>
+              </View>
+              
+              <View style={styles.statCard}>
+                <Heart size={24} color="#ef4444" />
+                <Text style={styles.statCardNumber}>156</Text>
+                <Text style={styles.statCardLabel}>إعجاب</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Achievements */}
+          <View style={styles.achievementsSection}>
+            <Text style={styles.sectionTitle}>الإنجازات</Text>
+            <View style={styles.achievementsList}>
+              {achievements.map(renderAchievement)}
+            </View>
+          </View>
+
+          {/* Friends */}
+          <View style={styles.friendsSection}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>الأصدقاء</Text>
+              <TouchableOpacity 
+                style={styles.seeAllButton}
+                onPress={() => router.push('/friends')}
+              >
+                <Text style={styles.seeAllText}>عرض الكل</Text>
+                <ChevronRight size={16} color="#8b5cf6" />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.friendsPreview}>
+              <View style={styles.friendPreviewItem}>
+                <Image 
+                  source={{ uri: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face' }} 
+                  style={styles.friendPreviewAvatar}
+                />
+                <Text style={styles.friendPreviewName}>أحمد محمد</Text>
+              </View>
+              <View style={styles.friendPreviewItem}>
+                <Image 
+                  source={{ uri: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face' }} 
+                  style={styles.friendPreviewAvatar}
+                />
+                <Text style={styles.friendPreviewName}>فاطمة علي</Text>
+              </View>
+              <View style={styles.friendPreviewItem}>
+                <Image 
+                  source={{ uri: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face' }} 
+                  style={styles.friendPreviewAvatar}
+                />
+                <Text style={styles.friendPreviewName}>محمد حسن</Text>
+              </View>
+              <View style={styles.friendPreviewItem}>
+                <Image 
+                  source={{ uri: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face' }} 
+                  style={styles.friendPreviewAvatar}
+                />
+                <Text style={styles.friendPreviewName}>سارة أحمد</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Settings */}
+          <View style={styles.settingsSection}>
+            <Text style={styles.sectionTitle}>الإعدادات</Text>
+            <View style={styles.settingsList}>
+              {settings.map(renderSetting)}
+            </View>
+          </View>
+
+          {/* WhatsApp Verification */}
+          <View style={styles.whatsappSection}>
+            <View style={styles.whatsappNotice}>
+              <Text style={styles.whatsappNoticeText}>
+                WhatsApp verification will be enabled after server functions are deployed. Use SMS for now.
+              </Text>
+            </View>
+            <Text style={styles.sectionTitle}>التحقق من الواتساب</Text>
+            <View style={styles.whatsappCard}>
+              <View style={styles.phoneInputRow}>
+                <TextInput
+                  style={styles.phoneInput}
+                  placeholder="+9665xxxxxxx"
+                  placeholderTextColor="#94a3b8"
+                  keyboardType="phone-pad"
+                  value={whatsappPhone}
+                  onChangeText={setWhatsappPhone}
+                  maxLength={13}
+                />
+                <TouchableOpacity 
+                  style={styles.verifyButton}
+                  onPress={handleWhatsappVerification}
+                  disabled={whatsappLoading}
+                >
+                  <Text style={styles.verifyButtonText}>
+                    {whatsappLoading ? 'جاري الإرسال...' : 'تحقق واتساب'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              
+              {showCodeInput && (
+                <View style={styles.codeInputRow}>
+                  <TextInput
+                    style={styles.codeInput}
+                    placeholder="أدخل رمز التحقق"
+                    placeholderTextColor="#94a3b8"
+                    keyboardType="number-pad"
+                    value={verificationCode}
+                    onChangeText={setVerificationCode}
+                    maxLength={6}
+                  />
+                  <TouchableOpacity 
+                    style={styles.checkCodeButton}
+                    onPress={handleCodeVerification}
+                    disabled={codeChecking}
+                  >
+                    <Text style={styles.checkCodeButtonText}>
+                      {codeChecking ? 'جاري التحقق...' : 'تحقق'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+              
+              {whatsappStatus && (
+                <Text style={[styles.statusText, { color: whatsappStatus.type === 'success' ? '#10b981' : '#ef4444' }]}>
+                  {whatsappStatus.message}
+                </Text>
+              )}
+            </View>
+          </View>
+
+          {/* Logout Button */}
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <LogOut size={20} color="#ef4444" />
+            <Text style={styles.logoutText}>تسجيل الخروج</Text>
+          </TouchableOpacity>
+        </ScrollView>
       </SafeAreaView>
     </LinearGradient>
   );
@@ -472,206 +715,473 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
+    paddingTop: 10,
   },
-  header: {
+  profileHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  headerButton: {
-    padding: 8,
-    width: 40,
-  },
-  headerTitle: {
-    color: 'white',
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 16,
-  },
-  profileSection: {
-    alignItems: 'center',
-    paddingVertical: 32,
+    paddingHorizontal: 20,
     marginBottom: 24,
   },
   avatarContainer: {
     position: 'relative',
-    marginBottom: 16,
+    marginRight: 16,
   },
   avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
   },
-  avatarPlaceholder: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: '#374151',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarEditButton: {
+  verifiedBadge: {
     position: 'absolute',
-    bottom: 0,
-    right: 0,
-    backgroundColor: '#4f46e5',
+    top: -4,
+    right: -4,
+    backgroundColor: '#10b981',
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  verifiedText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  editAvatarButton: {
+    position: 'absolute',
+    bottom: -4,
+    right: -4,
+    backgroundColor: '#8b5cf6',
     borderRadius: 16,
     width: 32,
     height: 32,
-    justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#1F2937',
+    justifyContent: 'center',
   },
-  userName: {
-    color: 'white',
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 4,
-    textAlign: 'center',
+  profileInfo: {
+    flex: 1,
   },
-  userHandle: {
-    color: '#9ca3af',
-    fontSize: 16,
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  userBio: {
-    color: '#d1d5db',
-    fontSize: 14,
-    textAlign: 'center',
-    lineHeight: 20,
-    maxWidth: 280,
-  },
-  userDetail: {
-    color: '#d1d5db',
-    fontSize: 13,
-    textAlign: 'center',
-    marginTop: 2,
-  },
-  settingsSection: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
-  },
-  sectionHeader: {
+  nameRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 4,
   },
-  sectionTitle: {
-    color: 'white',
+  userName: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginRight: 8,
+  },
+  premiumBadge: {
+    backgroundColor: 'rgba(251, 191, 36, 0.2)',
+    borderRadius: 12,
+    padding: 4,
+  },
+  username: {
+    color: '#94a3b8',
+    fontSize: 14,
+    marginBottom: 8,
+  },
+  bio: {
+    color: '#e2e8f0',
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  profileStats: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  statItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  statNumber: {
+    color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
-    marginLeft: 12,
+  },
+  statLabel: {
+    color: '#94a3b8',
+    fontSize: 12,
+  },
+  statDivider: {
+    width: 1,
+    height: 30,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    marginHorizontal: 8,
+  },
+  editProfileButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(139, 92, 246, 0.2)',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 16,
+    gap: 4,
+  },
+  editProfileText: {
+    color: '#8b5cf6',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  levelSection: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    marginHorizontal: 20,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 24,
+  },
+  levelHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  levelInfo: {
+    flex: 1,
+  },
+  levelText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  experienceText: {
+    color: '#94a3b8',
+    fontSize: 14,
+  },
+  coinDisplay: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(251, 191, 36, 0.2)',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 12,
+  },
+  coinIcon: {
+    fontSize: 16,
+    marginRight: 4,
+  },
+  coinAmount: {
+    color: '#fbbf24',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  progressContainer: {
+    marginTop: 8,
+  },
+  progressBar: {
+    height: 8,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 4,
+    marginBottom: 8,
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#8b5cf6',
+    borderRadius: 4,
+  },
+  progressText: {
+    color: '#94a3b8',
+    fontSize: 12,
+    textAlign: 'center',
+  },
+  statsSection: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    paddingHorizontal: 20,
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    gap: 12,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 16,
+    padding: 16,
+    alignItems: 'center',
+  },
+  statCardNumber: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  statCardLabel: {
+    color: '#94a3b8',
+    fontSize: 12,
+    textAlign: 'center',
+  },
+  achievementsSection: {
+    marginBottom: 24,
+  },
+  achievementsList: {
+    paddingHorizontal: 20,
+  },
+  achievementItem: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+  },
+  achievementIcon: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+  },
+  unlockedAchievement: {
+    backgroundColor: 'rgba(139, 92, 246, 0.2)',
+  },
+  lockedAchievement: {
+    backgroundColor: 'rgba(255,255,255,0.1)',
+  },
+  achievementIconText: {
+    fontSize: 24,
+  },
+  achievementInfo: {
+    flex: 1,
+  },
+  achievementName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  unlockedText: {
+    color: '#fff',
+  },
+  lockedText: {
+    color: '#94a3b8',
+  },
+  achievementDescription: {
+    color: '#94a3b8',
+    fontSize: 14,
+    marginBottom: 12,
+  },
+  achievementProgress: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  progressBar: {
+    flex: 1,
+    height: 6,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 3,
+    marginRight: 8,
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#8b5cf6',
+    borderRadius: 3,
+  },
+  progressText: {
+    color: '#94a3b8',
+    fontSize: 12,
+  },
+  unlockedDate: {
+    color: '#10b981',
+    fontSize: 12,
+    fontStyle: 'italic',
+  },
+  settingsSection: {
+    marginBottom: 24,
+  },
+  settingsList: {
+    paddingHorizontal: 20,
   },
   settingItem: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+  },
+  settingIcon: {
+    marginRight: 16,
   },
   settingInfo: {
     flex: 1,
-    paddingRight: 16,
   },
-  settingTitle: {
-    color: 'white',
+  settingName: {
+    color: '#fff',
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 4,
-    textAlign: 'right',
   },
   settingDescription: {
-    color: '#9ca3af',
+    color: '#94a3b8',
     fontSize: 14,
-    textAlign: 'right',
   },
-  actionsSection: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 16,
-    padding: 4,
-    marginBottom: 16,
-  },
-  actionItem: {
+  settingValue: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    borderRadius: 12,
+    gap: 8,
   },
-  actionText: {
-    color: 'white',
-    fontSize: 16,
-    marginLeft: 12,
+  settingValueText: {
+    color: '#8b5cf6',
+    fontSize: 14,
+    fontWeight: '600',
   },
-  logoutItem: {
-    marginTop: 8,
+  friendsSection: {
+    marginBottom: 24,
   },
-  logoutText: {
-    color: '#ef4444',
-  },
-  bottomSpacer: {
-    height: 40,
-  },
-  // Modal Styles
-  modalContainer: {
-    flex: 1,
-  },
-  modalContent: {
-    flex: 1,
-  },
-  modalHeader: {
+  sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.1)',
+    paddingHorizontal: 20,
+    marginBottom: 16,
   },
-  modalTitle: {
-    color: 'white',
-    fontSize: 18,
+  seeAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  seeAllText: {
+    color: '#8b5cf6',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  friendsPreview: {
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    gap: 12,
+  },
+  friendPreviewItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  friendPreviewAvatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginBottom: 8,
+  },
+  friendPreviewName: {
+    color: '#fff',
+    fontSize: 12,
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(239, 68, 68, 0.2)',
+    marginHorizontal: 20,
+    paddingVertical: 16,
+    borderRadius: 16,
+    marginBottom: 24,
+    gap: 8,
+  },
+  logoutText: {
+    color: '#ef4444',
+    fontSize: 16,
     fontWeight: 'bold',
   },
-  modalBody: {
-    flex: 1,
-    paddingHorizontal: 16,
+  // WhatsApp verification styles
+  whatsappSection: {
+    marginBottom: 24,
   },
-  avatarSection: {
-    alignItems: 'center',
-    paddingVertical: 32,
-  },
-  formSection: {
-    paddingBottom: 32,
-  },
-  fieldLabel: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 8,
-    marginTop: 16,
-    textAlign: 'right',
-  },
-  textInput: {
-    backgroundColor: '#374151',
-    borderRadius: 12,
-    padding: 16,
-    color: 'white',
-    fontSize: 16,
+  whatsappNotice: {
+    backgroundColor: 'rgba(255, 193, 7, 0.2)',
     borderWidth: 1,
-    borderColor: '#4b5563',
+    borderColor: '#ffc107',
+    borderRadius: 8,
+    padding: 12,
+    marginHorizontal: 20,
+    marginBottom: 12,
   },
-  bioInput: {
-    minHeight: 80,
-    textAlignVertical: 'top',
+  whatsappNoticeText: {
+    color: '#ffc107',
+    fontSize: 14,
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  whatsappCard: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 16,
+    padding: 16,
+    marginHorizontal: 20,
+  },
+  phoneInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 12,
+  },
+  phoneInput: {
+    flex: 1,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    color: '#fff',
+    fontSize: 16,
+    textAlign: 'right',
+    direction: 'rtl',
+  },
+  verifyButton: {
+    backgroundColor: '#8b5cf6',
+    borderRadius: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  verifyButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  codeInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 12,
+  },
+  codeInput: {
+    flex: 1,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    color: '#fff',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  checkCodeButton: {
+    backgroundColor: '#10b981',
+    borderRadius: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkCodeButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  statusText: {
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 8,
   },
 });
+
+

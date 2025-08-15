@@ -31,16 +31,7 @@ yarn-error.*
 *.pem
 
 # local env files
-.env
 .env*.local
-
-# HMS token server env files
-dreams-ksa-token-server/.env
-dreams-ksa-token-server/.env*.local
-
-# Backend env files
-backend/.env
-backend/.env*.local
 
 # typescript
 *.tsbuildinfo
