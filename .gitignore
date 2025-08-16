@@ -39,3 +39,17 @@ yarn-error.*
 app-example
 /android
 /ios
+node_modules/
+.expo/
+.expo-shared/
+android/.gradle/
+android/build/
+android/app/build/
+ios/build/
+*.keystore
+*.jks
+.DS_Store
+.env
+.env.*
+npm-debug.log*
+yarn-error.log*
