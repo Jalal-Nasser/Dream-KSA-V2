@@ -6,8 +6,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { ArrowLeft, Plus } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { API_BASE_URL } from '../config/api';
-import { Brand, BrandGradient } from '../lib/theme';
+import { API_BASE_URL } from '@/config/api';
+import { Brand, BrandGradient } from '@/lib/theme';
 
 export default function CreateRoomScreen() {
   const [roomName, setRoomName] = useState('');

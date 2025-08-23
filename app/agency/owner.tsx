@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, ActivityIndicator, Pressable, StyleSheet, ScrollView, Alert } from 'react-native';
-import { supabase } from '../../lib/supabase';
-import { currentMonth } from '../../lib/agency-utils';
+import { supabase } from '@/lib/supabase';
+import { currentMonth } from '@/lib/agency-utils';
 
 type Agency = { id: string; name: string };
 type HostRow = { user_id: string; agency_id: string; monthly_hours: number|null; monthly_gifts: number|null; display_name: string|null };

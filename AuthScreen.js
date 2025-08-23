@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { View, TextInput, Button, Alert, StyleSheet, Text, Pressable } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient';
 import { supabase } from './lib/supabase';
+import { getRedirectUri } from '@/auth/redirect';
 
 export default function AuthScreen({ onLogin }) {
   const [email, setEmail] = useState('')
@@ -89,6 +90,20 @@ export default function AuthScreen({ onLogin }) {
     }
   }
 
+  const onGoogle = async () => {
+    try {
+      const redirectTo = getRedirectUri();
+      console.log('[AUTH] redirect', redirectTo);
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo, skipBrowserRedirect: false },
+      });
+      if (error) throw error;
+    } catch (e) {
+      console.log('[AUTH] google error', e?.message || e);
+    }
+  };
+
   return (
     <LinearGradient
       colors={['#1F2937', '#111827', '#0A0E15']}
@@ -146,6 +161,18 @@ export default function AuthScreen({ onLogin }) {
           <Text style={styles.dividerText}>أو</Text>
           <View style={styles.dividerLine} />
         </View>
+
+        <Pressable 
+          style={[styles.guestButton, isLoading && styles.disabledButton]} 
+          onPress={onGoogle}
+          disabled={isLoading}
+        >
+          <Text style={styles.guestButtonText}>
+            تسجيل الدخول عبر Google
+          </Text>
+        </Pressable>
+        
+        <View style={{ height: 12 }} />
         
         <Pressable 
           style={[styles.guestButton, isLoading && styles.disabledButton]} 

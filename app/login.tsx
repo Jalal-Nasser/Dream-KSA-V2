@@ -25,10 +25,26 @@ import {
   Apple,
 } from 'lucide-react-native';
 import * as WebBrowser from 'expo-web-browser';
-import { makeRedirectUri } from 'expo-auth-session';
+import { getRedirectUri, useSupabaseAuthListener } from '@/auth/redirect';
+import { supabase } from '@/lib/supabase';
+import DevTokenButton from '@/components/DevTokenButton';
 
-import { supabase } from '../lib/supabase';
-import DevTokenButton from '../components/DevTokenButton';
+async function onLoginWithGoogle() {
+  const redirectTo = getRedirectUri();
+  console.log('[AUTH] start google with redirect', redirectTo);
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo, skipBrowserRedirect: false },
+  });
+  if (error) {
+    console.error('[AUTH] google error', error);
+  } else {
+    console.log('[AUTH] url opened', data?.url);
+    if (data?.url && Platform.OS !== 'web') {
+      await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
+    }
+  }
+}
 
 type CustomInputProps = TextInputProps & {
   placeholder?: string;
@@ -107,33 +123,7 @@ export default function Login() {
     checkSession();
   }, []);
 
-  const handleGoogleLogin = async () => {
-    try {
-      const redirectTo = makeRedirectUri({
-        useProxy: true,
-        scheme: 'dream-ksa',
-        path: 'auth/callback',
-      });
-      
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo, skipBrowserRedirect: true },
-      });
-      
-      if (error) {
-        Alert.alert('خطأ في تسجيل الدخول', error.message);
-        return;
-      }
-      
-      if (data?.url) {
-        await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
-      } else {
-        Alert.alert('خطأ في تسجيل الدخول', 'لم يتم إرجاع رابط المصادقة');
-      }
-    } catch (error) {
-      Alert.alert('خطأ في تسجيل الدخول', 'حدث خطأ غير متوقع');
-    }
-  };
+  useSupabaseAuthListener();
 
   const handlePhoneLogin = async () => {
     if (!phoneNumber.trim() || phoneNumber.length !== 9) {
@@ -177,6 +167,27 @@ export default function Login() {
       style={styles.container}
     >
       <DevTokenButton />
+      
+      {/* Temporary OAuth Debug Info */}
+      {__DEV__ && (
+        <View style={styles.debugContainer}>
+          <Text style={styles.debugText}>Debug Info:</Text>
+          <Text style={styles.debugText}>Scheme: dream-ksa</Text>
+          <Text style={styles.debugText}>Path: auth/callback</Text>
+          
+          {/* Reset Google Button */}
+          <Pressable
+            onPress={async () => {
+              await supabase.auth.signOut();
+              await WebBrowser.openBrowserAsync('https://accounts.google.com/Logout');
+            }}
+            style={styles.resetGoogleButton}
+          >
+            <Text style={styles.resetGoogleButtonText}>Reset Google</Text>
+          </Pressable>
+        </View>
+      )}
+      
       <View style={{ flex: 1, justifyContent: 'center' }}>
         {/* Header */}
         <View style={{ alignItems: 'center', marginTop: 60, marginBottom: 8 }}>
@@ -219,7 +230,7 @@ export default function Login() {
 
           {/* Google Login */}
           <CustomButton
-            onPress={handleGoogleLogin}
+            onPress={onLoginWithGoogle}
             style={styles.googleButton}
           >
             <Image
@@ -277,7 +288,7 @@ export default function Login() {
           {hasSession && (
             <View style={styles.joinLinkContainer}>
               <CustomButton 
-                onPress={() => router.push('/join')} 
+                onPress={() => router.push('/rooms')} 
                 style={styles.joinLinkButton}
               >
                 <Text style={styles.joinLinkText}>Join a Voice Room</Text>
@@ -550,5 +561,33 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginRight: 8,
+  },
+  debugContainer: {
+    position: 'absolute',
+    top: 100,
+    right: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    padding: 12,
+    borderRadius: 8,
+    zIndex: 1000,
+  },
+  debugText: {
+    color: 'white',
+    fontSize: 12,
+    fontFamily: 'monospace',
+    marginBottom: 4,
+  },
+  resetGoogleButton: {
+    backgroundColor: '#ef4444',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+    marginTop: 8,
+    alignSelf: 'flex-start',
+  },
+  resetGoogleButtonText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: '600',
   },
 });

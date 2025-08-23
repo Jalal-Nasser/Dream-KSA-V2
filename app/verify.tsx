@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'reac
 import { useLocalSearchParams, router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { supabase } from '../lib/supabase';
+import { supabase } from '@/lib/supabase';
 
 export default function Verify() {
   const [code, setCode] = useState('');
@@ -29,7 +29,7 @@ export default function Verify() {
       return;
     }
     
-    router.replace('/join');
+            router.replace('/rooms');
   };
 
   const onResend = async () => {

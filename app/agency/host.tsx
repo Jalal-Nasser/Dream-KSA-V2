@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, ActivityIndicator, Pressable, StyleSheet, ScrollView, Alert } from 'react-native';
-import { supabase } from '../../lib/supabase';
-import { currentMonth } from '../../lib/agency-utils';
+import { supabase } from '@/lib/supabase';
+import { currentMonth } from '@/lib/agency-utils';
 
 type Earnings = { id:string; total_points:number; host_share_points:number; agency_share_points:number; agency_id:string|null };
 type Payout = { id:string; amount:number; status:string; created_at:string; agency_id:string|null };

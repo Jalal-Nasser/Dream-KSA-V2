@@ -1,0 +1,44 @@
+### Test Explore Edge Function
+
+# Replace <project-ref> with your actual Supabase project reference
+# Base URL: https://<project-ref>.functions.supabase.co/explore
+
+### Test Featured Sorting (Default)
+GET https://<project-ref>.functions.supabase.co/explore?sort=featured
+Content-Type: application/json
+
+### Test Trending Sorting
+GET https://<project-ref>.functions.supabase.co/explore?sort=trending
+Content-Type: application/json
+
+### Test Active Sorting
+GET https://<project-ref>.functions.supabase.co/explore?sort=active
+Content-Type: application/json
+
+### Test Default Sorting (No sort parameter)
+GET https://<project-ref>.functions.supabase.co/explore
+Content-Type: application/json
+
+### Test Invalid Sort Parameter (Should default to featured)
+GET https://<project-ref>.functions.supabase.co/explore?sort=invalid
+Content-Type: application/json
+
+### Test CORS Preflight (OPTIONS)
+OPTIONS https://<project-ref>.functions.supabase.co/explore
+Access-Control-Request-Method: GET
+Access-Control-Request-Headers: content-type
+
+### Test with Authorization Header (Should work with anon key)
+GET https://<project-ref>.functions.supabase.co/explore?sort=featured
+Content-Type: application/json
+Authorization: Bearer <your-anon-key>
+
+### Test Error Handling - Invalid Method
+POST https://<project-ref>.functions.supabase.co/explore
+Content-Type: application/json
+
+### Test Performance - Multiple Concurrent Requests
+# Run these simultaneously to test concurrency
+GET https://<project-ref>.functions.supabase.co/explore?sort=featured
+GET https://<project-ref>.functions.supabase.co/explore?sort=trending
+GET https://<project-ref>.functions.supabase.co/explore?sort=active

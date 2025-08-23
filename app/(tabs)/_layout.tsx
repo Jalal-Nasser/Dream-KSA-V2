@@ -1,76 +1,29 @@
-import { Tabs } from 'expo-router';
 import React from 'react';
-import { Home, MessageCircle, Gift, Users, User } from 'lucide-react-native';
-import { BrandGradient, TabColors } from '../../lib/theme';
-import { useTheme } from '../../lib/ThemeProvider';
+import { Tabs } from 'expo-router';
+import { useTheme } from '@/lib/ThemeProvider';
+import TabBar from '@/src/components/TabBar';
+import { LinearGradient } from 'expo-linear-gradient';
+import { BrandGradient } from '@/lib/theme';
 
-export default function TabLayout() {
-  const { theme } = useTheme();
+export default function Layout() {
+  const t = useTheme();
   return (
     <Tabs
+      tabBar={(props) => <TabBar {...props} />}
       screenOptions={{
-        tabBarActiveTintColor: theme.colors.primary,
-        tabBarInactiveTintColor: theme.colors.tabInactive,
-        headerShown: false,
-        tabBarStyle: {
-          backgroundColor: theme.colors.tabBackground,
-          borderTopColor: theme.colors.border,
-          borderTopWidth: 0,
-          paddingBottom: 10,
-          paddingTop: 10,
-          height: 80,
-        },
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: '600',
-          marginTop: 6,
-        },
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'الرئيسية',
-          tabBarIcon: ({ color, size }) => (
-            <Home color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'دردشة',
-          tabBarIcon: ({ color, size }) => (
-            <MessageCircle color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="friends"
-        options={{
-          title: 'الأصدقاء',
-          tabBarIcon: ({ color, size }) => (
-            <Users color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="gifts"
-        options={{
-          title: 'الهدايا',
-          tabBarIcon: ({ color, size }) => (
-            <Gift color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: 'حسابي',
-          tabBarIcon: ({ color, size }) => (
-            <User color={color} size={size} />
-          ),
-        }}
-      />
+        headerBackground: () => (
+          <LinearGradient colors={BrandGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1 }} />
+        ),
+        headerTitleStyle: { color: 'white', fontWeight: '800' },
+        headerTintColor: 'white',
+        tabBarHideOnKeyboard: true,
+      }}
+    >
+      <Tabs.Screen name="home"    options={{ title: 'Home' }} />
+      <Tabs.Screen name="explore" options={{ title: 'Explore' }} />
+      <Tabs.Screen name="rooms"   options={{ title: 'Rooms' }} />
+      <Tabs.Screen name="agency"  options={{ title: 'Agencies' }} />
+      <Tabs.Screen name="profile" options={{ title: 'Profile' }} />
     </Tabs>
   );
 }

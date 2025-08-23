@@ -32,7 +32,7 @@ import {
   Users,
   Mic
 } from 'lucide-react-native';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '@/lib/supabase';
 
 const { width } = Dimensions.get('window');
 

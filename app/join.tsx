@@ -13,20 +13,32 @@ import {
   Platform
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { supabase } from '../lib/supabase';
+import { supabase } from '@/lib/supabase';
 import Constants from 'expo-constants';
 import { Copy, Mic } from 'lucide-react-native';
+
+// helpers at the top of the file
+const isUUID = (s: string) =>
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(s);
+
+const isHMSId = (s: string) => /^[0-9a-f]{24}$/i.test(s); // 100ms room id
+
+const isValidRoomId = (s: string) => isUUID(s) || isHMSId(s);
 
 export default function Join() {
   const [roomId, setRoomId] = useState('');
   const [displayName, setDisplayName] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   // Get functions base URL from app config
   const functionsBaseUrl = Constants.expoConfig?.extra?.FUNCTIONS_BASE_URL ||
     'https://kgcpeoidouajwytndtqi.functions.supabase.co';
+
+  // Clear errors when typing
+  useEffect(() => { 
+    if (error) setError(null); 
+  }, [roomId, displayName]);
 
   useEffect(() => {
     // Prefill display name from user profile
@@ -80,10 +92,8 @@ export default function Join() {
       return false;
     }
 
-    // Basic UUID validation
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(roomId.trim())) {
-      setError('Please enter a valid Room ID (UUID format)');
+    if (!isValidRoomId(roomId.trim())) {
+      setError('Please enter a valid Room ID (UUID or 100ms 24-char ID)');
       return false;
     }
 
@@ -96,61 +106,27 @@ export default function Join() {
     return true;
   };
 
-  const handleJoin = async () => {
-    if (!validateInputs()) return;
+  const onJoin = () => {
+    const id = roomId.trim();
+    
+    // Debug logs (remove later)
+    console.log('[JOIN] roomId:', roomId);
+    console.log('[JOIN] displayName:', displayName);
+    
+    if (!isValidRoomId(id)) { 
+      setError('Enter a valid Room ID (UUID or 24-char 100ms ID)'); 
+      return; 
+    }
+    if (!displayName.trim()) { 
+      setError('Please enter a display name'); 
+      return; 
+    }
 
-    try {
-      setLoading(true);
-      setError('');
-
-      // Get current session and access token
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-
-      if (sessionError || !session?.access_token) {
-        throw new Error('Authentication required. Please log in again.');
-      }
-
-      // Call hms-token Edge Function
-      const response = await fetch(`${functionsBaseUrl}/hms-token`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          user_id: session.user.id,
-          user_name: displayName.trim(),
-          role: 'listener',
-          room_id: roomId.trim(),
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `Failed to get token (${response.status})`);
-      }
-
-      const { token, room_id } = await response.json();
-
-      if (!token) {
-        throw new Error('No token received from server');
-      }
-
-      // Navigate to voicechat with params
-      router.push({
-        pathname: '/voicechat',
-        params: {
-          roomId: room_id || roomId.trim(),
-          token,
-          userName: displayName.trim(),
-        },
-      });
-
-    } catch (error: any) {
-      console.error('Join room error:', error);
-      setError(error.message || 'Failed to join room. Please try again.');
-    } finally {
-      setLoading(false);
+    if (isUUID(id)) {
+      router.push({ pathname: '/voicechat', params: { roomId: id, name: displayName.trim() } });
+    } else {
+      // 100ms ID direct test path
+      router.push({ pathname: '/voicechat', params: { hmsId: id, name: displayName.trim() } });
     }
   };
 
@@ -170,9 +146,10 @@ export default function Join() {
             <View style={styles.inputRow}>
               <TextInput
                 style={styles.input}
-                placeholder="Enter Room ID (UUID)"
+                placeholder="Enter Room ID (UUID or 100ms ID)"
                 value={roomId}
                 onChangeText={(text) => {
+                  console.log('[JOIN] roomId typing:', text); // Debug log per keystroke
                   setRoomId(text);
                   setError(''); // Clear error when typing
                 }}
@@ -187,6 +164,13 @@ export default function Join() {
                 <Copy size={20} color="#6B7280" />
               </Pressable>
             </View>
+            
+            {/* Room ID validation error */}
+            {roomId.trim() && !isValidRoomId(roomId.trim()) && (
+              <Text style={styles.validationErrorText}>
+                Enter a valid Room ID (UUID or 100ms 24-char ID)
+              </Text>
+            )}
           </View>
 
           {/* Display Name Input */}
@@ -197,6 +181,7 @@ export default function Join() {
               placeholder="Enter your display name"
               value={displayName}
               onChangeText={(text) => {
+                console.log('[JOIN] displayName typing:', text); // Debug log per keystroke
                 setDisplayName(text);
                 setError(''); // Clear error when typing
               }}
@@ -206,23 +191,14 @@ export default function Join() {
           </View>
 
           {/* Error Message */}
-          {error ? (
-            <View style={styles.errorContainer}>
-              <Text style={styles.errorText}>{error}</Text>
-            </View>
-          ) : null}
+          {error && <Text style={{ color: '#ef4444', textAlign: 'center', marginTop: 8 }}>{error}</Text>}
 
           {/* Join Button */}
           <Pressable
-            style={[styles.joinButton, loading && styles.joinButtonDisabled]}
-            onPress={handleJoin}
-            disabled={loading}
+            style={styles.joinButton}
+            onPress={onJoin}
           >
-            {loading ? (
-              <ActivityIndicator color="white" size="small" />
-            ) : (
-              <Text style={styles.joinButtonText}>Join Room</Text>
-            )}
+            <Text style={styles.joinButtonText}>Join Room</Text>
           </Pressable>
         </View>
       </View>
@@ -301,6 +277,12 @@ const styles = StyleSheet.create({
     color: '#DC2626',
     fontSize: 14,
     textAlign: 'center',
+  },
+  validationErrorText: {
+    color: '#ef4444',
+    fontSize: 12,
+    marginTop: 4,
+    marginLeft: 4,
   },
   joinButton: {
     backgroundColor: '#3B82F6',

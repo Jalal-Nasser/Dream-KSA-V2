@@ -1,77 +1,73 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { jsonOK, jsonErr, getUserFromReq, corsHeaders } from "../_shared/mod.ts";
-import { z } from "https://esm.sh/zod@3.23.8";
+/// <reference lib="dom" />
+import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 
-const TokenRequestSchema = z.object({
-  user_id: z.string().uuid(),
-  user_name: z.string().min(1),
-  role: z.enum(['room_admin', 'speaker', 'listener']),
-  room_id: z.string().uuid()
-});
+const SUBDOMAIN = Deno.env.get("HMS_SUBDOMAIN")!;
+const ACCESS_KEY = Deno.env.get("HMS_ACCESS_KEY")!;
+const SECRET     = Deno.env.get("HMS_SECRET")!;
+const REGION     = Deno.env.get("HMS_REGION") || "prod-in";
+
+// POST https://{REGION}.100ms.live/hmsapi/{SUBDOMAIN}.app.100ms.live/api/token
+const HMS_URL = `https://${REGION}.100ms.live/hmsapi/${SUBDOMAIN}.app.100ms.live/api/token`;
+const BASIC   = "Basic " + btoa(`${ACCESS_KEY}:${SECRET}`);
 
 serve(async (req) => {
-  // Handle CORS preflight
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
-  }
-
-  if (req.method !== 'POST') {
-    return jsonErr('Method Not Allowed', 405);
-  }
-
   try {
-    // Verify user authentication
-    const user = await getUserFromReq(req);
-    
-    // Parse request body
-    const body = await req.json();
-    const { user_id, user_name, role, room_id } = TokenRequestSchema.parse(body);
-    
-    // Verify user is requesting token for themselves
-    if (user.id !== user_id) {
-      return jsonErr('Unauthorized: Can only request token for yourself');
+    if (req.method !== "POST") {
+      return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405 });
     }
-    
-    // Get environment variables
-    const hmsManagementToken = Deno.env.get('HMS_MANAGEMENT_TOKEN');
-    const hmsSubdomain = Deno.env.get('HMS_SUBDOMAIN');
-    
-    if (!hmsManagementToken || !hmsSubdomain) {
-      return jsonErr('HMS configuration missing');
+
+    const body = await req.json().catch(() => ({}));
+    const { room_id, role, user_id } = body || {};
+
+    // Validate payload
+    if (!room_id || !role || !user_id) {
+      return new Response(
+        JSON.stringify({ error: "Missing fields", need: { room_id: true, role: true, user_id: true }, got: body }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
     }
-    
-    // Generate 100ms token
-    const tokenResponse = await fetch(`https://${hmsSubdomain}.100ms.live/api/token`, {
-      method: 'POST',
+
+    // Role alias protection (belt & suspenders)
+    const ALIAS: Record<string, string> = {
+      speake: "speaker", // typo fix
+      viewer: "listener", // if you want to keep old names
+      host:   "speaker",
+    };
+    const requested = (role || "").trim();
+    const role_to_use = ALIAS[requested] ?? requested;
+
+    // Forward to 100ms token API
+    const res = await fetch(HMS_URL, {
+      method: "POST",
       headers: {
-        'Authorization': `Bearer ${hmsManagementToken}`,
-        'Content-Type': 'application/json'
+        "Authorization": BASIC,
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        room_id,
-        user_id,
-        role,
-        user_name
-      })
+      body: JSON.stringify({ room_id, role: role_to_use, user_id }),
     });
-    
-    if (!tokenResponse.ok) {
-      const errorText = await tokenResponse.text();
-      return jsonErr(`Failed to generate HMS token: ${errorText}`);
+
+    const text = await res.text();
+    let json: any;
+    try { json = JSON.parse(text); } catch { json = { raw: text }; }
+
+    if (!res.ok) {
+      // Proxy the exact 100ms error so client sees WHY (role not found, room missing, etc.)
+      return new Response(JSON.stringify({ error: "hms_error", status: res.status, body: json }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
-    
-    const tokenData = await tokenResponse.json();
-    
-    return jsonOK({
-      token: tokenData.token,
-      room_id,
-      user_id,
-      role
+
+    // 100ms returns { token }
+    return new Response(JSON.stringify(json), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
     });
-    
-  } catch (error) {
-    console.error('HMS token error:', error);
-    return jsonErr(error.message || 'Failed to generate token');
+  } catch (e) {
+    return new Response(JSON.stringify({ error: "server_error", message: String(e) }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 });
 

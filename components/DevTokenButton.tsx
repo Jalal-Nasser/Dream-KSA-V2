@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { TouchableOpacity, Text, Alert, View, StyleSheet } from 'react-native';
-import { supabase } from '../lib/supabase';
+import { supabase } from '@/lib/supabase';
 
 export default function DevTokenButton() {
   const onPress = useCallback(async () => {

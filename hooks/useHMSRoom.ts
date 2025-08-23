@@ -58,14 +58,22 @@ export const useHMSRoom = ({ roomId, userId, userName, role }: UseHMSRoomProps) 
       try {
         if (HMSSDK) {
           console.log('🎤 Initializing REAL HMS SDK...');
-          const hmsInstance = await HMSSDK.build();
-          hmsInstanceRef.current = hmsInstance;
+          // Import and build HMS instance
+          const instance = await importHMS()
+          hmsInstanceRef.current = instance
 
-          // Set up real event listeners
-          hmsInstance.addEventListener(HMSUpdateListenerActions.ON_JOIN, onJoinSuccess);
-          hmsInstance.addEventListener(HMSUpdateListenerActions.ON_PEER_UPDATE, onPeerUpdate);
-          hmsInstance.addEventListener(HMSUpdateListenerActions.ON_TRACK_UPDATE, onTrackUpdate);
-          hmsInstance.addEventListener(HMSUpdateListenerActions.ON_ERROR, onError);
+          // Extra safety: ensure video is disabled before any operations
+          try {
+            if (typeof instance.setLocalVideoEnabled === "function") {
+              await instance.setLocalVideoEnabled(false);
+              console.log('[HMS] video disabled before join (extra safety)');
+            }
+          } catch (e) {
+            console.log('[HMS] pre-join video disable error:', e);
+          }
+
+          // Setup event listeners
+          setupEventListeners(instance)
           
           console.log('✅ HMS SDK initialized successfully - REAL microphone ready!');
         } else {
@@ -186,10 +194,25 @@ export const useHMSRoom = ({ roomId, userId, userName, role }: UseHMSRoomProps) 
           authToken,
           username: userName,
           metadata: JSON.stringify({ userId, role }),
+          // critical: request mic only, not camera
+          captureNetworkQualityInPreview: false,
+          isAudioOnly: true,
         });
 
         await hmsInstanceRef.current.join(config);
+        
+        // Immediately disable video after join
+        try {
+          if (typeof hmsInstanceRef.current.setLocalVideoEnabled === "function") {
+            await hmsInstanceRef.current.setLocalVideoEnabled(false);
+            console.log('[HMS] video disabled immediately after join');
+          }
+        } catch (e) {
+          console.log('[HMS] video disable error:', e);
+        }
+        
         console.log('🎯 REAL HMS join initiated - microphone will be active!');
+        console.log('[HMS] joined audio-only as', userName);
       }
 
     } catch (error: any) {

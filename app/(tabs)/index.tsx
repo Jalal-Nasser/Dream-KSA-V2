@@ -13,7 +13,7 @@ import {
   RefreshControl
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useTheme } from '../../lib/ThemeProvider';
+import { useTheme } from '@/lib/ThemeProvider';
 import { useRouter } from 'expo-router';
 import { 
   Search, 
@@ -29,9 +29,9 @@ import {
   MapPin,
   Clock
 } from 'lucide-react-native';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '@/lib/supabase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_BASE_URL } from '../../config/api';
+import { API_BASE_URL } from '@/config/api';
 
 interface Room {
   id: string;

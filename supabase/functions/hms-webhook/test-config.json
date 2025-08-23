@@ -1,0 +1,98 @@
+{
+  "test_webhooks": {
+    "room.started": {
+      "event": "room.started",
+      "room_id": "test-room-123",
+      "timestamp": 1640995200000
+    },
+    "room.ended": {
+      "event": "room.ended",
+      "room_id": "test-room-123",
+      "timestamp": 1640998800000
+    },
+    "peer.joined_speaker": {
+      "event": "peer.joined",
+      "room_id": "test-room-123",
+      "peer": {
+        "id": "peer-456",
+        "role": "speaker"
+      },
+      "timestamp": 1640995200000
+    },
+    "peer.joined_listener": {
+      "event": "peer.joined",
+      "room_id": "test-room-123",
+      "peer": {
+        "id": "peer-789",
+        "role": "listener"
+      },
+      "timestamp": 1640995200000
+    },
+    "peer.left_speaker": {
+      "event": "peer.left",
+      "room_id": "test-room-123",
+      "peer": {
+        "id": "peer-456",
+        "role": "speaker"
+      },
+      "timestamp": 1640998800000
+    },
+    "peer.left_listener": {
+      "event": "peer.left",
+      "room_id": "test-room-123",
+      "peer": {
+        "id": "peer-789",
+        "role": "listener"
+      },
+      "timestamp": 1640998800000
+    },
+    "track.updated": {
+      "event": "track.updated",
+      "room_id": "test-room-123",
+      "timestamp": 1640995200000
+    }
+  },
+  "test_rooms": [
+    {
+      "id": "test-uuid-1",
+      "hms_room_id": "test-room-123",
+      "name": "Test Room",
+      "is_live": false,
+      "listener_count": 0,
+      "speaker_count": 0,
+      "trending_score": 0,
+      "featured": false,
+      "last_active_at": "2022-01-01T00:00:00Z"
+    }
+  ],
+  "trending_score_examples": {
+    "empty_room": {
+      "listener_count": 0,
+      "speaker_count": 0,
+      "featured": false,
+      "hours_since_active": 0,
+      "expected_score": 0
+    },
+    "active_room": {
+      "listener_count": 10,
+      "speaker_count": 2,
+      "featured": false,
+      "hours_since_active": 0,
+      "expected_score": 16
+    },
+    "featured_room": {
+      "listener_count": 20,
+      "speaker_count": 3,
+      "featured": true,
+      "hours_since_active": 0,
+      "expected_score": 34
+    },
+    "decayed_room": {
+      "listener_count": 10,
+      "speaker_count": 2,
+      "featured": false,
+      "hours_since_active": 6,
+      "expected_score": 8
+    }
+  }
+}

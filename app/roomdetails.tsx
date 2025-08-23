@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { supabase } from '@/lib/supabase';
 import { 
   ArrowLeft, 
   Users, 
@@ -122,11 +123,48 @@ export default function RoomDetailsScreen() {
   const [isMuted, setIsMuted] = useState(false);
   const [isHandRaised, setIsHandRaised] = useState(false);
   const [showChat, setShowChat] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
   
   // Mock data - in real app, fetch from API
   const [roomInfo, setRoomInfo] = useState<Room | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+
+  // Get current user
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUser(user);
+    };
+    getCurrentUser();
+  }, []);
+
+  // Listen for mic status changes
+  useEffect(() => {
+    if (!currentUser?.id || !roomId) return;
+    
+    const channel = supabase
+      .channel(`room_participants:${roomId}`)
+      .on('postgres_changes', 
+        { event: 'UPDATE', schema: 'public', table: 'room_participants', filter: `room_id=eq.${roomId}` },
+        (payload) => {
+          if (payload.new?.user_id === currentUser.id) {
+            if (payload.new?.mic_granted) {
+              console.log('[MIC] Granted - should rejoin as speaker');
+              // TODO: Call HMS changeRole to speaker
+            } else if (payload.new?.role === 'listener') {
+              console.log('[MIC] Revoked - should rejoin as listener');
+              // TODO: Call HMS changeRole to listener
+            }
+          }
+        }
+      )
+      .subscribe();
+    
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [currentUser?.id, roomId]);
 
   useEffect(() => {
     // Simulate fetching room data
@@ -565,7 +603,30 @@ export default function RoomDetailsScreen() {
             
             <TouchableOpacity 
               style={[styles.actionButton, isHandRaised && styles.actionButtonActive]}
-              onPress={() => setIsHandRaised(!isHandRaised)}
+              onPress={async () => {
+                if (!currentUser?.id || !roomId) return;
+                
+                try {
+                  const newHandRaised = !isHandRaised;
+                  const { error } = await supabase
+                    .from('room_participants')
+                    .upsert({
+                      room_id: roomId,
+                      user_id: currentUser.id,
+                      hand_raised: newHandRaised,
+                      mic_granted: false,
+                      role: 'listener'
+                    });
+                  
+                  if (error) throw error;
+                  
+                  setIsHandRaised(newHandRaised);
+                  console.log('[RAISE] Hand', newHandRaised ? 'raised' : 'lowered');
+                } catch (error) {
+                  console.error('[RAISE] Error:', error);
+                  Alert.alert('Error', 'Failed to update hand status');
+                }
+              }}
             >
               <HandRaise size={20} color="#ffffff" />
             </TouchableOpacity>

@@ -13,8 +13,6 @@ interface HMSInstance {
   addEventListener: (event: string, callback: (data: any) => void) => void
   removeEventListener: (event: string, callback: (data: any) => void) => void
   setLocalAudioEnabled: (enabled: boolean) => Promise<void>
-  setLocalVideoEnabled: (enabled: boolean) => Promise<void>
-  switchCamera: () => Promise<void>
   getLocalPeer: () => any
   getRemotePeers: () => any[]
 }
@@ -24,7 +22,6 @@ export function useVoice100ms(roomId: string, role: 'room_admin' | 'speaker' | '
   const [isConnecting, setIsConnecting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [localAudioEnabled, setLocalAudioEnabled] = useState(false)
-  const [localVideoEnabled, setLocalVideoEnabled] = useState(false)
   const [peers, setPeers] = useState<any[]>([])
   const [localPeer, setLocalPeer] = useState<any>(null)
   
@@ -155,7 +152,6 @@ export function useVoice100ms(roomId: string, role: 'room_admin' | 'speaker' | '
         setPeers([])
         setLocalPeer(null)
         setLocalAudioEnabled(false)
-        setLocalVideoEnabled(false)
       }
     } catch (err) {
       console.error('Failed to leave room:', err)
@@ -176,29 +172,6 @@ export function useVoice100ms(roomId: string, role: 'room_admin' | 'speaker' | '
     }
   }, [hmsInstance, isConnected, localAudioEnabled])
 
-  const toggleVideo = useCallback(async () => {
-    try {
-      if (!hmsInstance.current || !isConnected) return
-
-      const newState = !localVideoEnabled
-      await hmsInstance.current.setLocalVideoEnabled(newState)
-      setLocalVideoEnabled(newState)
-    } catch (err) {
-      console.error('Failed to toggle video:', err)
-      setError(err instanceof Error ? err.message : 'Failed to toggle video')
-    }
-  }, [hmsInstance, isConnected, localVideoEnabled])
-
-  const switchCamera = useCallback(async () => {
-    try {
-      if (!hmsInstance.current || !isConnected) return
-      await hmsInstance.current.switchCamera()
-    } catch (err) {
-      console.error('Failed to switch camera:', err)
-      setError(err instanceof Error ? err.message : 'Failed to switch camera')
-    }
-  }, [hmsInstance, isConnected])
-
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -214,7 +187,6 @@ export function useVoice100ms(roomId: string, role: 'room_admin' | 'speaker' | '
     isConnecting,
     error,
     localAudioEnabled,
-    localVideoEnabled,
     peers,
     localPeer,
     
@@ -222,8 +194,6 @@ export function useVoice100ms(roomId: string, role: 'room_admin' | 'speaker' | '
     joinRoom,
     leaveRoom,
     toggleAudio,
-    toggleVideo,
-    switchCamera,
     
     // Computed
     canSpeak: role === 'speaker' || role === 'room_admin',
