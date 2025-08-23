@@ -1,10 +1,10 @@
 import React from 'react';
-import { View, Text, Pressable, ScrollView } from 'react-native';
+import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import { Users, Mic, MicOff, UserMinus, UserCheck } from 'lucide-react-native';
 
 interface RosterItem {
-  peerId: string;
+  peer: any; // HMSPeer type
   name: string;
   role: 'listener' | 'speaker' | 'moderator';
   vip?: {
@@ -18,9 +18,9 @@ interface RosterSheetProps {
   visible: boolean;
   onClose: () => void;
   canAdmin: boolean;
-  onMute: (peerId: string) => void;
-  onKick: (peerId: string) => void;
-  onMakeListener: (peerId: string) => void;
+  onMute: (peer: any) => void;
+  onKick: (peer: any) => void;
+  onMakeListener: (peer: any) => void;
 }
 
 export default function RosterSheet({
@@ -38,56 +38,55 @@ export default function RosterSheet({
   
   const renderRoleChip = (role: string) => {
     const roleColors = {
-      listener: 'bg-gray-600',
-      speaker: 'bg-green-600',
-      moderator: 'bg-blue-600',
+      listener: styles.listenerChip,
+      speaker: styles.speakerChip,
+      moderator: styles.moderatorChip,
     };
     
     return (
-      <View className={`px-2 py-1 rounded-full ${roleColors[role as keyof typeof roleColors] || 'bg-gray-600'}`}>
-        <Text className="text-white text-xs font-semibold uppercase">
+      <View style={[styles.roleChip, roleColors[role as keyof typeof roleColors] || styles.listenerChip]}>
+        <Text style={styles.roleChipText}>
           {role}
         </Text>
       </View>
     );
   };
-
+  
   const renderVipChip = (vip: { name: string; color: string }) => (
     <View 
-      className="px-2 py-1 rounded-full border border-yellow-400"
-      style={{ backgroundColor: vip.color }}
+      style={[styles.vipChip, { backgroundColor: vip.color }]}
     >
-      <Text className="text-white text-xs font-semibold">
+      <Text style={styles.vipChipText}>
         {vip.name}
       </Text>
     </View>
   );
-
+  
   const renderAdminActions = (item: RosterItem) => {
     if (!canAdmin) return null;
 
     return (
-      <View className="flex-row gap-2">
+      <View style={styles.adminActions}>
         {/* Mute Button */}
         <Pressable
-          onPress={() => onMute(item.peerId)}
-          className="bg-orange-600 px-3 py-1 rounded-lg"
+          onPress={() => onMute(item.peer)}
+          style={styles.muteButton}
         >
           <MicOff size={14} color="white" />
         </Pressable>
         
         {/* Make Listener Button */}
         <Pressable
-          onPress={() => onMakeListener(item.peerId)}
-          className="bg-blue-600 px-3 py-1 rounded-lg"
+          onPress={() => onMakeListener(item.peer)}
+          style={styles.makeListenerButton}
         >
           <UserCheck size={14} color="white" />
         </Pressable>
         
         {/* Kick Button */}
         <Pressable
-          onPress={() => onKick(item.peerId)}
-          className="bg-red-600 px-3 py-1 rounded-lg"
+          onPress={() => onKick(item.peer)}
+          style={styles.kickButton}
         >
           <UserMinus size={14} color="white" />
         </Pressable>
@@ -101,57 +100,55 @@ export default function RosterSheet({
       snapPoints={['60%', '90%']}
       onDismiss={onClose}
       enablePanDownToClose
-      backgroundStyle={{ backgroundColor: '#1f2937' }}
-      handleIndicatorStyle={{ backgroundColor: '#6b7280' }}
+      backgroundStyle={styles.bottomSheetBackground}
+      handleIndicatorStyle={styles.handleIndicator}
     >
-      <BottomSheetView className="flex-1">
+      <BottomSheetView style={styles.container}>
         {/* Header */}
-        <View className="px-4 py-4 border-b border-gray-700">
-          <View className="flex-row items-center justify-between">
-            <View className="flex-row items-center">
+        <View style={styles.header}>
+          <View style={styles.headerContent}>
+            <View style={styles.headerLeft}>
               <Users size={20} color="#6b5ce7" />
-              <Text className="text-white text-lg font-semibold ml-2">
+              <Text style={styles.headerTitle}>
                 Participants ({items.length})
               </Text>
             </View>
             
             <Pressable
               onPress={onClose}
-              className="bg-gray-700 px-3 py-1 rounded-lg"
+              style={styles.closeButton}
             >
-              <Text className="text-white text-sm">Close</Text>
+              <Text style={styles.closeButtonText}>Close</Text>
             </Pressable>
           </View>
         </View>
 
         {/* Roster List */}
-        <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}>
+        <ScrollView style={styles.rosterList} showsVerticalScrollIndicator={false}>
           {items.length === 0 ? (
-            <View className="py-8 items-center">
-              <Text className="text-gray-400 text-center">
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyStateText}>
                 No participants in room
               </Text>
             </View>
           ) : (
             items.map((item, index) => (
               <View
-                key={item.peerId}
-                className={`py-3 flex-row items-center justify-between ${
-                  index < items.length - 1 ? 'border-b border-gray-700' : ''
-                }`}
+                key={item.peer.peerID || index}
+                style={[styles.rosterItem, index < items.length - 1 && styles.rosterItemBorder]}
               >
                 {/* Participant Info */}
-                <View className="flex-1 mr-3">
-                  <View className="flex-row items-center mb-2">
-                    <Text className="text-white font-semibold text-base mr-2">
+                <View style={styles.participantInfo}>
+                  <View style={styles.participantHeader}>
+                    <Text style={styles.participantName}>
                       {item.name}
                     </Text>
                     {renderRoleChip(item.role)}
                     {item.vip && renderVipChip(item.vip)}
                   </View>
                   
-                  <Text className="text-gray-400 text-sm">
-                    Peer ID: {item.peerId.slice(0, 8)}...
+                  <Text style={styles.peerId}>
+                    Peer ID: {(item.peer.peerID || 'unknown').slice(0, 8)}...
                   </Text>
                 </View>
 
@@ -164,8 +161,8 @@ export default function RosterSheet({
 
         {/* Footer Info */}
         {canAdmin && (
-          <View className="px-4 py-3 border-t border-gray-700 bg-gray-800">
-            <Text className="text-gray-400 text-xs text-center">
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>
               Admin controls enabled • Use with caution
             </Text>
           </View>
@@ -174,3 +171,151 @@ export default function RosterSheet({
     </BottomSheetModal>
   );
 }
+
+const styles = StyleSheet.create({
+  bottomSheetBackground: {
+    backgroundColor: '#1f2937',
+  },
+  handleIndicator: {
+    backgroundColor: '#6b7280',
+  },
+  container: {
+    flex: 1,
+  },
+  header: {
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#374151',
+  },
+  headerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerTitle: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+  closeButton: {
+    backgroundColor: '#374151',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  closeButtonText: {
+    color: 'white',
+    fontSize: 14,
+  },
+  rosterList: {
+    flex: 1,
+    paddingHorizontal: 16,
+  },
+  emptyState: {
+    paddingVertical: 32,
+    alignItems: 'center',
+  },
+  emptyStateText: {
+    color: '#9CA3AF',
+    textAlign: 'center',
+  },
+  rosterItem: {
+    paddingVertical: 12,
+  },
+  rosterItemBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#374151',
+  },
+  participantInfo: {
+    flex: 1,
+    marginRight: 12,
+  },
+  participantHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  participantName: {
+    color: 'white',
+    fontWeight: '600',
+    fontSize: 16,
+    marginRight: 8,
+  },
+  peerId: {
+    color: '#9CA3AF',
+    fontSize: 14,
+  },
+  roleChip: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginRight: 8,
+  },
+  listenerChip: {
+    backgroundColor: '#4B5563',
+  },
+  speakerChip: {
+    backgroundColor: '#059669',
+  },
+  moderatorChip: {
+    backgroundColor: '#2563EB',
+  },
+  roleChipText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+  },
+  vipChip: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#F59E0B',
+  },
+  vipChipText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  adminActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  muteButton: {
+    backgroundColor: '#EA580C',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  makeListenerButton: {
+    backgroundColor: '#2563EB',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  kickButton: {
+    backgroundColor: '#DC2626',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  footer: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#374151',
+    backgroundColor: '#1F2937',
+  },
+  footerText: {
+    color: '#9CA3AF',
+    fontSize: 12,
+    textAlign: 'center',
+  },
+});

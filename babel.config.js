@@ -7,7 +7,8 @@ module.exports = function (api) {
         root: ['./'],
         alias: { '@': '.' },
         extensions: ['.ts', '.tsx', '.js', '.jsx', '.json']
-      }]
+      }],
+      'nativewind/babel'
     ]
   };
 };

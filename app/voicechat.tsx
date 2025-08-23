@@ -18,6 +18,7 @@ import { useAdminControls } from '@/src/hooks/useAdminControls';
 import RosterSheet from '@/src/components/RosterSheet';
 
 import { Users } from 'lucide-react-native';
+import { HMSPeer } from '@100mslive/react-native-hms';
 
 // Log environment once at module load
 logEnvOnce();
@@ -201,7 +202,7 @@ export default function VoiceChat() {
   // Roster state
   const [rosterVisible, setRosterVisible] = useState(false);
   const [rosterItems, setRosterItems] = useState<Array<{
-    peerId: string;
+    peer: HMSPeer;
     name: string;
     role: 'listener' | 'speaker' | 'moderator';
     vip?: { name: string; color: string };
@@ -209,25 +210,25 @@ export default function VoiceChat() {
   
   // Update roster when participants change
   useEffect(() => {
-    if (hmsGate.hms) {
-      const items = participants.map(p => ({
-        peerId: p.user_id,
-        name: p.display_name || p.user_id,
-        role: p.mic_status === 'granted' ? 'speaker' : 'listener' as 'listener' | 'speaker' | 'moderator',
-        vip: vipMap[p.user_id] ? {
-          name: vipMap[p.user_id].name,
-          color: vipMap[p.user_id].badge_color || '#FFD700'
+    if (hmsGate.hms && hmsGate.peers) {
+      const items = hmsGate.peers.map(peer => ({
+        peer,
+        name: peer.name || peer.userID || 'Unknown',
+        role: peer.role?.name === 'speaker' ? 'speaker' : 'listener' as 'listener' | 'speaker' | 'moderator',
+        vip: vipMap[peer.userID] ? {
+          name: vipMap[peer.userID].name,
+          color: vipMap[peer.userID].badge_color || '#FFD700'
         } : undefined
       }));
       setRosterItems(items);
     }
-  }, [participants, vipMap, hmsGate.hms]);
+  }, [hmsGate.hms, hmsGate.peers, vipMap]);
   
   // Roster handlers with proper error handling and user feedback
-  const handleMakeListener = useCallback(async (peerId: string) => {
+  const handleMakeListener = useCallback(async (peer: HMSPeer) => {
     try {
       // QA: Actions don't crash if peer leaves between tap → call (gracefully ignore)
-      await adminControls.makeListener(peerId);
+      await adminControls.makeListener(peer);
       Alert.alert('Success', 'User role changed to listener');
     } catch (error: any) {
       console.error('Make listener failed:', error);
@@ -235,10 +236,10 @@ export default function VoiceChat() {
     }
   }, [adminControls]);
   
-  const handleKick = useCallback(async (peerId: string) => {
+  const handleKick = useCallback(async (peer: HMSPeer) => {
     try {
       // QA: Actions don't crash if peer leaves between tap → call (gracefully ignore)
-      await adminControls.kick(peerId);
+      await adminControls.kick(peer);
       Alert.alert('Success', 'User removed from room');
     } catch (error: any) {
       console.error('Kick failed:', error);
@@ -246,10 +247,10 @@ export default function VoiceChat() {
     }
   }, [adminControls]);
   
-  const handleMute = useCallback(async (peerId: string) => {
+  const handleMute = useCallback(async (peer: HMSPeer) => {
     try {
       // QA: Actions don't crash if peer leaves between tap → call (gracefully ignore)
-      await adminControls.mute(peerId);
+      await adminControls.mute(peer);
       Alert.alert('Success', 'User audio muted');
     } catch (error: any) {
       console.error('Mute failed:', error);

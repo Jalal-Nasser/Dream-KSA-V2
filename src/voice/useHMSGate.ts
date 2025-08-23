@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { getHmsToken } from './getHmsToken';
 import { HMS_ROLES } from '@/env';
 import type { MicStatus } from '@/src/db/types';
-import { HMSSDK, HMSConfig, HMSTrackSettings, HMSUpdateListenerActions } from '@100mslive/react-native-hms';
+import { HMSSDK, HMSConfig, HMSTrackSettings, HMSUpdateListenerActions, HMSPeer } from '@100mslive/react-native-hms';
 import { setLevels, updateLevel } from './useHmsLevels';
 
 type GateParams = {
@@ -15,6 +15,7 @@ type GateParams = {
 export function useHMSGate({ hmsRoomId, userId, displayName, micStatus }: GateParams) {
   const hmsRef = useRef<HMSSDK | null>(null);
   const [role, setRole] = useState<string>('');
+  const [peers, setPeers] = useState<HMSPeer[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -85,9 +86,27 @@ export function useHMSGate({ hmsRoomId, userId, displayName, micStatus }: GatePa
         // Attach listener for speaker updates
         hmsRef.current?.addEventListener(HMSUpdateListenerActions.ON_SPEAKER_UPDATE, listener);
         
+        // Attach listener for peer updates
+        const peerListener = (data: any) => {
+          if (cancelled) return;
+          console.log('[HMS] Peer update:', data);
+          
+          // Update peers list based on the event
+          if (data?.type === 'PEER_JOINED' && data?.peer) {
+            setPeers(prev => [...prev, data.peer]);
+          } else if (data?.type === 'PEER_LEFT' && data?.peer) {
+            setPeers(prev => prev.filter(p => p.peerID !== data.peer.peerID));
+          } else if (data?.type === 'PEER_UPDATE' && data?.peer) {
+            setPeers(prev => prev.map(p => p.peerID === data.peer.peerID ? data.peer : p));
+          }
+        };
+        
+        hmsRef.current?.addEventListener(HMSUpdateListenerActions.ON_PEER_UPDATE, peerListener);
+        
         // Store cleanup function
         cleanup = () => {
           hmsRef.current?.removeEventListener(HMSUpdateListenerActions.ON_SPEAKER_UPDATE, listener);
+          hmsRef.current?.removeEventListener(HMSUpdateListenerActions.ON_PEER_UPDATE, peerListener);
         };
       } catch (e) {
         if (!cancelled) console.log('[HMS] join failed', e);
@@ -107,5 +126,6 @@ export function useHMSGate({ hmsRoomId, userId, displayName, micStatus }: GatePa
       try { await hmsRef.current?.leave(); } catch {}
     },
     hms: hmsRef.current,
+    peers,
   };
 }
