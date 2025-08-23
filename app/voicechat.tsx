@@ -202,7 +202,7 @@ export default function VoiceChat() {
   // Roster state
   const [rosterVisible, setRosterVisible] = useState(false);
   const [rosterItems, setRosterItems] = useState<Array<{
-    peer: HMSPeer;
+    peer: any; // HMSPeer type
     name: string;
     role: 'listener' | 'speaker' | 'moderator';
     vip?: { name: string; color: string };
@@ -225,7 +225,7 @@ export default function VoiceChat() {
   }, [hmsGate.hms, hmsGate.peers, vipMap]);
   
   // Roster handlers with proper error handling and user feedback
-  const handleMakeListener = useCallback(async (peer: HMSPeer) => {
+  const handleMakeListener = useCallback(async (peer: any) => {
     try {
       // QA: Actions don't crash if peer leaves between tap → call (gracefully ignore)
       await adminControls.makeListener(peer);
@@ -236,7 +236,7 @@ export default function VoiceChat() {
     }
   }, [adminControls]);
   
-  const handleKick = useCallback(async (peer: HMSPeer) => {
+  const handleKick = useCallback(async (peer: any) => {
     try {
       // QA: Actions don't crash if peer leaves between tap → call (gracefully ignore)
       await adminControls.kick(peer);
@@ -247,7 +247,7 @@ export default function VoiceChat() {
     }
   }, [adminControls]);
   
-  const handleMute = useCallback(async (peer: HMSPeer) => {
+  const handleMute = useCallback(async (peer: any) => {
     try {
       // QA: Actions don't crash if peer leaves between tap → call (gracefully ignore)
       await adminControls.mute(peer);
