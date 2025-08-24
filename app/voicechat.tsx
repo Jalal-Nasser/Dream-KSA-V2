@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { Alert, View, Text, FlatList, ScrollView, Pressable, Image } from 'react-native';
+import { Alert, View, Text, FlatList, ScrollView, Pressable, Image, ImageBackground, StyleSheet } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { ENV, HMS_ROLES, logEnvOnce } from '@/env';
 import { supabase } from '@/lib/supabase';
 import { RaiseHandButton } from '@/src/components/RaiseHandButton';
@@ -42,6 +43,14 @@ export default function VoiceChat() {
   const [meId, setMeId] = useState<string>('');
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [roomData, setRoomData] = useState<any>(null);
+  const [branding, setBranding] = useState<{
+    title?: string;
+    agency_name?: string;
+    theme_color?: string;
+    banner_url?: string;
+    listener_count?: number;
+    speaker_count?: number;
+  } | null>(null);
   const { participants, pendingSorted, speakers, vipMap } = useMicQueue(appRoomId || '');
   
   // Real 100ms audio levels
@@ -109,28 +118,37 @@ export default function VoiceChat() {
     });
   }, []);
   
-  // Fetch room data for branding
+  // Fetch branding data by hms_room_id
   useEffect(() => {
-    if (!appRoomId) return;
+    if (!hmsRoomId) return;
     
-    const fetchRoomData = async () => {
+    const fetchBrandingData = async () => {
       try {
         const { data, error } = await supabase
           .from('rooms_public_view')
-          .select('*')
-          .eq('id', appRoomId)
+          .select('title, agency_name, theme_color, banner_url, listener_count, speaker_count')
+          .eq('hms_room_id', hmsRoomId)
+          .limit(1)
           .single();
         
-        if (!error && data) {
-          setRoomData(data);
+        if (!mounted.current) return;
+        
+        if (error) {
+          console.log('[VC] fetch branding error:', error);
+          return;
+        }
+        
+        if (data) {
+          setBranding(data);
+          console.log('[VC] branding loaded:', data);
         }
       } catch (err) {
-        console.error('Failed to fetch room data:', err);
+        console.error('Failed to fetch branding data:', err);
       }
     };
     
-    fetchRoomData();
-  }, [appRoomId]);
+    fetchBrandingData();
+  }, [hmsRoomId]);
 
   // Admin check: rooms.owner_id === me OR agency membership (owner/manager)
   useEffect(() => {
@@ -269,6 +287,89 @@ export default function VoiceChat() {
   // Split participants into speakers and listeners
   const speakersList = participants.filter(p => p.mic_status === 'granted');
   const listenersList = participants.filter(p => p.mic_status !== 'granted');
+  
+  // Compute live counts - prefer HMS peer data when available, fallback to DB
+  const liveCounts = useMemo(() => {
+    const hmsPeers = hmsGate.peers || [];
+    const hmsListeners = hmsPeers.filter(peer => peer.role?.name !== 'speaker').length;
+    const hmsSpeakers = hmsPeers.filter(peer => peer.role?.name === 'speaker').length;
+    
+    // Use HMS counts if available and > 0, otherwise fallback to DB or participant counts
+    const listenerCount = hmsPeers.length > 0 ? hmsListeners : (branding?.listener_count || listenersList.length);
+    const speakerCount = hmsPeers.length > 0 ? hmsSpeakers : (branding?.speaker_count || speakersList.length);
+    
+    return { listenerCount, speakerCount };
+  }, [hmsGate.peers, branding?.listener_count, branding?.speaker_count, listenersList.length, speakersList.length]);
+
+  // Branded header component
+  const renderBrandedHeader = useCallback(() => {
+    if (!branding) {
+      // Loading skeleton
+      return (
+        <View style={styles.headerSkeleton}>
+          <View style={styles.skeletonTitle} />
+          <View style={styles.skeletonAgency} />
+          <View style={styles.skeletonStats} />
+        </View>
+      );
+    }
+
+    const backgroundColor = branding.theme_color || '#262626';
+    const title = branding.title || 'Voice Chat';
+    const agencyName = branding.agency_name;
+
+    if (branding.banner_url) {
+      // Banner image with gradient overlay
+      return (
+        <View style={styles.brandedHeader}>
+          <ImageBackground
+            source={{ uri: branding.banner_url }}
+            style={styles.headerBackground}
+            resizeMode="cover"
+          >
+            <LinearGradient
+              colors={['transparent', 'rgba(0,0,0,0.7)']}
+              style={styles.gradientOverlay}
+            />
+            <View style={styles.headerContent}>
+              <Text style={styles.roomTitle}>{title}</Text>
+              {agencyName && (
+                <Text style={styles.agencyName}>{agencyName}</Text>
+              )}
+              <View style={styles.statsRow}>
+                <Text style={styles.statsText}>
+                  👂 {liveCounts.listenerCount} · 🎙 {liveCounts.speakerCount}
+                </Text>
+              </View>
+            </View>
+          </ImageBackground>
+        </View>
+      );
+    } else {
+      // Theme color fallback
+      return (
+        <View style={styles.brandedHeader}>
+          <View style={[styles.colorFallback, { backgroundColor }]}>
+            <LinearGradient
+              colors={['transparent', 'rgba(0,0,0,0.4)']}
+              style={styles.gradientOverlay}
+            />
+            <View style={styles.headerContent}>
+              <Text style={styles.roomTitle}>{title}</Text>
+              {agencyName && (
+                <Text style={styles.agencyName}>{agencyName}</Text>
+              )}
+              <View style={styles.statsRow}>
+                <Text style={styles.statsText}>
+                  👂 {liveCounts.listenerCount} · 🎙 {liveCounts.speakerCount}
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      );
+    }
+  }, [branding, liveCounts]);
 
   const ready = !!appRoomId && !!hmsRoomId;
   if (!ready) {
@@ -281,60 +382,45 @@ export default function VoiceChat() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#0E131A' }}>
-      {/* Header */}
+    <View style={{ flex: 1, backgroundColor: '#000000' }}>
+      {/* Branded Header */}
+      {renderBrandedHeader()}
+      
+      {/* Secondary Header with User Info and Roster */}
       <View style={{ 
         paddingHorizontal: 16, 
-        paddingTop: 16, 
+        paddingTop: 12, 
         paddingBottom: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: '#1a2330',
+        backgroundColor: '#0E131A',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
       }}>
-        {/* Agency Banner */}
-        {roomData?.agency_icon_url && (
-          <View className="h-32 w-full mb-4 rounded-lg overflow-hidden">
-            <Image
-              source={{ uri: roomData.agency_icon_url }}
-              className="w-full h-full"
-              resizeMode="cover"
-            />
-            {/* Gradient overlay for text readability */}
-            <View className="absolute inset-0 bg-black/40" />
-            
-            {/* Room title over banner */}
-            <View className="absolute bottom-3 left-3 right-3">
-              <Text className="text-white font-bold text-xl drop-shadow-lg mb-1">
-                {roomData?.name || 'Voice Chat'}
-              </Text>
-              <Text className="text-white text-sm drop-shadow-lg opacity-90">
-                {roomData?.agency_name}
-              </Text>
-            </View>
-          </View>
-        )}
-        
-        {/* Header Content */}
-        <View className="flex-row items-center justify-between">
-          <View className="flex-1">
-            <Text style={{ color: 'white', fontSize: 18, fontWeight: '800', textAlign: 'left' }}>
-              {displayName} • {isAdmin ? 'Admin' : 'User'}
-            </Text>
-            <Text style={{ color: '#9CA3AF', fontSize: 14, textAlign: 'left', marginTop: 4 }}>
-              {speakersList.length} speaking • {listenersList.length} listening
-            </Text>
-          </View>
-          
-          {/* Roster Button */}
-          {hmsGate.hms && (
-            <Pressable
-              onPress={openRoster}
-              className="bg-blue-600 px-4 py-2 rounded-lg flex-row items-center"
-            >
-              <Users size={16} color="white" />
-              <Text className="text-white font-semibold ml-2">Roster</Text>
-            </Pressable>
-          )}
+        <View style={{ flex: 1 }}>
+          <Text style={{ color: 'white', fontSize: 16, fontWeight: '600' }}>
+            {displayName} • {isAdmin ? 'Admin' : 'User'}
+          </Text>
         </View>
+        
+        {/* Roster Button */}
+        {hmsGate.hms && (
+          <Pressable
+            onPress={openRoster}
+            style={{
+              backgroundColor: '#2563EB',
+              paddingHorizontal: 16,
+              paddingVertical: 8,
+              borderRadius: 8,
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}
+          >
+            <Users size={16} color="white" />
+            <Text style={{ color: 'white', fontWeight: '600', marginLeft: 8 }}>
+              Roster
+            </Text>
+          </Pressable>
+        )}
       </View>
 
       {/* Debug: Show current audio levels */}
@@ -343,7 +429,7 @@ export default function VoiceChat() {
           <Text style={{ color: 'white', fontSize: 12, fontWeight: '600' }}>Audio Levels:</Text>
           {Object.entries(levels).map(([userId, level]) => (
             <Text key={userId} style={{ color: '#9CA3AF', fontSize: 11 }}>
-              {userId}: {(level * 100).toFixed(1)}%
+              {userId}: {(Number(level) * 100).toFixed(1)}%
             </Text>
           ))}
         </View>
@@ -491,5 +577,98 @@ export default function VoiceChat() {
     </View>
   );
 }
+
+// Styles for the branded header
+const styles = StyleSheet.create({
+  brandedHeader: {
+    height: 180,
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  headerBackground: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'flex-end',
+  },
+  colorFallback: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'flex-end',
+  },
+  gradientOverlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: '70%',
+  },
+  headerContent: {
+    position: 'absolute',
+    left: 16,
+    right: 16,
+    bottom: 16,
+    zIndex: 2,
+  },
+  roomTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: 'white',
+    marginBottom: 4,
+    textShadowColor: 'rgba(0,0,0,0.8)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  agencyName: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.9)',
+    marginBottom: 8,
+    textShadowColor: 'rgba(0,0,0,0.6)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  statsText: {
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.85)',
+    fontFamily: 'monospace',
+    textShadowColor: 'rgba(0,0,0,0.6)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  headerSkeleton: {
+    height: 180,
+    backgroundColor: '#262626',
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
+    justifyContent: 'flex-end',
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+  },
+  skeletonTitle: {
+    height: 24,
+    backgroundColor: '#404040',
+    borderRadius: 4,
+    marginBottom: 8,
+    width: '70%',
+  },
+  skeletonAgency: {
+    height: 16,
+    backgroundColor: '#404040',
+    borderRadius: 4,
+    marginBottom: 12,
+    width: '50%',
+  },
+  skeletonStats: {
+    height: 14,
+    backgroundColor: '#404040',
+    borderRadius: 4,
+    width: '40%',
+  },
+});
 
 

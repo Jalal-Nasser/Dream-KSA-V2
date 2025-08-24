@@ -1,40 +1,51 @@
 import React from 'react';
-import { View, Pressable } from 'react-native';
+import { View, Pressable, StyleSheet } from 'react-native';
 
 interface ColorSwatchRowProps {
+  presets: string[];
+  value: string;
   onPick: (hex: string) => void;
-  selectedColor?: string;
-  colors?: string[];
 }
 
-const DEFAULT_COLORS = [
-  '#4F46E5', // Indigo
-  '#22C55E', // Green
-  '#F59E0B', // Amber
-  '#EF4444', // Red
-  '#10B981', // Emerald
-  '#3B82F6', // Blue
-];
-
-export default function ColorSwatchRow({ 
-  onPick, 
-  selectedColor, 
-  colors = DEFAULT_COLORS 
-}: ColorSwatchRowProps) {
+export default function ColorSwatchRow({ presets, value, onPick }: ColorSwatchRowProps) {
   return (
-    <View className="flex-row gap-3 justify-center">
-      {colors.map((color) => (
+    <View style={styles.container}>
+      {presets.map((hex) => (
         <Pressable
-          key={color}
-          onPress={() => onPick(color)}
-          className={`w-10 h-10 rounded-full border-2 ${
-            selectedColor === color 
-              ? 'border-white shadow-lg' 
-              : 'border-gray-600'
-          }`}
-          style={{ backgroundColor: color }}
+          key={hex}
+          onPress={() => onPick(hex)}
+          style={[
+            styles.swatch,
+            { backgroundColor: hex },
+            value === hex ? styles.selectedSwatch : styles.defaultSwatch
+          ]}
         />
       ))}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  swatch: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 2,
+  },
+  defaultSwatch: {
+    borderColor: '#374151', // neutral-700
+  },
+  selectedSwatch: {
+    borderColor: 'white',
+    borderWidth: 3,
+    shadowColor: '#3B82F6', // blue-400
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 4,
+    elevation: 8,
+  },
+});

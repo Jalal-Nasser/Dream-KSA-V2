@@ -1,453 +1,711 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, TextInput, ScrollView, Pressable, Alert, ActivityIndicator, Image } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { supabase } from '@/lib/supabase';
-import { Camera, Save, User, Building2, Crown } from 'lucide-react-native';
+import { View, Text, TextInput, Pressable, ScrollView, Alert, ActivityIndicator, StyleSheet, ViewStyle } from 'react-native';
+import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
-import AvatarPicker from '@/src/components/AvatarPicker';
+import { supabase } from '../../../lib/supabase';
+import { Camera, Save, User, Building, Crown } from 'lucide-react-native';
 
+// Types
 interface Profile {
   user_id: string;
   display_name: string;
   avatar_url: string | null;
-  bio: string | null;
+  bio: string;
   created_at: string;
   updated_at: string;
 }
 
-interface VipInfo {
-  vip_name: string;
-  badge_color: string;
-  priority: number;
+interface VipLevel {
+  name: string;
+  color: string;
 }
 
 interface AgencyMembership {
-  agency_id: string;
   agency_name: string;
-  role: 'owner' | 'manager' | 'host' | 'member';
-  joined_at: string;
+  role: string;
+}
+
+interface User {
+  id: string;
+  email?: string;
 }
 
 export default function ProfileScreen() {
-  const insets = useSafeAreaInsets();
+  // State
+  const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [vipInfo, setVipInfo] = useState<VipInfo | null>(null);
-  const [agencyMemberships, setAgencyMemberships] = useState<AgencyMembership[]>([]);
+  const [vipLevel, setVipLevel] = useState<VipLevel | null>(null);
+  const [memberships, setMemberships] = useState<AgencyMembership[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [editing, setEditing] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  
+  // Form state
   const [displayName, setDisplayName] = useState('');
   const [bio, setBio] = useState('');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-
-  // Fetch user profile and related data
-  const fetchProfile = useCallback(async () => {
+  const [isDirty, setIsDirty] = useState(false);
+  
+  // Validation
+  const [nameError, setNameError] = useState<string | null>(null);
+  const [bioError, setBioError] = useState<string | null>(null);
+  
+  // Load user data on mount
+  useEffect(() => {
+    loadUserData();
+  }, []);
+  
+  const loadUserData = async () => {
     try {
       setLoading(true);
       
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
+      // Get current user session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session?.user) {
         Alert.alert('Error', 'User not authenticated');
         return;
       }
-
-      // Fetch profile
+      
+      const currentUser = session.user;
+      setUser(currentUser);
+      
+      // Fetch profile data
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select('*')
-        .eq('user_id', user.id)
+        .select('display_name, avatar_url, bio, created_at, updated_at')
+        .eq('user_id', currentUser.id)
         .single();
-
+      
       if (profileError && profileError.code !== 'PGRST116') {
-        console.error('Profile fetch error:', profileError);
-        Alert.alert('Error', 'Failed to fetch profile');
-        return;
+        // PGRST116 = no rows returned, which is fine for new users
+        throw profileError;
       }
-
-      // Create profile if it doesn't exist
-      let finalProfile: Profile;
-      if (!profileData) {
-        const { data: newProfile, error: createError } = await supabase
+      
+      let profile: Profile;
+      if (profileData) {
+        profile = {
+          user_id: currentUser.id,
+          ...profileData
+        };
+      } else {
+        // Create blank profile for new user
+        const { data: newProfile, error: insertError } = await supabase
           .from('profiles')
           .insert({
-            user_id: user.id,
-            display_name: user.email?.split('@')[0] || 'User',
-            bio: null,
-            avatar_url: null
+            user_id: currentUser.id,
+            display_name: '',
+            avatar_url: null,
+            bio: ''
           })
           .select()
           .single();
-
-        if (createError) {
-          console.error('Profile creation error:', createError);
-          Alert.alert('Error', 'Failed to create profile');
-          return;
-        }
-        finalProfile = newProfile;
-      } else {
-        finalProfile = profileData;
+          
+        if (insertError) throw insertError;
+        profile = newProfile;
       }
-
-      setProfile(finalProfile);
-      setDisplayName(finalProfile.display_name || '');
-      setBio(finalProfile.bio || '');
-      setAvatarUrl(finalProfile.avatar_url);
-
-      // Fetch VIP info
-      const { data: vipData } = await supabase
+      
+      setProfile(profile);
+      setDisplayName(profile.display_name || '');
+      setBio(profile.bio || '');
+      setAvatarUrl(profile.avatar_url);
+      
+      // Fetch VIP level
+      const { data: vipData, error: vipError } = await supabase
         .from('user_vip')
         .select(`
-          vip_levels (
-            name,
-            badge_color,
-            priority
-          )
+          vip_levels(name, color)
         `)
-        .eq('user_id', user.id)
+        .eq('user_id', currentUser.id)
         .single();
-
+      
       if (vipData?.vip_levels) {
-        setVipInfo({
-          vip_name: vipData.vip_levels.name,
-          badge_color: vipData.vip_levels.badge_color,
-          priority: vipData.vip_levels.priority
-        });
+        // vip_levels is an array, take the first one
+        const vipLevelData = Array.isArray(vipData.vip_levels) 
+          ? vipData.vip_levels[0] 
+          : vipData.vip_levels;
+        if (vipLevelData) {
+          setVipLevel(vipLevelData as VipLevel);
+        }
       }
-
+      
       // Fetch agency memberships
-      const { data: agencyData } = await supabase
+      const { data: membershipData, error: membershipError } = await supabase
         .from('agency_members')
         .select(`
-          agency_id,
           role,
-          joined_at,
-          agencies (
-            name
-          )
+          agencies(name)
         `)
-        .eq('user_id', user.id);
-
-      if (agencyData) {
-        const memberships: AgencyMembership[] = agencyData.map(item => ({
-          agency_id: item.agency_id,
-          agency_name: item.agencies?.name || 'Unknown Agency',
-          role: item.role,
-          joined_at: item.joined_at
-        }));
-        setAgencyMemberships(memberships);
+        .eq('user_id', currentUser.id);
+      
+      if (membershipData) {
+        const agencyMemberships = membershipData
+          .filter(m => m.agencies && Array.isArray(m.agencies) && m.agencies[0]?.name)
+          .map(m => ({
+            agency_name: m.agencies[0].name,
+            role: m.role
+          }));
+        setMemberships(agencyMemberships);
       }
-
+      
     } catch (error) {
-      console.error('Profile fetch error:', error);
-      Alert.alert('Error', 'Failed to load profile');
+      console.error('Failed to load user data:', error);
+      Alert.alert('Error', 'Failed to load profile data');
     } finally {
       setLoading(false);
     }
-  }, []);
-
-  useEffect(() => {
-    fetchProfile();
-  }, [fetchProfile]);
-
-  // Handle avatar upload
-  const handleAvatarChange = useCallback(async (uri: string) => {
-    if (!profile?.user_id) return;
-
+  };
+  
+  // Validation helpers
+  const validateDisplayName = (name: string): string | null => {
+    if (!name.trim()) return 'Display name is required';
+    if (name.length < 2) return 'Display name must be at least 2 characters';
+    if (name.length > 40) return 'Display name must be 40 characters or less';
+    return null;
+  };
+  
+  const validateBio = (bio: string): string | null => {
+    if (bio.length > 200) return 'Bio must be 200 characters or less';
+    return null;
+  };
+  
+  // Handle form changes
+  const handleDisplayNameChange = (text: string) => {
+    setDisplayName(text);
+    setNameError(validateDisplayName(text));
+    setIsDirty(true);
+  };
+  
+  const handleBioChange = (text: string) => {
+    setBio(text);
+    setBioError(validateBio(text));
+    setIsDirty(true);
+  };
+  
+  // Avatar upload handler
+  const handleAvatarUpload = async () => {
+    if (!user) return;
+    
     try {
-      setSaving(true);
-
-      // Convert image to blob
-      const response = await fetch(uri);
-      const blob = await response.blob();
-
-      // Upload to Supabase Storage
-      const fileName = `${profile.user_id}.jpg`;
-      const { data, error } = await supabase.storage
-        .from('avatars')
-        .upload(fileName, blob, {
-          upsert: true,
-          contentType: 'image/jpeg'
-        });
-
-      if (error) {
-        console.error('Avatar upload error:', error);
-        Alert.alert('Error', 'Failed to upload avatar');
+      // Request permissions
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission needed', 'Please grant photo library access to change your avatar');
         return;
       }
-
-      // Get public URL
-      const { data: urlData } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(fileName);
-
-      const publicUrl = urlData.publicUrl;
-
-      // Update profile with new avatar URL
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ avatar_url: publicUrl })
-        .eq('user_id', profile.user_id);
-
-      if (updateError) {
-        console.error('Profile update error:', updateError);
-        Alert.alert('Error', 'Failed to update profile');
-        return;
+      
+      // Pick image
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 0.9,
+        allowsEditing: true,
+        aspect: [1, 1], // Square for avatar
+      });
+      
+      if (!result.canceled && result.assets[0]) {
+        setUploading(true);
+        
+        const asset = result.assets[0];
+        const response = await fetch(asset.uri);
+        const blob = await response.blob();
+        
+        // Upload to Supabase storage
+        const path = `${user.id}.jpg`;
+        const { error: uploadError } = await supabase.storage
+          .from('avatars')
+          .upload(path, blob, { 
+            upsert: true, 
+            contentType: 'image/jpeg' 
+          });
+          
+        if (uploadError) throw uploadError;
+        
+        // Get public URL
+        const { data: urlData } = supabase.storage
+          .from('avatars')
+          .getPublicUrl(path);
+          
+        // Update local state for preview
+        setAvatarUrl(urlData.publicUrl);
+        setIsDirty(true);
+        
+        Alert.alert('Success', 'Avatar updated successfully. Save changes to apply.');
       }
-
-      setAvatarUrl(publicUrl);
-      Alert.alert('Success', 'Avatar updated successfully');
-
+      
     } catch (error) {
-      console.error('Avatar change error:', error);
-      Alert.alert('Error', 'Failed to update avatar');
+      console.error('Failed to upload avatar:', error);
+      Alert.alert('Error', 'Failed to upload avatar image');
     } finally {
-      setSaving(false);
+      setUploading(false);
     }
-  }, [profile?.user_id]);
-
-  // Handle profile save
-  const handleSave = useCallback(async () => {
-    if (!profile?.user_id) return;
-
+  };
+  
+  // Save profile handler
+  const handleSave = async () => {
+    if (!user || !isDirty) return;
+    
+    // Validate before saving
+    const nameValidation = validateDisplayName(displayName);
+    const bioValidation = validateBio(bio);
+    
+    if (nameValidation) {
+      setNameError(nameValidation);
+      return;
+    }
+    
+    if (bioValidation) {
+      setBioError(bioValidation);
+      return;
+    }
+    
     try {
       setSaving(true);
-
+      
       const { error } = await supabase
         .from('profiles')
         .update({
           display_name: displayName.trim(),
-          bio: bio.trim() || null,
-          updated_at: new Date().toISOString()
+          bio: bio.trim(),
+          avatar_url: avatarUrl
         })
-        .eq('user_id', profile.user_id);
-
-      if (error) {
-        console.error('Profile save error:', error);
-        Alert.alert('Error', 'Failed to save profile');
-        return;
-      }
-
+        .eq('user_id', user.id);
+        
+      if (error) throw error;
+      
       // Update local state
-      setProfile(prev => prev ? {
-        ...prev,
-        display_name: displayName.trim(),
-        bio: bio.trim() || null
-      } : null);
-
-      setEditing(false);
+      setProfile(prev => prev ? { ...prev, display_name: displayName.trim(), bio: bio.trim(), avatar_url: avatarUrl } : null);
+      setIsDirty(false);
+      
       Alert.alert('Success', 'Profile updated successfully');
-
+      
     } catch (error) {
-      console.error('Profile save error:', error);
+      console.error('Failed to save profile:', error);
       Alert.alert('Error', 'Failed to save profile');
     } finally {
       setSaving(false);
     }
-  }, [profile?.user_id, displayName, bio]);
-
-  // Handle edit mode toggle
-  const toggleEditing = useCallback(() => {
-    if (editing) {
-      // Reset to original values
-      setDisplayName(profile?.display_name || '');
-      setBio(profile?.bio || '');
-    }
-    setEditing(!editing);
-  }, [editing, profile]);
-
+  };
+  
+  // Loading state
   if (loading) {
     return (
-      <View className="flex-1 bg-gray-900 justify-center items-center">
-        <ActivityIndicator size="large" color="#6C5CE7" />
-        <Text className="text-gray-400 mt-4">Loading profile...</Text>
+      <View style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#3B82F6" />
+          <Text style={styles.loadingText}>Loading profile...</Text>
+        </View>
       </View>
     );
   }
-
-  if (!profile) {
+  
+  if (!user || !profile) {
     return (
-      <View className="flex-1 bg-gray-900 justify-center items-center">
-        <Text className="text-red-400 text-lg">Profile not found</Text>
-        <Pressable
-          onPress={fetchProfile}
-          className="bg-blue-600 px-6 py-3 rounded-xl mt-4"
-        >
-          <Text className="text-white font-semibold">Retry</Text>
-        </Pressable>
+      <View style={styles.container}>
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorMessage}>Failed to load profile</Text>
+        </View>
       </View>
     );
   }
-
+  
+  const canSave = isDirty && !nameError && !bioError && !saving && !uploading;
+  
   return (
-    <View 
-      className="flex-1 bg-gray-900"
-      style={{ paddingTop: insets.top }}
-    >
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View className="px-4 py-6 border-b border-gray-800">
-          <Text className="text-white text-2xl font-bold text-center">Profile</Text>
-        </View>
-
-        {/* Avatar Section */}
-        <View className="px-4 py-6">
-          <View className="items-center">
-            <AvatarPicker
-              currentAvatarUrl={avatarUrl}
-              onAvatarChange={handleAvatarChange}
-              loading={saving}
-            />
-          </View>
-        </View>
-
-        {/* Profile Info Section */}
-        <View className="px-4 py-4">
-          {/* Display Name */}
-          <View className="mb-6">
-            <View className="flex-row items-center mb-2">
-              <User size={20} color="#6C5CE7" />
-              <Text className="text-gray-300 text-sm font-medium ml-2">Display Name</Text>
-              {vipInfo && (
-                <View 
-                  className="ml-3 px-3 py-1 rounded-full"
-                  style={{ backgroundColor: vipInfo.badge_color }}
-                >
-                  <Text className="text-black text-xs font-bold">
-                    {vipInfo.vip_name}
-                  </Text>
-                </View>
+    <View style={styles.container}>
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        
+        {/* Hero Card */}
+        <View style={styles.heroCard}>
+          <View style={styles.heroContent}>
+            {/* Avatar Section */}
+            <View style={styles.avatarSection}>
+              <View style={styles.avatarContainer}>
+                {avatarUrl ? (
+                  <Image 
+                    source={{ uri: avatarUrl }}
+                    style={styles.avatar}
+                    contentFit="cover"
+                  />
+                ) : (
+                  <View style={styles.avatarPlaceholder}>
+                    <User size={32} color="#6B7280" />
+                  </View>
+                )}
+              </View>
+              
+              {/* Upload Button */}
+              <Pressable
+                onPress={handleAvatarUpload}
+                disabled={uploading}
+                style={styles.uploadButton}
+                accessibilityLabel="Change avatar"
+              >
+                {uploading ? (
+                  <ActivityIndicator size="small" color="white" />
+                ) : (
+                  <Camera size={16} color="white" />
+                )}
+              </Pressable>
+            </View>
+            
+            {/* Display Name */}
+            <View style={styles.nameSection}>
+              <TextInput
+                value={displayName}
+                onChangeText={handleDisplayNameChange}
+                placeholder="Enter display name"
+                placeholderTextColor="#6B7280"
+                style={[
+                  styles.nameInput,
+                  nameError ? styles.inputError : styles.inputNormal
+                ]}
+                maxLength={40}
+                accessibilityLabel="Display name input"
+              />
+              {nameError && (
+                <Text style={styles.errorText}>{nameError}</Text>
               )}
             </View>
             
-            {editing ? (
-              <TextInput
-                value={displayName}
-                onChangeText={setDisplayName}
-                className="bg-gray-800 text-white px-4 py-3 rounded-xl border border-gray-700"
-                placeholder="Enter display name"
-                placeholderTextColor="#6B7280"
-                maxLength={50}
-              />
-            ) : (
-              <Text className="text-white text-lg font-semibold px-4 py-3">
-                {profile.display_name || 'No display name'}
-              </Text>
-            )}
-          </View>
-
-          {/* Bio */}
-          <View className="mb-6">
-            <Text className="text-gray-300 text-sm font-medium mb-2">Bio</Text>
-            
-            {editing ? (
-              <TextInput
-                value={bio}
-                onChangeText={setBio}
-                className="bg-gray-800 text-white px-4 py-3 rounded-xl border border-gray-700"
-                placeholder="Tell us about yourself..."
-                placeholderTextColor="#6B7280"
-                multiline
-                numberOfLines={4}
-                textAlignVertical="top"
-                maxLength={500}
-              />
-            ) : (
-              <Text className="text-gray-300 px-4 py-3">
-                {profile.bio || 'No bio added yet'}
-              </Text>
-            )}
-          </View>
-
-          {/* Agency Memberships */}
-          {agencyMemberships.length > 0 && (
-            <View className="mb-6">
-              <View className="flex-row items-center mb-3">
-                <Building2 size={20} color="#6C5CE7" />
-                <Text className="text-gray-300 text-sm font-medium ml-2">Agency Memberships</Text>
+            {/* VIP Badge */}
+            {vipLevel && (
+              <View 
+                style={[styles.vipBadge, { backgroundColor: vipLevel.color }]}
+              >
+                <View style={styles.vipContent}>
+                  <Crown size={14} color="white" />
+                  <Text style={styles.vipText}>
+                    {vipLevel.name}
+                  </Text>
+                </View>
               </View>
-              
-              <View className="flex-row flex-wrap gap-2">
-                {agencyMemberships.map((membership) => (
-                  <View
-                    key={membership.agency_id}
-                    className="bg-gray-800 px-3 py-2 rounded-full border border-gray-700"
-                  >
-                    <Text className="text-white text-sm font-medium">
+            )}
+            
+            {/* Email */}
+            <Text style={styles.emailText}>{user.email}</Text>
+          </View>
+        </View>
+        
+        {/* Bio Section */}
+        <View style={styles.bioCard}>
+          <Text style={styles.sectionTitle}>Bio</Text>
+          <TextInput
+            value={bio}
+            onChangeText={handleBioChange}
+            placeholder="Tell us about yourself..."
+            placeholderTextColor="#6B7280"
+            style={[
+              styles.bioInput,
+              bioError ? styles.inputError : styles.inputNormal
+            ]}
+            multiline
+            textAlignVertical="top"
+            maxLength={200}
+            accessibilityLabel="Bio input"
+          />
+          <View style={styles.bioFooter}>
+            {bioError && (
+              <Text style={styles.errorText}>{bioError}</Text>
+            )}
+            <Text style={styles.charCount}>
+              {bio.length}/200
+            </Text>
+          </View>
+        </View>
+        
+        {/* Agency Memberships */}
+        {memberships.length > 0 && (
+          <View style={styles.membershipsCard}>
+            <Text style={styles.sectionTitle}>Agency Memberships</Text>
+            <View style={styles.membershipsList}>
+              {memberships.map((membership, index) => (
+                <View 
+                  key={`membership-${index}`}
+                  style={styles.membershipChip}
+                >
+                  <View style={styles.membershipContent}>
+                    <Building size={12} color="#9CA3AF" />
+                    <Text style={styles.agencyName}>
                       {membership.agency_name}
                     </Text>
-                    <Text className="text-gray-400 text-xs capitalize">
+                    <Text style={styles.agencyRole}>
                       {membership.role}
                     </Text>
                   </View>
-                ))}
-              </View>
+                </View>
+              ))}
             </View>
-          )}
-
-          {/* VIP Status */}
-          {vipInfo && (
-            <View className="mb-6">
-              <View className="flex-row items-center mb-3">
-                <Crown size={20} color="#FFD700" />
-                <Text className="text-gray-300 text-sm font-medium ml-2">VIP Status</Text>
-              </View>
-              
-              <View 
-                className="px-4 py-3 rounded-xl"
-                style={{ backgroundColor: vipInfo.badge_color }}
-              >
-                <Text className="text-black text-lg font-bold text-center">
-                  {vipInfo.vip_name}
-                </Text>
-                <Text className="text-black text-sm text-center opacity-80">
-                  Priority Level {vipInfo.priority}
-                </Text>
-              </View>
-            </View>
-          )}
-        </View>
-
-        {/* Action Buttons */}
-        <View className="px-4 py-6">
-          {editing ? (
-            <View className="flex-row gap-3">
-              <Pressable
-                onPress={toggleEditing}
-                className="flex-1 bg-gray-700 px-6 py-3 rounded-xl"
-                disabled={saving}
-              >
-                <Text className="text-white font-semibold text-center">Cancel</Text>
-              </Pressable>
-              
-              <Pressable
-                onPress={handleSave}
-                className="flex-1 bg-blue-600 px-6 py-3 rounded-xl flex-row items-center justify-center"
-                disabled={saving}
-              >
-                {saving ? (
-                  <ActivityIndicator size="small" color="white" />
-                ) : (
-                  <Save size={20} color="white" />
-                )}
-                <Text className="text-white font-semibold ml-2">
-                  {saving ? 'Saving...' : 'Save'}
-                </Text>
-              </Pressable>
-            </View>
+          </View>
+        )}
+        
+        {/* Save Button */}
+        <Pressable
+          onPress={handleSave}
+          disabled={!canSave}
+          style={[
+            styles.saveButton,
+            canSave ? styles.saveButtonActive : styles.saveButtonDisabled
+          ]}
+          accessibilityLabel="Save profile changes"
+        >
+          {saving ? (
+            <ActivityIndicator size="small" color="white" />
           ) : (
-            <Pressable
-              onPress={toggleEditing}
-              className="bg-blue-600 px-6 py-3 rounded-xl flex-row items-center justify-center"
-            >
-              <User size={20} color="white" />
-              <Text className="text-white font-semibold ml-2">Edit Profile</Text>
-            </Pressable>
+            <Save size={20} color="white" />
           )}
-        </View>
+          <Text style={styles.saveButtonText}>
+            {saving ? 'Saving...' : 'Save Changes'}
+          </Text>
+        </Pressable>
+        
+        {/* Status Messages */}
+        {!isDirty && (
+          <Text style={styles.statusText}>
+            All changes saved
+          </Text>
+        )}
+        
+        {isDirty && (
+          <Text style={styles.dirtyText}>
+            You have unsaved changes
+          </Text>
+        )}
       </ScrollView>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#000000', // bg-black
+  },
+  scrollView: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 24,
+  },
+  heroCard: {
+    backgroundColor: '#171717', // bg-neutral-900
+    borderRadius: 16, // rounded-2xl
+    padding: 24, // p-6
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 8,
+    marginBottom: 24, // mb-6
+  },
+  heroContent: {
+    alignItems: 'center',
+  },
+  avatarSection: {
+    position: 'relative',
+    marginBottom: 16, // mb-4
+  },
+  avatarContainer: {
+    width: 96, // w-24
+    height: 96, // h-24
+    borderRadius: 48, // rounded-full
+    overflow: 'hidden',
+    backgroundColor: '#262626', // bg-neutral-800
+  },
+  avatar: {
+    width: '100%',
+    height: '100%',
+  },
+  avatarPlaceholder: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#404040', // bg-neutral-700
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  uploadButton: {
+    position: 'absolute',
+    bottom: -8, // -bottom-2
+    right: -8, // -right-2
+    backgroundColor: '#2563EB', // bg-blue-600
+    width: 32, // w-8
+    height: 32, // h-8
+    borderRadius: 16, // rounded-full
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  nameSection: {
+    width: '100%',
+    marginBottom: 12, // mb-3
+  },
+  nameInput: {
+    textAlign: 'center',
+    fontSize: 20, // text-xl
+    fontWeight: '600', // font-semibold
+    color: 'white',
+    backgroundColor: '#262626', // bg-neutral-800
+    borderWidth: 1,
+    borderRadius: 8, // rounded-lg
+    paddingHorizontal: 12, // px-3
+    paddingVertical: 8, // py-2
+  },
+  inputNormal: {
+    borderColor: '#404040', // border-neutral-700
+  },
+  inputError: {
+    borderColor: '#EF4444', // border-red-500
+  },
+  errorText: {
+    color: '#F87171', // text-red-400
+    fontSize: 12, // text-xs
+    marginTop: 4, // mt-1
+    textAlign: 'center',
+  },
+  vipBadge: {
+    paddingHorizontal: 12, // px-3
+    paddingVertical: 4, // py-1
+    borderRadius: 16, // rounded-full
+    marginBottom: 12, // mb-3
+  },
+  vipContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  vipText: {
+    color: 'white',
+    fontWeight: '600', // font-semibold
+    fontSize: 14, // text-sm
+    marginLeft: 4, // ml-1
+  },
+  emailText: {
+    color: '#9CA3AF', // text-neutral-400
+    fontSize: 14, // text-sm
+  },
+  bioCard: {
+    backgroundColor: '#171717', // bg-neutral-900
+    borderRadius: 16, // rounded-2xl
+    padding: 16, // p-4
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 8,
+    marginBottom: 24, // mb-6
+  },
+  sectionTitle: {
+    color: 'white',
+    fontWeight: '600', // font-semibold
+    marginBottom: 12, // mb-3
+  },
+  bioInput: {
+    backgroundColor: '#262626', // bg-neutral-800
+    borderWidth: 1,
+    borderRadius: 8, // rounded-lg
+    paddingHorizontal: 12, // px-3
+    paddingVertical: 12, // py-3
+    color: 'white',
+    minHeight: 100, // min-h-[100]
+  },
+  bioFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8, // mt-2
+  },
+  charCount: {
+    color: '#9CA3AF', // text-neutral-400
+    fontSize: 12, // text-xs
+    marginLeft: 'auto', // ml-auto
+  },
+  membershipsCard: {
+    backgroundColor: '#171717', // bg-neutral-900
+    borderRadius: 16, // rounded-2xl
+    padding: 16, // p-4
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 8,
+    marginBottom: 24, // mb-6
+  },
+  membershipsList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  membershipChip: {
+    paddingHorizontal: 12, // px-3
+    paddingVertical: 8, // py-2
+    borderRadius: 16, // rounded-full
+    borderWidth: 1,
+    borderColor: '#525252', // border-neutral-600
+    backgroundColor: '#262626', // bg-neutral-800
+    marginRight: 8, // mr-2
+    marginBottom: 8, // mb-2
+  },
+  membershipContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  agencyName: {
+    color: '#D1D5DB', // text-neutral-300
+    fontSize: 14, // text-sm
+    marginLeft: 4, // ml-1
+    fontWeight: '500', // font-medium
+  },
+  agencyRole: {
+    color: '#6B7280', // text-neutral-500
+    fontSize: 12, // text-xs
+    marginLeft: 8, // ml-2
+    textTransform: 'capitalize',
+  },
+  saveButton: {
+    paddingVertical: 16, // py-4
+    paddingHorizontal: 24, // px-6
+    borderRadius: 8, // rounded-lg
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  saveButtonActive: {
+    backgroundColor: '#2563EB', // bg-blue-600
+  },
+  saveButtonDisabled: {
+    backgroundColor: '#404040', // bg-neutral-700
+  },
+  saveButtonText: {
+    color: 'white',
+    fontWeight: '600', // font-semibold
+    marginLeft: 8, // ml-2
+  },
+  statusText: {
+    color: '#6B7280', // text-neutral-500
+    textAlign: 'center',
+    marginTop: 16, // mt-4
+    fontSize: 14, // text-sm
+  },
+  dirtyText: {
+    color: '#60A5FA', // text-blue-400
+    textAlign: 'center',
+    marginTop: 16, // mt-4
+    fontSize: 14, // text-sm
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    color: '#9CA3AF', // text-neutral-400
+    marginTop: 16, // mt-4
+    fontSize: 14, // text-sm
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorMessage: {
+    color: '#9CA3AF', // text-neutral-400
+    textAlign: 'center',
+    fontSize: 14, // text-sm
+  },
+});
 
 
