@@ -37,3 +37,9 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
+
+# Android build outputs (added to prevent large-file pushes)
+android/app/build/
+android/app/release/
+*.apk
+*.aab
