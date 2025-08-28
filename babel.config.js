@@ -4,11 +4,11 @@ module.exports = function (api) {
     presets: ['babel-preset-expo'],
     plugins: [
       ['module-resolver', {
-        root: ['./'],
+        root: ['.'],
         alias: { '@': '.' },
         extensions: ['.ts', '.tsx', '.js', '.jsx', '.json']
       }],
-      'nativewind/babel'
-    ]
+      'react-native-reanimated/plugin' // must be last
+    ],
   };
 };

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/supabase";
 
 async function getMyId() {
   const { data } = await supabase.auth.getUser();

@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/supabase';
 
 export type Agency = { id: string; name: string; owner_id: string; icon_url?: string | null; created_at?: string };
 export type AgencyRole = 'owner' | 'manager' | 'host' | 'member';

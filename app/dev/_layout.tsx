@@ -1,44 +1,12 @@
 import React from 'react';
-import { Stack } from 'expo-router';
+import { View, Text } from 'react-native';
 
-export default function DevLayout() {
+export default function Layout() {
   return (
-    <Stack 
-      screenOptions={{ 
-        headerTitleAlign: 'center',
-        headerStyle: { backgroundColor: '#1f2937' },
-        headerTitleStyle: { color: 'white', fontWeight: '800' },
-        headerTintColor: 'white',
-      }}
-    >
-      <Stack.Screen 
-        name="qa-featured" 
-        options={{ 
-          title: 'QA: Featured Rooms',
-          headerShown: true 
-        }} 
-      />
-      <Stack.Screen 
-        name="qa-agency-rls" 
-        options={{ 
-          title: 'QA: Agency RLS',
-          headerShown: true 
-        }} 
-      />
-      <Stack.Screen 
-        name="feature-audit" 
-        options={{ 
-          title: 'QA: Feature Audit',
-          headerShown: true 
-        }} 
-      />
-      <Stack.Screen 
-        name="qa-invites" 
-        options={{ 
-          title: 'QA: Invites',
-          headerShown: true 
-        }} 
-      />
-    </Stack>
+    <View>
+      <Text>Layout: app/dev/_layout.tsx</Text>
+      <Text>Restored layout - inspect and replace with original content</Text>
+    </View>
   );
 }
+

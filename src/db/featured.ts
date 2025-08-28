@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/supabase';
 
 export async function listFeatured(limit: number = 10) {
   const { data, error } = await supabase

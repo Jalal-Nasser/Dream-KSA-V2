@@ -1,0 +1,221 @@
+import { useEffect, useRef, useState } from "react";
+import { Alert } from "react-native";
+import { HMS_ROLES } from "../src/env";
+
+/**
+ * useHmsLevels
+ * - returns a reactive map of audio levels by peer id and a small pub/sub API
+ * - if @100mslive/react-native-hms is installed and exposes event hooks, we try to listen to them
+ * - otherwise, the hook provides publishLevel(...) so your other code (or dev tools) can push levels
+ *
+ * Usage:
+ * const { levels, publishLevel, subscribe } = useHmsLevels();
+ * publishLevel(peerId, 0.8);
+ */
+type Levels = Record<string, number>;
+type Subscriber = (levels: Levels) => void;
+
+let HMSSDK: any = null;
+try {
+  // try best-effort require; if not present we keep going with shim behavior
+  // @ts-ignore
+  HMSSDK = require("@100mslive/react-native-hms");
+} catch (e) {
+  HMSSDK = null;
+}
+
+export default function useHmsLevels() {
+  const [levels, setLevels] = useState<Levels>({});
+  const subsRef = useRef<Map<number, Subscriber>>(new Map());
+  const subId = useRef(0);
+  const mountedRef = useRef(true);
+
+  // helper to notify subscribers
+  function notify(newLevels: Levels) {
+    for (const cb of subsRef.current.values()) {
+      try {
+        cb(newLevels);
+      } catch (e) {
+        // swallow subscriber errors
+        // eslint-disable-next-line no-console
+        console.warn("[useHmsLevels] subscriber error", e);
+      }
+    }
+  }
+
+  // publishLevel: update local state + notify
+  function publishLevel(peerId: string, raw: number) {
+    // normalize to 0..1
+    const level = Math.max(0, Math.min(1, Number(raw) || 0));
+    setLevels((prev) => {
+      const next = { ...prev, [peerId]: level };
+      notify(next);
+      return next;
+    });
+  }
+
+  // subscribe/unsubscribe for external listeners
+  function subscribe(cb: Subscriber) {
+    const id = ++subId.current;
+    subsRef.current.set(id, cb);
+    // call immediately with current state
+    try {
+      cb(levels);
+    } catch {}
+    return id;
+  }
+  function unsubscribe(id: number) {
+    subsRef.current.delete(id);
+  }
+
+  // reset levels
+  function reset() {
+    setLevels({});
+    notify({});
+  }
+
+  // Attempt to auto-hook 100ms SDK audio-level events (best-effort, many SDKs differ)
+  useEffect(() => {
+    mountedRef.current = true;
+    let sdkInstance: any = null;
+    let detachFns: (() => void)[] = [];
+
+    async function setup() {
+      if (!HMSSDK) {
+        // no native SDK installed — nothing to wire
+        return;
+      }
+
+      try {
+        // try a few different ways to access an instance / emitter depending on package shape
+        // 1) HMSSDK.HMSSDK or HMSSDK.HMS or HMSSDK.default
+        // @ts-ignore
+        sdkInstance = HMSSDK.HMSSDK?.getInstance ? HMSSDK.HMSSDK.getInstance() : HMSSDK.HMSSDK || HMSSDK.default || HMSSDK;
+
+        // if we have a ready instance with event subscribe, try common event names:
+        // NOTE: exact event names may differ per SDK version; we attempt several common ones
+        const trySubscribe = (obj: any, eventName: string, handler: (ev: any) => void) => {
+          if (!obj) return false;
+          if (typeof obj.on === "function") {
+            try {
+              obj.on(eventName, handler);
+              detachFns.push(() => {
+                try {
+                  obj.off && obj.off(eventName, handler);
+                } catch {}
+              });
+              return true;
+            } catch (e) {}
+          }
+          // some SDKs expose addListener/removeListener
+          if (typeof obj.addListener === "function") {
+            try {
+              const sub = obj.addListener(eventName, handler);
+              detachFns.push(() => {
+                try {
+                  sub.remove && sub.remove();
+                } catch {}
+              });
+              return true;
+            } catch (e) {}
+          }
+          return false;
+        };
+
+        // handler normalizes events into publishLevel(peerId, level)
+        const handler = (ev: any) => {
+          try {
+            // attempt to extract peer id + level from common payload shapes
+            // possible shapes: { peerId, level } or { peer_id, level } or { clientId, audioLevel } or array of {peerId, level}
+            if (!ev) return;
+            if (Array.isArray(ev)) {
+              for (const item of ev) {
+                const pid = item.peerId || item.peer_id || item.clientId || item.id;
+                const lvl = item.level ?? item.audioLevel ?? item.volume;
+                if (pid) publishLevel(String(pid), Number(lvl || 0));
+              }
+              return;
+            }
+            const pid = ev.peerId || ev.peer_id || ev.clientId || ev.id;
+            const lvl = ev.level ?? ev.audioLevel ?? ev.volume ?? ev.value;
+            if (pid) {
+              publishLevel(String(pid), Number(lvl || 0));
+            }
+          } catch (e) {
+            // ignore parsing errors
+          }
+        };
+
+        // try common event names used across real-time SDKs
+        const eventNames = [
+          "peer-audio-level", // hypothetical
+          "peer_audio_level_changed",
+          "audio_level",
+          "audioLevel",
+          "peer_audio_level",
+          "peerVolumeChanged",
+          "audio_level_changed",
+          "volume_level",
+          "onPeerAudioLevelChanged",
+        ];
+
+        let bound = false;
+        for (const name of eventNames) {
+          if (trySubscribe(sdkInstance, name, handler)) {
+            bound = true;
+            // eslint-disable-next-line no-console
+            console.log("[useHmsLevels] subscribed to sdk event:", name);
+            // we keep trying to bind others too (some SDKs emit multiple shapes)
+          }
+        }
+
+        // If sdkInstance exposes getPeers or getPeerManager we could poll as a fallback
+        if (!bound && typeof sdkInstance.getPeers === "function") {
+          // lightweight polling fallback (1000ms)
+          const poll = setInterval(async () => {
+            try {
+              const peers = await sdkInstance.getPeers();
+              if (!peers) return;
+              // peers may be an array with audioLevel property
+              for (const p of peers) {
+                const pid = p.id || p.peerId || p.clientId;
+                const lvl = p.level ?? p.audioLevel ?? p.volume ?? 0;
+                if (pid) publishLevel(String(pid), Number(lvl || 0));
+              }
+            } catch (e) {}
+          }, 1000);
+          detachFns.push(() => clearInterval(poll));
+        }
+      } catch (err: any) {
+        // initialization failed — keep shim behavior
+        // eslint-disable-next-line no-console
+        console.warn("[useHmsLevels] sdk hook failed:", err?.message || err);
+      }
+    }
+
+    setup();
+
+    return () => {
+      mountedRef.current = false;
+      // detach all listeners
+      for (const fn of detachFns) {
+        try {
+          fn();
+        } catch {}
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // return stable API
+  return {
+    levels,
+    publishLevel, // call to inject/update a peer's level
+    subscribe, // cb => id
+    unsubscribe, // id => void
+    reset,
+  };
+}
+
+// Also expose a named export for compatibility with `import { useHmsLevels } from '@/voice/useHmsLevels'`
+export { useHmsLevels };

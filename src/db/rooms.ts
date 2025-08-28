@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/supabase';
 
 export type Room = { id: string; name: string; owner_id: string; agency_id?: string | null; mic_policy?: 'queue' | 'free' | null; topic?: string | null; featured?: boolean | null; created_at?: string };
 

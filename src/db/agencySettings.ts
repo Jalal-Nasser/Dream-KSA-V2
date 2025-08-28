@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/supabase";
 
 export async function getAgencyById(id: string) {
   const { data, error } = await supabase.from("agencies").select("id,name,icon_url,theme_color,featured_banner").eq("id", id).maybeSingle();

@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/supabase";
 
 export async function listRoster(agencyId: string) {
   const { data, error } = await supabase

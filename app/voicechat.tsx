@@ -3,8 +3,8 @@ import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { Alert, View, Text, FlatList, ScrollView, Pressable, Image, ImageBackground, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ENV, HMS_ROLES, logEnvOnce } from '@/env';
-import { supabase } from '@/lib/supabase';
+import { ENV, HMS_ROLES, logEnvOnce } from '@/src/env';
+import { supabase } from '@/supabase';
 import { RaiseHandButton } from '@/src/components/RaiseHandButton';
 import { AdminMicPanel } from '@/src/components/AdminMicPanel';
 import SpeakerTile from '@/src/components/SpeakerTile';
@@ -670,5 +670,6 @@ const styles = StyleSheet.create({
     width: '40%',
   },
 });
+
 
 

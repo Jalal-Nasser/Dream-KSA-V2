@@ -1,35 +1,12 @@
-import { Stack } from 'expo-router';
+import React from 'react';
+import { View, Text } from 'react-native';
 
-export default function ProfileLayout() {
+export default function Layout() {
   return (
-    <Stack 
-      screenOptions={{ 
-        headerShown: false,
-        headerStyle: {
-          backgroundColor: '#1F2937',
-        },
-        headerTintColor: '#fff',
-        headerTitleStyle: {
-          fontWeight: 'bold',
-        },
-      }}
-    >
-      <Stack.Screen 
-        name="index" 
-        options={{ 
-          title: 'الملف الشخصي',
-          headerShown: true 
-        }} 
-      />
-      <Stack.Screen 
-        name="settings" 
-        options={{ 
-          title: 'الإعدادات',
-          headerShown: true,
-          headerBackTitle: 'رجوع'
-        }} 
-      />
-    </Stack>
+    <View>
+      <Text>Layout: app/(tabs)/profile/_layout.tsx</Text>
+      <Text>Restored layout - inspect and replace with original content</Text>
+    </View>
   );
 }
 

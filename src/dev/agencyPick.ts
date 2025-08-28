@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/supabase";
 
 export async function pickAnyAgencyId(): Promise<string | null> {
   // Prefer one I own

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { View, TextInput, Button, Alert, StyleSheet, Text, Pressable } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient';
-import { supabase } from './lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { getRedirectUri } from '@/auth/redirect';
 
 export default function AuthScreen({ onLogin }) {

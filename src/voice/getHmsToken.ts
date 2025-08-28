@@ -1,5 +1,5 @@
 // Calls the Supabase Edge Function 'hms-token' and returns a 100ms room token
-import { ENV } from '@/env';
+import { ENV } from '@/src/env';
 
 type TokenResp = { token: string };
 

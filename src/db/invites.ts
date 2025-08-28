@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/supabase";
 
 function randomCode(len = 10) {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";

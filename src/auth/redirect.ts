@@ -1,7 +1,7 @@
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
 import { useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/supabase';
 import { router } from 'expo-router';
 
 WebBrowser.maybeCompleteAuthSession();

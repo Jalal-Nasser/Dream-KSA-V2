@@ -1,63 +1,51 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, View, Text, TextInput, Pressable, FlatList, Image, Alert, Switch } from 'react-native';
-import { listMyAgencies, getAgencyById, type AgencyLite } from '@/src/db/agencyPicker';
+import { Modal, View, Text, TextInput, Pressable, StyleSheet, Alert, Switch } from 'react-native';
+import { supabase } from '@/supabase';
 import { createRoom } from '@/src/db/rooms';
-import { useCanFeatureRoom } from '@/src/hooks/useCanFeatureRoom';
-import { supabase } from '@/lib/supabase';
 
 export function RoomCreateModal({
   visible,
   onClose,
   onCreated,
+  agencyId,
 }: {
   visible: boolean;
   onClose: () => void;
-  onCreated: (roomId: string) => void;
+  onCreated?: (roomId: string) => void;
+  agencyId: string | null; 
 }) {
-  const [agencies, setAgencies] = useState<AgencyLite[]>([]);
-  const [selected, setSelected] = useState<AgencyLite | null>(null);
   const [roomName, setRoomName] = useState('');
-  const [topic, setTopic] = useState('');
   const [startAsFeatured, setStartAsFeatured] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [myId, setMyId] = useState<string | null>(null);
+  const [errorText, setErrorText] = useState('');
 
+  // Reset state when modal becomes visible
   useEffect(() => {
-    if (!visible) return;
-    (async () => {
-      const rows = await listMyAgencies();
-      setAgencies(rows);
-      if (rows.length > 0 && !selected) setSelected(rows[0]);
-      
-      // Get current user ID for permission check
-      const { data: { user } } = await supabase.auth.getUser();
-      setMyId(user?.id || null);
-    })();
+    if (visible) {
+      setRoomName('');
+      setStartAsFeatured(false);
+      setErrorText('');
+      setBusy(false);
+    }
   }, [visible]);
 
-  async function selectAgency(id: string) {
-    const a = await getAgencyById(id);
-    setSelected(a);
-  }
-
   async function submit() {
-    if (!roomName.trim()) return Alert.alert('Room name required');
+    if (roomName.trim().length < 2 || roomName.trim().length > 50) {
+      setErrorText('Title must be between 2 and 50 characters.');
+      return;
+    }
+    setErrorText('');
     setBusy(true);
     try {
       const room = await createRoom({
         name: roomName.trim(),
-        topic: topic.trim() || undefined,
-        agency_id: selected?.id ?? null,
-        mic_policy: selected?.default_mic_policy ?? undefined,
+        agency_id: agencyId,
         featured: startAsFeatured,
       });
+      onCreated?.(room.id);
       onClose();
-      onCreated(room.id);
-      setRoomName('');
-      setTopic('');
-      setStartAsFeatured(false);
     } catch (e: any) {
-      Alert.alert('Create failed', e?.message || 'Unknown error');
+      setErrorText(e?.message || 'An unknown error occurred.');
     } finally {
       setBusy(false);
     }
@@ -65,86 +53,36 @@ export function RoomCreateModal({
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' }}>
-        <View style={{ backgroundColor: '#0B0F14', padding: 16, borderTopLeftRadius: 16, borderTopRightRadius: 16 }}>
-          <Text style={{ color: 'white', fontSize: 18, fontWeight: '800' }}>Create Room</Text>
+      <View style={styles.modalBackdrop}>
+        <View style={styles.modalContainer}>
+          <Text style={styles.title}>Create Room</Text>
 
-          <Text style={{ color: '#9BA7B4', marginTop: 10 }}>Agency</Text>
-          <FlatList
-            data={agencies}
-            horizontal
-            keyExtractor={(i) => i.id}
-            contentContainerStyle={{ gap: 10, paddingVertical: 8 }}
-            renderItem={({ item }) => {
-              const picked = selected?.id === item.id;
-              return (
-                <Pressable
-                  onPress={() => selectAgency(item.id)}
-                  style={{
-                    padding: 10,
-                    borderRadius: 12,
-                    borderWidth: 1,
-                    borderColor: picked ? item.theme_color || '#6C5CE7' : '#1f2937',
-                    backgroundColor: picked ? 'rgba(108,92,231,0.15)' : 'transparent',
-                    minWidth: 120,
-                    alignItems: 'center',
-                  }}
-                >
-                  {item.icon_url ? (
-                    <Image source={{ uri: item.icon_url }} style={{ width: 36, height: 36, borderRadius: 8, marginBottom: 6 }} />
-                  ) : (
-                    <View style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: '#1f2937', marginBottom: 6 }} />
-                  )}
-                  <Text style={{ color: 'white', fontWeight: '700' }} numberOfLines={1}>
-                    {item.name}
-                  </Text>
-                  <Text style={{ color: '#9BA7B4', fontSize: 12 }}>
-                    {item.default_mic_policy === 'free' ? 'Free mic' : 'Queue'}
-                  </Text>
-                </Pressable>
-              );
-            }}
-          />
-
-          <Text style={{ color: '#9BA7B4', marginTop: 8 }}>Room name</Text>
           <TextInput
             value={roomName}
             onChangeText={setRoomName}
-            placeholder="e.g., VIP Lounge"
+            placeholder="Room title"
             placeholderTextColor="#6b7280"
-            style={{ color: 'white', borderWidth: 1, borderColor: '#1f2937', borderRadius: 12, padding: 10, marginTop: 6 }}
+            style={styles.input}
           />
-          <Text style={{ color: '#9BA7B4', marginTop: 8 }}>Topic (optional)</Text>
-          <TextInput
-            value={topic}
-            onChangeText={setTopic}
-            placeholder="What’s happening?"
-            placeholderTextColor="#6b7280"
-            style={{ color: 'white', borderWidth: 1, borderColor: '#1f2937', borderRadius: 12, padding: 10, marginTop: 6 }}
-          />
+          
+          <View style={styles.switchContainer}>
+            <Text style={styles.label}>Start as Featured</Text>
+            <Switch
+              value={startAsFeatured}
+              onValueChange={setStartAsFeatured}
+              trackColor={{ false: '#1f2937', true: '#6C5CE7' }}
+              thumbColor={startAsFeatured ? 'white' : '#9CA3AF'}
+            />
+          </View>
 
-          {/* Featured toggle - only show if user can feature */}
-          {selected && myId && (() => {
-            const canFeatureNew = useCanFeatureRoom({ id: "new", owner_id: myId, agency_id: selected.id });
-            return canFeatureNew ? (
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
-                <Text style={{ color: '#9BA7B4' }}>Start as Featured</Text>
-                <Switch
-                  value={startAsFeatured}
-                  onValueChange={setStartAsFeatured}
-                  trackColor={{ false: '#1f2937', true: selected?.theme_color || '#6C5CE7' }}
-                  thumbColor={startAsFeatured ? 'white' : '#9CA3AF'}
-                />
-              </View>
-            ) : null;
-          })()}
+          {errorText ? <Text style={styles.errorText}>{errorText}</Text> : null}
 
-          <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>
-            <Pressable onPress={onClose} disabled={busy} style={{ flex: 1, padding: 12, borderRadius: 12, borderWidth: 1, borderColor: '#1f2937' }}>
-              <Text style={{ color: 'white', textAlign: 'center', fontWeight: '700' }}>Cancel</Text>
+          <View style={styles.buttonRow}>
+            <Pressable onPress={onClose} disabled={busy} style={[styles.button, styles.cancelButton]}>
+              <Text style={styles.buttonText}>Cancel</Text>
             </Pressable>
-            <Pressable onPress={submit} disabled={busy} style={{ flex: 1, padding: 12, borderRadius: 12, backgroundColor: selected?.theme_color || '#6C5CE7' }}>
-              <Text style={{ color: 'white', textAlign: 'center', fontWeight: '700' }}>{busy ? 'Creating…' : 'Create'}</Text>
+            <Pressable onPress={submit} disabled={busy} style={[styles.button, styles.createButton]}>
+              <Text style={styles.buttonText}>{busy ? 'Creating…' : 'Create Room'}</Text>
             </Pressable>
           </View>
         </View>
@@ -152,6 +90,82 @@ export function RoomCreateModal({
     </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  modalContainer: {
+    backgroundColor: '#0B1220',
+    padding: 20,
+    borderRadius: 16,
+    width: '100%',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  title: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: '800',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  input: {
+    color: 'white',
+    borderWidth: 1,
+    borderColor: '#1f2937',
+    borderRadius: 12,
+    padding: 12,
+    marginTop: 6,
+    backgroundColor: '#1f2937',
+  },
+  switchContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  label: {
+    color: '#9BA7B4',
+    fontSize: 16,
+  },
+  errorText: {
+    color: '#ef4444',
+    textAlign: 'center',
+    marginTop: 12,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 20,
+  },
+  button: {
+    flex: 1,
+    padding: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  cancelButton: {
+    backgroundColor: '#334155',
+  },
+  createButton: {
+    backgroundColor: '#6C5CE7',
+  },
+  buttonText: {
+    color: 'white',
+    fontWeight: '700',
+    fontSize: 16,
+  }
+});
+
+export default RoomCreateModal;
 
 
 

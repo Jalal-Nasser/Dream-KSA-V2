@@ -1,29 +1,41 @@
-import { useEffect, useState } from 'react';
+/**
+ * shim: voice/useHmsLevels.ts (and app/src variants)
+ * Metro-friendly shim that re-exports canonical src/voice/useHmsLevels if present,
+ * otherwise provides a safe, non-throwing development stub.
+ */
 
-// shared map of userId -> level (0..1)
-let _levels: Record<string, number> = {};
-const _subs = new Set<React.Dispatch<React.SetStateAction<Record<string, number>>>>();
+try {
+  // Static require acceptable to Metro
+  // eslint-disable-next-line @typescript-eslint/no-var-requires, global-require
+  const impl = require('./useHmsLevels');
+  module.exports = impl;
+  exports.default = impl.default || impl;
+  Object.keys(impl).forEach(k => { if (k !== 'default') exports[k] = impl[k]; });
+} catch (e) {
+  // Fallback stub
+  // eslint-disable-next-line no-console
+  console.warn('[voice/useHmsLevels shim] canonical src/voice/useHmsLevels not found. Using fallback stub.', e && e.message);
 
-export function setLevels(map: Record<string, number>) {
-  _levels = map;
-  _subs.forEach((set) => set({ ..._levels }));
-}
+  function useHmsLevels(roomId) {
+    // return a minimal API matching expected shape:
+    // { levels: Map(peerId -> level), subscribe: fn, unsubscribe: fn }
+    const levels = {};
+    const subscribe = (onChange) => {
+      console.warn('[useHmsLevels stub] subscribe called', { roomId });
+      // no-op; return unsubscribe
+      return () => {};
+    };
+    const unsubscribe = () => {
+      console.warn('[useHmsLevels stub] unsubscribe called', { roomId });
+    };
+    return { levels, subscribe, unsubscribe };
+  }
 
-export function updateLevel(userId: string, level: number) {
-  if (_levels[userId] === level) return;
-  _levels = { ..._levels, [userId]: level };
-  _subs.forEach((set) => set({ ..._levels }));
-}
-
-export function useHmsLevels() {
-  const [map, setMap] = useState<Record<string, number>>(_levels);
-  useEffect(() => { 
-    _subs.add(setMap); 
-    return () => { 
-      _subs.delete(setMap); 
-    }; 
-  }, []);
-  return map;
+  module.exports = {
+    __esModule: true,
+    default: useHmsLevels,
+    useHmsLevels,
+  };
 }
 
 

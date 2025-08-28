@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/supabase";
 
 export async function tryUpdateThemeBanner(agencyId: string, themeColor: string, banner: string) {
   const { error } = await supabase

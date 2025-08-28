@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/supabase";
 
 export async function tryToggleFeaturedOnce(roomId: string, current: boolean) {
   // Optimistic: flip, then flip back. Return { ok: boolean, code?: string, message?: string }

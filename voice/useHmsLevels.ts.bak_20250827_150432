@@ -1,0 +1,25 @@
+/**
+ * shim: useHmsLevels
+ * Metro-friendly development stub so imports like '../voice/useHmsLevels' resolve.
+ * This provides a safe non-throwing hook until the canonical implementation is placed at src/voice/useHmsLevels.
+ * Back up any existing file before overwriting.
+ */
+
+ // eslint-disable-next-line no-console
+ console.warn('[shim] useHmsLevels shim loaded — replace with real src/voice/useHmsLevels for production.');
+
+ export function useHmsLevels(roomId) {
+   // Return a simple, predictable shape so existing UI code won't crash.
+   // Adjust shape later to match your real implementation.
+   return {
+     levels: [], // array of { peerId, level } or similar in real impl
+     localLevel: null,
+     isReady: false,
+     getLevelForPeer: (peerId) => null,
+     // Optional control methods (no-op)
+     subscribe: (cb) => { /* no-op */ return () => {}; },
+     unsubscribeAll: () => {},
+   };
+ }
+
+ export default useHmsLevels;

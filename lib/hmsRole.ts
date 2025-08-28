@@ -1,6 +1,6 @@
 import { getHmsToken } from './getHmsToken';
 import { HMSSDK } from '@100mslive/react-native-hms';
-import { HMS_ROLES } from '@/env';
+import { HMS_ROLES } from '@/src/env';
 
 let sdkRef: HMSSDK | null = null as any;
 

@@ -1,6 +1,6 @@
 import { HMSSDK, HMSConfig, HMSUpdateListenerActions } from '@100mslive/react-native-hms';
 import { getHmsToken } from './getHmsToken';
-import { ENV } from '@/env';
+import { ENV } from '@/src/env';
 
 type HMSRole = string;
 

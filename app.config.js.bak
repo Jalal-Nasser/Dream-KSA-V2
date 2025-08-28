@@ -1,0 +1,31 @@
+// app.config.js
+export default ({ config }) => ({
+  ...config,
+  name: 'Dream KSA - Group Voice Chat Rooms',
+  slug: 'dream-ksa',
+  scheme: 'dream-ksa',
+  plugins: ['expo-router'],
+  android: {
+    package: 'app.dreamksa',
+    permissions: [
+      'INTERNET',
+      'RECORD_AUDIO',
+      'BLUETOOTH',
+      'BLUETOOTH_CONNECT',
+      'MODIFY_AUDIO_SETTINGS'
+    ],
+    intentFilters: [
+      {
+        action: 'VIEW',
+        category: ['BROWSABLE', 'DEFAULT'],
+        data: [
+          { scheme: 'dream-ksa', host: 'auth', pathPrefix: '/callback' },
+          { scheme: 'dream-ksa', host: 'auth', pathPrefix: '/redirect' },
+        ],
+      },
+    ],
+  },
+  ios: {
+    bundleIdentifier: 'com.dreamksa.app',
+  },
+});

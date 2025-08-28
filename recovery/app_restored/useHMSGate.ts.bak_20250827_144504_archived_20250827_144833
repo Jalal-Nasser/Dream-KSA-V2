@@ -1,0 +1,162 @@
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Alert } from "react-native";
+import { ENV, HMS_ROLES } from "../src/env"; // app/src/env.ts should re-export app/env.ts values
+
+// Try to require the native 100ms SDK — if not present, we will shim (no crash)
+let HMSSDK: any = null;
+try {
+  // @ts-ignore
+  HMSSDK = require("@100mslive/react-native-hms").HMSSDK;
+} catch (e) {
+  HMSSDK = null;
+}
+
+/** Inline token fetcher so we don't depend on external path imports.
+ * Expects ENV.HMS_TOKEN_URL to accept POST { room_id, role, user_id } and return { token }.
+ */
+async function fetchHmsToken({ room_id, role, user_id }: { room_id: string; role: string; user_id?: string }) {
+  if (!ENV.HMS_TOKEN_URL) throw new Error("HMS_TOKEN_URL not set in ENV");
+  const res = await fetch(ENV.HMS_TOKEN_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ room_id, role, user_id }),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`HMS token fetch failed: ${res.status} ${text}`);
+  }
+  const json = await res.json();
+  return json.token;
+}
+
+type MicStatus = "none" | "requested" | "granted";
+type GateState = "idle" | "joining" | "joined" | "leaving" | "error";
+
+/**
+ * useHMSGate (self-contained)
+ * - hmsRoomId: room id used for token request
+ * - displayName: user's display name
+ * - userId: auth uid (optional but useful to server)
+ * - micStatus: 'granted' means speaker role; otherwise listener
+ */
+export default function useHMSGate(params: {
+  hmsRoomId: string;
+  displayName: string;
+  userId?: string;
+  micStatus: MicStatus;
+}) {
+  const { hmsRoomId, displayName, userId, micStatus } = params;
+  const [state, setState] = useState<GateState>("idle");
+  const [role, setRole] = useState<string>("");
+  const [lastError, setLastError] = useState<string | null>(null);
+
+  const desiredRole = useMemo(() => {
+    return micStatus === "granted" ? HMS_ROLES.speaker : HMS_ROLES.listener;
+  }, [micStatus]);
+
+  const hmsRef = useRef<any>(null);
+  const currentRoleRef = useRef<string>("");
+
+  // initialize HMSSDK instance if native SDK available
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      if (!HMSSDK) return;
+      try {
+        if (!hmsRef.current) {
+          hmsRef.current = await HMSSDK.build();
+        }
+      } catch (e: any) {
+        if (!mounted) return;
+        console.warn("[HMSGate] HMSSDK init failed", e?.message || e);
+        setLastError(e?.message || "HMSSDK init failed");
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  async function joinWithRole(nextRole: string) {
+    try {
+      setState("joining");
+      setLastError(null);
+
+      // Fetch a fresh token
+      const token = await fetchHmsToken({ room_id: hmsRoomId, role: nextRole, user_id: userId });
+
+      if (!HMSSDK || !hmsRef.current) {
+        // Shim: log and pretend succeeded so dev flow continues without native module.
+        console.log("[HMSGate] shim join:", { nextRole, tokenLength: String(token?.length) });
+        currentRoleRef.current = nextRole;
+        setRole(nextRole);
+        setState("joined");
+        return;
+      }
+
+      // Ensure clean leave before rejoin
+      try {
+        await hmsRef.current.leave();
+      } catch (e) {
+        // ignore if not joined
+      }
+
+      await hmsRef.current.join({
+        authToken: token,
+        userName: displayName || "Guest",
+        // audio only: mute for listeners, unmuted for speakers; always videoMuted
+        audioMuted: nextRole !== HMS_ROLES.speaker,
+        videoMuted: true,
+        metadata: JSON.stringify({ app: "dreams-ksa" }),
+      });
+
+      currentRoleRef.current = nextRole;
+      setRole(nextRole);
+      setState("joined");
+    } catch (e: any) {
+      console.warn("[HMSGate] join failed", e);
+      setLastError(e?.message || String(e));
+      setState("error");
+      Alert.alert("Voice join failed", e?.message || "Unknown error");
+    }
+  }
+
+  async function ensureRole() {
+    if (!desiredRole) return;
+    if (currentRoleRef.current === desiredRole && state === "joined") return;
+    await joinWithRole(desiredRole);
+  }
+
+  async function leave() {
+    setState("leaving");
+    try {
+      if (HMSSDK && hmsRef.current) {
+        await hmsRef.current.leave();
+      } else {
+        console.log("[HMSGate] shim leave()");
+      }
+    } catch (e) {
+      // ignore
+    } finally {
+      currentRoleRef.current = "";
+      setRole("");
+      setState("idle");
+    }
+  }
+
+  // react to role changes
+  useEffect(() => {
+    ensureRole();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [desiredRole, hmsRoomId, userId]);
+
+  return {
+    state, // "idle" | "joining" | "joined" | "leaving" | "error"
+    role, // current role string
+    lastError,
+    rejoin: ensureRole,
+    leave,
+    hms: hmsRef.current, // HMS instance for admin controls
+    peers: [], // Shim: empty array for now, will be populated when HMS is properly integrated
+  };
+}
