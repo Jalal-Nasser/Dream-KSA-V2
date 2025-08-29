@@ -2,18 +2,15 @@ import React from 'react';
 import { SafeAreaView, View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Platform } from 'react-native';
 
 /**
- * UI-only login screen.
- * IMPORTANT: This file intentionally does NOT import lib/supabase or other backends
- * to avoid creating clients at module-load time while env vars may be unset.
+ * UI-only login screen - uses assets/images/logo.png
  */
 
 export default function LoginScreen(): JSX.Element {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        {/* If you have an assets/logo.png file it will display; otherwise comment out the Image */}
-        {/** Replace path if your logo lives elsewhere */}
-        <Image source={require('../assets/logo.png')} style={styles.logo} resizeMode="contain" />
+        {/* Use the real logo path you provided */}
+        <Image source={require('../assets/images/logo.png')} style={styles.logo} resizeMode="contain" />
         <Text style={styles.title}>Dreams</Text>
         <Text style={styles.subtitle}>غرف الدردشة الصوتية</Text>
       </View>
@@ -46,7 +43,7 @@ export default function LoginScreen(): JSX.Element {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#071233', alignItems: 'center', justifyContent: 'space-between', padding: 20 },
   header: { alignItems: 'center', marginTop: Platform.OS === 'ios' ? 28 : 20 },
-  logo: { width: 92, height: 92, marginBottom: 10 },
+  logo: { width: 120, height: 120, marginBottom: 12, borderRadius: 12, backgroundColor: 'transparent' },
   title: { color: '#ffffff', fontSize: 30, fontWeight: '800' },
   subtitle: { color: '#9aa4bf', fontSize: 14, marginTop: 6 },
   card: { width: '100%', backgroundColor: '#061126', borderRadius: 16, padding: 16, marginTop: 24, elevation: 2 },
