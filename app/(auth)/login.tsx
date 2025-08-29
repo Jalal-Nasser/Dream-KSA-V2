@@ -10,7 +10,7 @@ export default function LoginScreen() {
       <View style={styles.header}>
         {/* Replace ../../assets/logo.png with your real logo file; if missing it will simply show nothing */}
         {/* If you don't have assets/logo.png, add one or replace require with a local URI */}
-        <Image source={require('../../assets/logo.png')} style={styles.logo} resizeMode="contain" />
+        <Image source={require('../../assets/images/logo.png')} style={styles.logo} resizeMode="contain" />
         <Text style={styles.title}>Dreams</Text>
         <Text style={styles.subtitle}>Group voice rooms — like Binmo</Text>
       </View>
