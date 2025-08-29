@@ -1,12 +1,11 @@
 import React from 'react';
-import { Stack, Redirect } from 'expo-router';
+import LoginScreen from './login';
 
 /**
- * Temporary root layout for debugging: redirect to /login so the login screen is visible.
- * Replace this with your original layout when ready.
+ * Temporary root layout: render the login UI directly to avoid router redirect loops
+ * and maximum-update-depth errors while we restore the UI.
  */
 export default function RootLayout() {
-  // Immediate redirect to the login route
-  return <Redirect href="/login" />;
+  return <LoginScreen />;
 }
 
