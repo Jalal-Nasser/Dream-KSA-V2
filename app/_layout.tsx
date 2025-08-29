@@ -1,12 +1,12 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { Stack, Redirect } from 'expo-router';
 
-export default function Layout() {
-  return (
-    <View>
-      <Text>Layout: app/_layout.tsx</Text>
-      <Text>Restored layout - inspect and replace with original content</Text>
-    </View>
-  );
+/**
+ * Temporary root layout for debugging: redirect to /login so the login screen is visible.
+ * Replace this with your original layout when ready.
+ */
+export default function RootLayout() {
+  // Immediate redirect to the login route
+  return <Redirect href="/login" />;
 }
 
