@@ -11,7 +11,7 @@ if (-not $anon) { Write-Host "Warning: SUPABASE_ANON not set in environment." }
 $body = @{ room_id = $RoomId; role = $Role; user_id = $UserId } | ConvertTo-Json
 
 try {
-  $resp = Invoke-RestMethod -Uri 'https://kgcpeoidouajwytndtqi.supabase.co/functions/v1/hms-token' `
+  $resp = Invoke-RestMethod -Uri 'https://api.dreamsksa.online/get-token' `
     -Method Post `
     -Headers @{ 'Content-Type' = 'application/json'; 'Authorization' = "Bearer $anon" } `
     -Body $body -ErrorAction Stop
@@ -21,7 +21,7 @@ try {
 }
 catch {
   $ex = $_.Exception
-  if ($ex.Response -ne $null) {
+  if ($null -ne $ex.Response) {
     $status = $ex.Response.StatusCode.value__ 2>$null
     $stream = $ex.Response.GetResponseStream()
     $reader = New-Object System.IO.StreamReader($stream)

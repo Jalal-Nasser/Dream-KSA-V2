@@ -9,7 +9,7 @@ export const ENV = {
   SUPABASE_URL: process.env.EXPO_PUBLIC_SUPABASE_URL ?? '',
   SUPABASE_ANON: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? '',
   FUNCTIONS_BASE: process.env.EXPO_PUBLIC_FUNCTIONS_BASE_URL ?? '',
-  HMS_TOKEN_URL: process.env.EXPO_PUBLIC_HMS_TOKEN_URL ?? '',
+  HMS_TOKEN_URL: process.env.EXPO_PUBLIC_HMS_TOKEN_URL ?? 'https://api.dreamsksa.online/get-token',
   HMS_LISTENER_ROLE: process.env.EXPO_PUBLIC_HMS_LISTENER_ROLE ?? 'listener',
   HMS_SPEAKER_ROLE: process.env.EXPO_PUBLIC_HMS_SPEAKER_ROLE ?? 'speaker',
   HMS_MODERATOR_ROLE: process.env.EXPO_PUBLIC_HMS_MODERATOR_ROLE ?? 'moderator',
@@ -41,5 +41,8 @@ export function logEnvOnce(key: string, payload?: any) {
     // ignore logging errors
   }
 }
+
+// Log the HMS token URL at startup for verification
+logEnvOnce('HMS_TOKEN_URL', { HMS_TOKEN_URL: ENV.HMS_TOKEN_URL });
 
 export default ENV;

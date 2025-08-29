@@ -24,8 +24,10 @@ import {
   Globe,
   Apple,
 } from 'lucide-react-native';
+import ENV from './env';
 
 console.log('[ENV] URL:', process.env.EXPO_PUBLIC_SUPABASE_URL);
+console.log('[ENV] Resolved HMS_TOKEN_URL ->', ENV.HMS_TOKEN_URL);
 
 type CustomInputProps = TextInputProps & {
   placeholder?: string;
@@ -81,6 +83,11 @@ const AnimatedView: React.FC<AnimatedViewProps> = ({ delay = 0, children }) => {
       ])
     ).start();
   }, [delay, floatAnim]);
+
+  // Log HMS token URL on startup
+  useEffect(() => {
+    console.log('[ENV:start] HMS token URL:', ENV.HMS_TOKEN_URL);
+  }, []);
 
   const translateY = floatAnim.interpolate({
     inputRange: [0, 1],
