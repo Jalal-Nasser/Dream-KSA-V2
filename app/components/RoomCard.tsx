@@ -1,5 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
 export default function RoomCard({
   title,
@@ -7,6 +9,7 @@ export default function RoomCard({
   agency,
   featured = false,
 }: { title: string; listeners?: number; agency?: string; featured?: boolean }) {
+  const router = useRouter();
   return (
     <View style={[styles.card, featured && styles.featured]}>
       <View style={styles.left}>
@@ -17,8 +20,18 @@ export default function RoomCard({
         <Text numberOfLines={1} style={styles.sub}>{agency || 'Dream KSA'}</Text>
       </View>
       <View style={styles.right}>
-        <Text style={styles.count}>{listeners}</Text>
-        <Text style={styles.countSub}>مستمع</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+          <Ionicons name="people" size={14} color="#fff" />
+          <Text style={styles.count}>{listeners}</Text>
+        </View>
+        <TouchableOpacity
+          style={styles.join}
+          activeOpacity={0.9}
+          onPress={() => router.push({ pathname: '/room/[id]', params: { id: String(Math.random()).slice(2,7), name: title } })}
+        >
+          <Ionicons name="radio" size={14} color="#fff" />
+          <Text style={styles.joinTxt}>ادخل</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -41,5 +54,6 @@ const styles = StyleSheet.create({
   sub: { color: 'rgba(255,255,255,0.7)', marginTop: 2, fontSize: 12 },
   right: { alignItems: 'center', paddingLeft: 8 },
   count: { color: '#fff', fontWeight: '800' },
-  countSub: { color: 'rgba(255,255,255,0.6)', fontSize: 11 },
+  join: { marginTop: 6, backgroundColor: '#e21b73', borderRadius: 12, paddingVertical: 6, paddingHorizontal: 10, flexDirection: 'row', alignItems: 'center', gap: 6 },
+  joinTxt: { color: '#fff', fontWeight: '800', fontSize: 12 },
 });
