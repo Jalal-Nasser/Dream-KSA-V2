@@ -11,8 +11,10 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
 export default function LoginScreen(): JSX.Element {
+  const router = useRouter();
   // Background animation: gentle Ken Burns (zoom + drift)
   const bgScale = useRef(new Animated.Value(1)).current;
   const bgTranslate = useRef(new Animated.Value(0)).current;
@@ -69,7 +71,11 @@ export default function LoginScreen(): JSX.Element {
 
         {/* actions */}
         <View style={styles.actions}>
-          <TouchableOpacity style={styles.googleBtn} activeOpacity={0.9}>
+          <TouchableOpacity
+            style={styles.googleBtn}
+            activeOpacity={0.9}
+            onPress={() => router.replace('/(tabs)')}
+          >
             {/* Revert to using the Google icon image */}
             <Image
               source={require('../assets/icons/google.png')}
@@ -81,7 +87,11 @@ export default function LoginScreen(): JSX.Element {
 
           {/* Facebook button (brand-style, below Google) */}
           <View style={{ height: 12 }} />
-          <TouchableOpacity style={styles.facebookBtn} activeOpacity={0.9}>
+          <TouchableOpacity
+            style={styles.facebookBtn}
+            activeOpacity={0.9}
+            onPress={() => router.replace('/(tabs)')}
+          >
             <Image
               source={require('../assets/icons/facebook.png')}
               resizeMode="contain"
