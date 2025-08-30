@@ -28,7 +28,9 @@ export default function Login() {
 
       {/* logo pushed upward (near top) */}
       <View style={styles.center}>
-        <Image source={LOGO} style={styles.logo} resizeMode="contain" />
+        <View style={styles.logoShadow}>
+          <Image source={LOGO} style={styles.logo} resizeMode="contain" />
+        </View>
         <Text style={styles.subtitle}>غرف الدردشة الصوتية</Text>
       </View>
 
@@ -86,6 +88,14 @@ const styles = StyleSheet.create({
 
   // pushed up by using a negative marginTop so logo sits higher on the screen
   center: { alignItems: 'center', marginTop: -92 },
+  logoShadow: {
+    borderRadius: 18,
+    shadowColor: '#000',
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 10,
+  },
   logo: { width: 140, height: 140, borderRadius: 18, backgroundColor: 'transparent' },
   subtitle: { color: 'rgba(255,255,255,0.95)', marginTop: 12, fontWeight: '600' },
 
