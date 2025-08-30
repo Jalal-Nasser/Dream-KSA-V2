@@ -13,7 +13,7 @@ export default function Login() {
   const router = useRouter();
   return (
     <ImageBackground source={BG_LOCAL} style={styles.bg} resizeMode="cover">
-    <LinearGradient
+      <LinearGradient
         colors={['rgba(234,88,206,0.30)', 'rgba(123,82,255,0.22)', 'rgba(20,150,255,0.18)']}
         start={[0, 0]}
         end={[1, 1]}
@@ -23,13 +23,13 @@ export default function Login() {
 
       <View style={styles.topRow}>
         <Text style={styles.topLink}>Can't login?</Text>
-        </View>
+      </View>
 
       {/* logo pushed upward (near top) */}
       <View style={styles.center}>
         <Image source={LOGO} style={styles.logo} resizeMode="contain" />
         <Text style={styles.subtitle}>غرف الدردشة الصوتية</Text>
-        </View>
+      </View>
 
       <View style={styles.cardWrap}>
         <View style={styles.card}>
@@ -45,12 +45,12 @@ export default function Login() {
             <View style={styles.iconLeft}><Ionicons name="logo-facebook" size={18} color="#fff" /></View>
             <Text style={styles.btnFBText}>متابعة بـ Facebook</Text>
           </TouchableOpacity>
-          </View>
+        </View>
 
         <TouchableOpacity activeOpacity={0.9} style={styles.fab} onPress={() => router.replace('/(tabs)')}>
           <Ionicons name="call" size={26} color="#00B050" />
         </TouchableOpacity>
-          </View>
+      </View>
 
       <Text style={styles.terms}>باستمرارك، أنت توافق على الشروط وسياسة الخصوصية</Text>
     </ImageBackground>
@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
 
   fab: {
     marginTop: 14,
-    width: 72, height: 72, borderRadius: 36,
+    width: 60, height: 60, borderRadius: 30,
     alignItems: 'center', justifyContent: 'center',
     backgroundColor: 'rgba(255,255,255,0.96)',
     shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 8, elevation: 6
