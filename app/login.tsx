@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, Image, ImageBackground, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, Image, ImageBackground, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -11,6 +11,7 @@ const GOOGLE_ICON = require('../assets/icons/google.png');
 
 export default function Login() {
   const router = useRouter();
+  const [phone, setPhone] = useState('');
   return (
     <ImageBackground source={BG_LOCAL} style={styles.bg} resizeMode="cover">
       <LinearGradient
@@ -45,11 +46,30 @@ export default function Login() {
             <View style={styles.iconLeft}><Ionicons name="logo-facebook" size={18} color="#fff" /></View>
             <Text style={styles.btnFBText}>متابعة بـ Facebook</Text>
           </TouchableOpacity>
-        </View>
 
-        <TouchableOpacity activeOpacity={0.9} style={styles.fab} onPress={() => router.replace('/(tabs)')}>
-          <Ionicons name="phone-portrait" size={32} color="#00B050" />
-        </TouchableOpacity>
+          {/* divider and mobile login box */}
+          <View style={styles.dividerRow}>
+            <View style={styles.divider} />
+            <Text style={styles.dividerText}>أو استخدام رقم الهاتف</Text>
+            <View style={styles.divider} />
+          </View>
+
+          <View style={styles.phoneRow}>
+            <View style={styles.flagBox}>
+              <Text style={{ fontSize: 18 }}>🇸🇦</Text>
+              <Text style={{ fontSize: 15, marginLeft: 6, color: '#111827', fontWeight: '700' }}>+966</Text>
+            </View>
+            <TextInput
+              style={styles.phoneInput}
+              placeholder="5xxxxxxxx"
+              placeholderTextColor="#9CA3AF"
+              keyboardType="phone-pad"
+              value={phone}
+              onChangeText={setPhone}
+              maxLength={9}
+            />
+          </View>
+        </View>
       </View>
 
       <Text style={styles.terms}>باستمرارك، أنت توافق على الشروط وسياسة الخصوصية</Text>
@@ -114,13 +134,24 @@ const styles = StyleSheet.create({
   btnFBText: { color: '#fff', fontWeight: '800', fontSize: 15 },
   iconLeft: { position: 'absolute', left: 12 },
 
-  fab: {
-    marginTop: 14,
-    width: 52, height: 52, borderRadius: 26,
-    alignItems: 'center', justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.96)',
-    shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 8, elevation: 6
+  dividerRow: { flexDirection: 'row', alignItems: 'center', width: '100%', marginTop: 10, marginBottom: 10 },
+  divider: { flex: 1, height: 1, backgroundColor: '#E6E6E9' },
+  dividerText: { color: '#6B7280', marginHorizontal: 8, fontSize: 12, fontWeight: '700' },
+
+  phoneRow: {
+    width: '100%',
+    backgroundColor: '#F3F4F6',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E6E6E9',
+    height: 48,
+    paddingHorizontal: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between'
   },
+  flagBox: { flexDirection: 'row', alignItems: 'center' },
+  phoneInput: { flex: 1, textAlign: 'right', direction: 'ltr', fontSize: 15, color: '#111827' },
 
   terms: { color: 'rgba(255,255,255,0.9)', textAlign: 'center', padding: 14, fontSize: 12 }
 });
