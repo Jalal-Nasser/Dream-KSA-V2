@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
   cardWrap: { alignItems: 'center', paddingHorizontal: 20 },
   card: {
     width: '94%',
-    backgroundColor: 'rgba(255,255,255,0.86)',
+    backgroundColor: 'rgba(255,255,255,0.80)',
     borderRadius: 16,
     paddingVertical: 18,
     paddingHorizontal: 14,
