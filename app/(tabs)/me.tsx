@@ -16,11 +16,14 @@ function Stat({ label, value }: { label: string; value: number | string }) {
 function ListRow({ title, icon, onPress }: { title: string; icon: React.ReactNode; onPress?: () => void }) {
   return (
     <TouchableOpacity activeOpacity={0.85} style={styles.row} onPress={onPress}>
+      {/* Right side (title + icon) in RTL */}
       <Text style={styles.rowTitle}>{title}</Text>
       <View style={styles.rowRight}>
-        <View style={styles.rowIcon}>
-          {icon}
-        </View>
+        <View style={styles.rowIcon}>{icon}</View>
+      </View>
+      {/* Left chevron */}
+      <View style={styles.rowLeft}>
+        <Ionicons name="chevron-back" size={18} color="#C7CDD5" />
       </View>
     </TouchableOpacity>
   );
@@ -31,6 +34,13 @@ export default function Me() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
       <ScrollView contentContainerStyle={{ paddingBottom: 28, paddingTop: 8 }}>
+        {/* Top edit icon */}
+        <View style={styles.pageTopRow}>
+          <TouchableOpacity onPress={() => router.push('/profile/edit')} activeOpacity={0.85}>
+            <Ionicons name="create-outline" size={24} color="#9CA3AF" />
+          </TouchableOpacity>
+        </View>
+
         {/* Top profile header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
@@ -46,17 +56,8 @@ export default function Me() {
             </View>
           </View>
           <View>
-            <View style={styles.avatarWrap}>
-              <View style={styles.avatar}>
-                <Text style={{ color: '#fff', fontWeight: '900', fontSize: 18 }}>J</Text>
-              </View>
-              <TouchableOpacity
-                onPress={() => router.push('/profile/edit')}
-                style={styles.editBtn}
-                activeOpacity={0.85}
-              >
-                <Ionicons name="pencil" size={14} color="#111" />
-              </TouchableOpacity>
+            <View style={styles.avatar}>
+              <Text style={{ color: '#fff', fontWeight: '900', fontSize: 18 }}>J</Text>
             </View>
           </View>
         </View>
@@ -84,10 +85,10 @@ export default function Me() {
 
         {/* Level / Badges tabs */}
         <View style={styles.ribbonRow}>
-          <View style={[styles.ribbon, { backgroundColor: '#FFEFEA' }]}>
+          <View style={[styles.ribbon, { backgroundColor: '#FDECCE' }]}>
             <Text style={styles.ribbonTxt}>مستوى</Text>
           </View>
-          <View style={[styles.ribbon, { backgroundColor: '#F7EAFE' }]}>
+          <View style={[styles.ribbon, { backgroundColor: '#FBE7EC' }]}>
             <Text style={styles.ribbonTxt}>الأوسمة</Text>
           </View>
         </View>
@@ -102,8 +103,11 @@ export default function Me() {
           <ListRow title="محفظة" icon={<Ionicons name="card" size={18} color="#F59E0B" />} />
           <ListRow title="متجر" icon={<Ionicons name="storefront" size={18} color="#22C55E" />} />
           <ListRow title="وكالة" icon={<Ionicons name="person" size={18} color="#06B6D4" />} />
-          <ListRow title="العلاقة" icon={<Ionicons name="heart" size={18} color="#EF4444" />} />
           <ListRow title="مهام" icon={<Ionicons name="calendar" size={18} color="#3B82F6" />} />
+
+          {/* rewards pill */}
+          <View style={styles.rewardsPill}><Text style={styles.rewardsText}>مكافآت 🎁</Text></View>
+
           <ListRow title="دعوة مستخدم جديد" icon={<Ionicons name="person-add" size={18} color="#10B981" />} />
 
           {/* floating badge (أول شحنة) */}
@@ -125,15 +129,14 @@ export default function Me() {
 }
 
 const styles = StyleSheet.create({
+  pageTopRow: { paddingHorizontal: 16, paddingBottom: 4, alignItems: 'flex-start' },
   header: { flexDirection: 'row-reverse', alignItems: 'center', paddingHorizontal: 16, paddingTop: 4, paddingBottom: 6 },
   headerLeft: { flex: 1, alignItems: 'flex-end' },
-  avatarWrap: { position: 'relative' },
   avatar: { width: 72, height: 72, borderRadius: 36, backgroundColor: '#00C853', alignItems: 'center', justifyContent: 'center' },
-  editBtn: { position: 'absolute', left: -6, bottom: 0, width: 24, height: 24, borderRadius: 12, backgroundColor: '#F2F6FA', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border },
   nameRow: { color: colors.text, fontSize: 18, fontWeight: '900' },
   name: { color: colors.text, fontSize: 18, fontWeight: '900' },
   idRow: { flexDirection: 'row-reverse', alignItems: 'center', marginTop: 4 },
-  idText: { color: '#6B7280', fontWeight: '700' },
+  idText: { color: '#9CA3AF', fontWeight: '700' },
 
   statsRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, marginHorizontal: 16 },
   statItem: { alignItems: 'center' },
@@ -175,6 +178,10 @@ const styles = StyleSheet.create({
   rowRight: { flexDirection: 'row', alignItems: 'center' },
   rowIcon: { width: 28, height: 28, borderRadius: 6, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F2F6FA' },
   rowTitle: { color: colors.text, fontWeight: '800', fontSize: 15 },
+  rowLeft: { width: 20, alignItems: 'center' },
+
+  rewardsPill: { alignSelf: 'flex-start', marginHorizontal: 12, marginVertical: 6, backgroundColor: '#FFEDD5', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 14 },
+  rewardsText: { color: '#C2410C', fontWeight: '900' },
 
   firstChargeBadge: { position: 'absolute', left: 10, bottom: -10, backgroundColor: '#E7F7EF', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 16, borderWidth: 1, borderColor: '#B8E7C2' },
   firstChargeTxt: { color: '#00A651', fontWeight: '900' },
