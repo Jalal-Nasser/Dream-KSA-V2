@@ -2,10 +2,11 @@ import React from 'react';
 import { Tabs } from 'expo-router';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 
+// Use file-based routes inside app/(tabs) and only set shared screenOptions here.
 export default function TabLayout() {
   return (
     <Tabs
-      screenOptions={{
+      screenOptions={({ route }) => ({
         headerShown: false,
         tabBarStyle: {
           backgroundColor: '#0b1020',
@@ -15,37 +16,16 @@ export default function TabLayout() {
         tabBarActiveTintColor: '#fff',
         tabBarInactiveTintColor: 'rgba(255,255,255,0.6)',
         tabBarLabelStyle: { fontSize: 12, marginBottom: 6 },
-      }}
-    >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'استكشاف',
-          tabBarIcon: ({ color, size }) => <Ionicons name="planet" color={color} size={size} />,
-        }}
-      />
-      <Tabs.Screen
-        name="live"
-        options={{
-          title: 'غرف مباشرة',
-          tabBarIcon: ({ color, size }) => <Ionicons name="radio" color={color} size={size} />,
-        }}
-      />
-      <Tabs.Screen
-        name="agencies"
-        options={{
-          title: 'الوكالات',
-          tabBarIcon: ({ color, size }) => <MaterialIcons name="groups" color={color} size={size} />,
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: 'حسابي',
-          tabBarIcon: ({ color, size }) => <Ionicons name="person-circle" color={color} size={size} />,
-        }}
-      />
-    </Tabs>
+        tabBarIcon: ({ color, size }) => {
+          const name = route.name;
+          if (name === 'index') return <Ionicons name="planet" color={color} size={size} />;
+          if (name === 'live') return <Ionicons name="radio" color={color} size={size} />;
+          if (name === 'agencies') return <MaterialIcons name="groups" color={color} size={size} />;
+          if (name === 'profile') return <Ionicons name="person-circle" color={color} size={size} />;
+          return null;
+        },
+      })}
+    />
   );
 }
 
