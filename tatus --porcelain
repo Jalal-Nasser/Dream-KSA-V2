@@ -1,0 +1,5 @@
+[33m61e7ab5[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mbackup/2025-08-16-login-working[m[33m, [m[1;31morigin/backup/2025-08-16-login-working[m[33m)[m chore(assets): update logo and icon images for improved UI
+[33m7e4c869[m feat(ui): binmo-inspired login styling (UI-only)
+[33m6a196fe[m feat(ui): google/apple login buttons (UI only) + icon placeholders
+[33m4098be8[m fix(ui): point login image to assets/images/logo.png and tweak sizing
+[33mfbaca6a[m chore(debug): stub Linking to prevent auto deep-link navigation (temporary)
