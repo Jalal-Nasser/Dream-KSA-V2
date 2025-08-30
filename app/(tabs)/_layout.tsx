@@ -2,27 +2,34 @@ import React from 'react';
 import { Tabs } from 'expo-router';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 
-// Use file-based routes inside app/(tabs) and only set shared screenOptions here.
+// Light Binmo-style bottom tab: white rounded bar, green active color.
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#0b1020',
-          borderTopColor: 'transparent',
+          position: 'absolute',
+          left: 12,
+          right: 12,
+          bottom: 14,
           height: 64,
+          borderRadius: 20,
+          backgroundColor: '#ffffff',
+          shadowColor: '#000',
+          shadowOpacity: 0.08,
+          shadowRadius: 12,
+          elevation: 6,
         },
-        tabBarActiveTintColor: '#fff',
-        tabBarInactiveTintColor: 'rgba(255,255,255,0.6)',
-        tabBarLabelStyle: { fontSize: 12, marginBottom: 6 },
+        tabBarActiveTintColor: '#00C853', // lively green like Binmo accents
+        tabBarInactiveTintColor: '#7A7A7A',
+        tabBarLabelStyle: { fontSize: 12, marginBottom: 2, fontWeight: '700' },
         tabBarIcon: ({ color, size }) => {
           const name = route.name;
-          if (name === 'index') return <Ionicons name="planet" color={color} size={size} />;
-          if (name === 'live') return <Ionicons name="radio" color={color} size={size} />;
-          if (name === 'agencies') return <MaterialIcons name="groups" color={color} size={size} />;
-          // support both 'profile' and 'me' (if either exists); prefer 'me' now
-          if (name === 'profile' || name === 'me') return <Ionicons name="person-circle" color={color} size={size} />;
+          if (name === 'index') return <Ionicons name="home" color={color} size={20} />;
+          if (name === 'live') return <Ionicons name="radio" color={color} size={20} />;
+          if (name === 'agencies') return <MaterialIcons name="groups" color={color} size={20} />;
+          if (name === 'me' || name === 'profile') return <Ionicons name="person" color={color} size={20} />;
           return null;
         },
       })}

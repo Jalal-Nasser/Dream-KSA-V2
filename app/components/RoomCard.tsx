@@ -13,23 +13,26 @@ export default function RoomCard({
   return (
     <View style={[styles.card, featured && styles.featured]}>
       <View style={styles.left}>
-        <View style={styles.avatar}><Text style={styles.letter}>{(agency || 'D')[0]}</Text></View>
+        <View style={[styles.avatar, agency ? styles.avatarAgency : null]}><Text style={styles.letter}>{(agency || 'D')[0]}</Text></View>
       </View>
       <View style={{ flex: 1 }}>
         <Text numberOfLines={1} style={styles.title}>{title}</Text>
-        <Text numberOfLines={1} style={styles.sub}>{agency || 'Dream KSA'}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <Text numberOfLines={1} style={styles.sub}>{agency || 'Dream KSA'}</Text>
+          {agency && <View style={styles.agencyBadge}><Text style={styles.agencyTxt}>وكالة</Text></View>}
+        </View>
       </View>
       <View style={styles.right}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-          <Ionicons name="people" size={14} color="#fff" />
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Ionicons name="people" size={14} color="#333" />
           <Text style={styles.count}>{listeners}</Text>
         </View>
         <TouchableOpacity
           style={styles.join}
-          activeOpacity={0.9}
+          activeOpacity={0.95}
           onPress={() => router.push({ pathname: '/room/[id]', params: { id: String(Math.random()).slice(2,7), name: title } })}
         >
-          <Ionicons name="radio" size={14} color="#fff" />
+          <Ionicons name="mic" size={14} color="#fff" />
           <Text style={styles.joinTxt}>ادخل</Text>
         </TouchableOpacity>
       </View>
@@ -39,21 +42,28 @@ export default function RoomCard({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#0f1625',
-    borderRadius: 16,
-    padding: 14,
+    backgroundColor: '#ffffff',
+    borderRadius: 14,
+    padding: 12,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  featured: { borderWidth: 1, borderColor: 'rgba(226,27,115,0.35)' },
+  featured: { borderWidth: 1, borderColor: 'rgba(0,200,83,0.12)' },
   left: { marginRight: 6 },
-  avatar: { width: 38, height: 38, borderRadius: 19, backgroundColor: '#172138', alignItems: 'center', justifyContent: 'center' },
-  letter: { color: '#fff', fontWeight: '700' },
-  title: { color: '#fff', fontSize: 16, fontWeight: '700' },
-  sub: { color: 'rgba(255,255,255,0.7)', marginTop: 2, fontSize: 12 },
+  avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#F0F4F8', alignItems: 'center', justifyContent: 'center' },
+  avatarAgency: { backgroundColor: '#FFEDE6' },
+  letter: { color: '#333', fontWeight: '700' },
+  title: { color: '#111827', fontSize: 16, fontWeight: '800' },
+  sub: { color: '#6B7280', marginTop: 2, fontSize: 12 },
+  agencyBadge: { backgroundColor: '#E7F7EF', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 },
+  agencyTxt: { color: '#00A651', fontSize: 11, fontWeight: '800' },
   right: { alignItems: 'center', paddingLeft: 8 },
-  count: { color: '#fff', fontWeight: '800' },
-  join: { marginTop: 6, backgroundColor: '#e21b73', borderRadius: 12, paddingVertical: 6, paddingHorizontal: 10, flexDirection: 'row', alignItems: 'center', gap: 6 },
-  joinTxt: { color: '#fff', fontWeight: '800', fontSize: 12 },
+  count: { color: '#374151', fontWeight: '700', marginLeft: 6 },
+  join: { marginTop: 8, backgroundColor: '#00C853', borderRadius: 12, paddingVertical: 8, paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', gap: 8 },
+  joinTxt: { color: '#fff', fontWeight: '800', fontSize: 13 },
 });

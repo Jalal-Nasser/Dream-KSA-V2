@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, Text, FlatList, StyleSheet, SafeAreaView } from 'react-native';
+import { SafeAreaView, View, Text, StyleSheet, FlatList } from 'react-native';
 import RoomCard from '../components/RoomCard';
-import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const MOCK = [
   { id: '1', title: 'ساحة الدردشة العامة', listeners: 248, agency: 'Dream KSA', featured: true },
@@ -12,14 +12,15 @@ const MOCK = [
 export default function Explore() {
   return (
     <SafeAreaView style={styles.safe}>
-      <View style={styles.header}>
-        <Text style={styles.hi}>استكشف الغرف</Text>
-        <Text style={styles.sub}>مميزة • نشطة الآن</Text>
-        <View style={styles.search}>
-          <Ionicons name="search" size={18} color="rgba(255,255,255,0.7)" />
-          <Text style={styles.searchTxt}>ابحث عن غرفة…</Text>
+      <LinearGradient colors={['#FFF6FB', '#FFF8EE']} style={styles.headerWrap}>
+        <View style={styles.header}>
+          <Text style={styles.hi}>اكتشف الغرف</Text>
+          <Text style={styles.subDark}>مميزة • نشطة الآن</Text>
+          <View style={styles.search}>
+            <Text style={styles.searchTxtDark}>ابحث عن غرفة…</Text>
+          </View>
         </View>
-      </View>
+      </LinearGradient>
       <FlatList
         data={MOCK}
         keyExtractor={(i) => i.id}
@@ -31,11 +32,12 @@ export default function Explore() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#071021' },
-  header: { paddingTop: 8, paddingHorizontal: 16, paddingBottom: 8 },
-  hi: { color: '#fff', fontSize: 22, fontWeight: '800' },
-  sub: { color: 'rgba(255,255,255,0.7)', marginTop: 2 },
-  search: { marginTop: 10, backgroundColor: '#0f1625', borderRadius: 12, paddingVertical: 10, paddingHorizontal: 12, flexDirection:'row', alignItems:'center', gap:10 },
-  searchTxt:{ color:'rgba(255,255,255,0.7)' }
+  safe: { flex: 1, backgroundColor: '#F5F7FB' },
+  headerWrap: { paddingBottom: 8 },
+  header: { paddingTop: 16, paddingHorizontal: 16, paddingBottom: 12 },
+  hi: { color: '#111827', fontSize: 22, fontWeight: '800' },
+  subDark: { color: '#6B7280', marginTop: 6 },
+  search: { marginTop: 12, backgroundColor: '#FFFFFF', borderRadius: 12, paddingVertical: 10, paddingHorizontal: 12, borderWidth: 1, borderColor: '#ECEFF3' },
+  searchTxtDark: { color: '#9CA3AF' }
 });
 
