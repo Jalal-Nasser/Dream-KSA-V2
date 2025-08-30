@@ -1,22 +1,7 @@
-import React, { useEffect } from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
+import React from 'react';
+import LoginScreen from './login';
 
-// Small redirector so the app root shows the couple-background login screen (app/login.tsx)
-export default function IndexRedirect() {
-  const router = useRouter();
-  useEffect(() => {
-    // replace so back navigation won't return here
-    router.replace('/login');
-  }, [router]);
-
-  return (
-    <View style={styles.container}>
-      <ActivityIndicator size="large" color="#e21b73" />
-    </View>
-  );
+// Render the login screen directly from the app root to avoid navigation-before-mount races.
+export default function Index() {
+  return <LoginScreen />;
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#071021' },
-});
