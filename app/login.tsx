@@ -4,32 +4,20 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 
-/**
- * Polished login screen:
- * - Couple background image (remote) + gradient tint (pink -> purple -> blue)
- * - Translucent white login card (rounded)
- * - Google (white pill), Facebook (blue pill), Phone FAB
- * - Tapping any CTA navigates to /(tabs) (UI only)
- */
-
-const BG_URI = 'https://images.unsplash.com/photo-1508997449629-303059a0397b?q=80&w=1400&auto=format&fit=crop';
+const BG_LOCAL = require('../assets/images/login-bg.jpg');
 
 export default function Login() {
   const router = useRouter();
   return (
-    <ImageBackground source={{ uri: BG_URI }} style={styles.bg} resizeMode="cover">
-      {/* color tint */}
+    <ImageBackground source={BG_LOCAL} style={styles.bg} resizeMode="cover">
       <LinearGradient
-        colors={['rgba(234,88,206,0.36)', 'rgba(123,82,255,0.28)', 'rgba(20,150,255,0.20)']}
+        colors={['rgba(234,88,206,0.30)', 'rgba(123,82,255,0.22)', 'rgba(20,150,255,0.18)']}
         start={[0, 0]}
         end={[1, 1]}
         style={StyleSheet.absoluteFill}
       />
-
-      {/* subtle dim so white elements read */}
       <View style={styles.dim} />
 
-      {/* Top small link */}
       <View style={styles.topRow}>
         <Text style={styles.topLink}>Can't login?</Text>
       </View>
@@ -39,34 +27,22 @@ export default function Login() {
         <Text style={styles.subtitle}>غرف الدردشة الصوتية</Text>
       </View>
 
-      {/* translucent login card */}
       <View style={styles.cardWrap}>
         <View style={styles.card}>
           <Text style={styles.cardTitle}>انضم إلى مجتمع Dream KSA</Text>
           <Text style={styles.cardSub}>اختر طريقة تسجيل الدخول المفضلة</Text>
 
-          <TouchableOpacity
-            activeOpacity={0.9}
-            style={styles.btnWhite}
-            onPress={() => router.replace('/(tabs)')}
-          >
+          <TouchableOpacity activeOpacity={0.9} style={styles.btnWhite} onPress={() => router.replace('/(tabs)')}>
             <View style={styles.iconLeft}><Ionicons name="logo-google" size={18} color="#DB4437" /></View>
             <Text style={styles.btnWhiteText}>متابعة بـ Google</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            activeOpacity={0.9}
-            style={styles.btnFB}
-            onPress={() => router.replace('/(tabs)')}
-          >
+          <TouchableOpacity activeOpacity={0.9} style={styles.btnFB} onPress={() => router.replace('/(tabs)')}>
             <View style={styles.iconLeft}><Ionicons name="logo-facebook" size={18} color="#fff" /></View>
             <Text style={styles.btnFBText}>متابعة بـ Facebook</Text>
           </TouchableOpacity>
-
-          <View style={{ height: 6 }} />
         </View>
 
-        {/* Phone FAB below */}
         <TouchableOpacity activeOpacity={0.9} style={styles.fab} onPress={() => router.replace('/(tabs)')}>
           <Ionicons name="call" size={22} color="#00B050" />
         </TouchableOpacity>
@@ -79,7 +55,7 @@ export default function Login() {
 
 const styles = StyleSheet.create({
   bg: { flex: 1, justifyContent: 'space-between', backgroundColor: '#000' },
-  dim: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.08)' },
+  dim: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.06)' },
 
   topRow: { paddingTop: 44, paddingHorizontal: 18, alignItems: 'flex-end' },
   topLink: { color: 'rgba(255,255,255,0.95)', fontWeight: '700' },
@@ -91,7 +67,7 @@ const styles = StyleSheet.create({
   cardWrap: { alignItems: 'center', paddingHorizontal: 20 },
   card: {
     width: '94%',
-    backgroundColor: 'rgba(255,255,255,0.88)',
+    backgroundColor: 'rgba(255,255,255,0.92)',
     borderRadius: 16,
     paddingVertical: 18,
     paddingHorizontal: 14,
