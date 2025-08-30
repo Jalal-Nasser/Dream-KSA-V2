@@ -1,7 +1,8 @@
 import React from 'react';
-import { SafeAreaView, View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { SafeAreaView, View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { colors } from '../_binmo-theme';
+import { useRouter } from 'expo-router';
 
 function Stat({ label, value }: { label: string; value: number | string }) {
   return (
@@ -12,12 +13,12 @@ function Stat({ label, value }: { label: string; value: number | string }) {
   );
 }
 
-function ListRow({ title, icon, iconColor = '#6B7280', onPress }: { title: string; icon: React.ReactNode; iconColor?: string; onPress?: () => void }) {
+function ListRow({ title, icon, onPress }: { title: string; icon: React.ReactNode; onPress?: () => void }) {
   return (
     <TouchableOpacity activeOpacity={0.85} style={styles.row} onPress={onPress}>
       <Text style={styles.rowTitle}>{title}</Text>
       <View style={styles.rowRight}>
-        <View style={[styles.rowIcon, { backgroundColor: '#F2F6FA' }]}>
+        <View style={styles.rowIcon}>
           {icon}
         </View>
       </View>
@@ -26,9 +27,10 @@ function ListRow({ title, icon, iconColor = '#6B7280', onPress }: { title: strin
 }
 
 export default function Me() {
+  const router = useRouter();
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
-      <ScrollView contentContainerStyle={{ paddingBottom: 28 }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 28, paddingTop: 8 }}>
         {/* Top profile header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
@@ -44,8 +46,17 @@ export default function Me() {
             </View>
           </View>
           <View>
-            <View style={styles.avatar}>
-              <Text style={{ color: '#fff', fontWeight: '900', fontSize: 18 }}>J</Text>
+            <View style={styles.avatarWrap}>
+              <View style={styles.avatar}>
+                <Text style={{ color: '#fff', fontWeight: '900', fontSize: 18 }}>J</Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => router.push('/profile/edit')}
+                style={styles.editBtn}
+                activeOpacity={0.85}
+              >
+                <Ionicons name="pencil" size={14} color="#111" />
+              </TouchableOpacity>
             </View>
           </View>
         </View>
@@ -114,15 +125,17 @@ export default function Me() {
 }
 
 const styles = StyleSheet.create({
-  header: { flexDirection: 'row-reverse', alignItems: 'center', paddingHorizontal: 16, paddingTop: 8, paddingBottom: 6 },
+  header: { flexDirection: 'row-reverse', alignItems: 'center', paddingHorizontal: 16, paddingTop: 4, paddingBottom: 6 },
   headerLeft: { flex: 1, alignItems: 'flex-end' },
-  avatar: { width: 64, height: 64, borderRadius: 32, backgroundColor: '#00C853', alignItems: 'center', justifyContent: 'center' },
+  avatarWrap: { position: 'relative' },
+  avatar: { width: 72, height: 72, borderRadius: 36, backgroundColor: '#00C853', alignItems: 'center', justifyContent: 'center' },
+  editBtn: { position: 'absolute', left: -6, bottom: 0, width: 24, height: 24, borderRadius: 12, backgroundColor: '#F2F6FA', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border },
   nameRow: { color: colors.text, fontSize: 18, fontWeight: '900' },
   name: { color: colors.text, fontSize: 18, fontWeight: '900' },
   idRow: { flexDirection: 'row-reverse', alignItems: 'center', marginTop: 4 },
   idText: { color: '#6B7280', fontWeight: '700' },
 
-  statsRow: { flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 10 },
+  statsRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, marginHorizontal: 16 },
   statItem: { alignItems: 'center' },
   statValue: { color: colors.text, fontWeight: '900', fontSize: 18 },
   statLabel: { color: colors.textMuted, marginTop: 2 },
@@ -160,7 +173,7 @@ const styles = StyleSheet.create({
 
   row: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 14, paddingVertical: 14 },
   rowRight: { flexDirection: 'row', alignItems: 'center' },
-  rowIcon: { width: 28, height: 28, borderRadius: 6, alignItems: 'center', justifyContent: 'center' },
+  rowIcon: { width: 28, height: 28, borderRadius: 6, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F2F6FA' },
   rowTitle: { color: colors.text, fontWeight: '800', fontSize: 15 },
 
   firstChargeBadge: { position: 'absolute', left: 10, bottom: -10, backgroundColor: '#E7F7EF', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 16, borderWidth: 1, borderColor: '#B8E7C2' },
