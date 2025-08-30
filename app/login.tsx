@@ -1,157 +1,243 @@
-import React, { useState } from 'react';
-import { View, Text, Image, ImageBackground, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import {
+  SafeAreaView,
+  View,
+  Text,
+  Image,
+  Animated,
+  TouchableOpacity,
+  StatusBar,
+  StyleSheet,
+  Platform,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 
-// local assets
-const BG_LOCAL = require('../assets/images/login-bg.jpg');
-const LOGO = require('../assets/images/logo.png');
-const GOOGLE_ICON = require('../assets/icons/google.png');
-
-export default function Login() {
+export default function LoginScreen(): JSX.Element {
   const router = useRouter();
-  const [phone, setPhone] = useState('');
+  // Background animation: gentle Ken Burns (zoom + drift)
+  const bgScale = useRef(new Animated.Value(1)).current;
+  const bgTranslate = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(bgScale, { toValue: 1.06, duration: 12000, useNativeDriver: true }),
+        Animated.timing(bgScale, { toValue: 1.0, duration: 12000, useNativeDriver: true }),
+      ])
+    ).start();
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(bgTranslate, { toValue: -14, duration: 9000, useNativeDriver: true }),
+        Animated.timing(bgTranslate, { toValue: 0, duration: 9000, useNativeDriver: true }),
+      ])
+    ).start();
+  }, [bgScale, bgTranslate]);
+
   return (
-    <ImageBackground source={BG_LOCAL} style={styles.bg} resizeMode="cover">
-      <LinearGradient
-        colors={['rgba(234,88,206,0.30)', 'rgba(123,82,255,0.22)', 'rgba(20,150,255,0.18)']}
-        start={[0, 0]}
-        end={[1, 1]}
-        style={StyleSheet.absoluteFill}
+    <View style={styles.bg}>
+      {/* Animated background image */}
+      <Animated.Image
+        source={require('../assets/images/login-bg.png')}
+        resizeMode="cover"
+        style={[
+          styles.bgImage,
+          {
+            transform: [{ scale: bgScale }, { translateY: bgTranslate }],
+            opacity: 0.98,
+          },
+        ]}
       />
-      <View style={styles.dim} />
+      <StatusBar barStyle="light-content" />
+      <View style={styles.topCircle} />
 
-      <View style={styles.topRow}>
-        <Text style={styles.topLink}>Can't login?</Text>
-      </View>
+      <SafeAreaView style={styles.safe}>
+        {/* top-right */}
+        <TouchableOpacity style={styles.topRight} activeOpacity={0.7}>
+          <Text style={styles.topRightText}>Can't login?</Text>
+        </TouchableOpacity>
 
-      {/* logo pushed upward (near top) */}
-      <View style={styles.center}>
-        <Image source={LOGO} style={styles.logo} resizeMode="contain" />
-        <Text style={styles.subtitle}>غرف الدردشة الصوتية</Text>
-      </View>
-
-      <View style={styles.cardWrap}>
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>انضم إلى مجتمع Dream KSA</Text>
-          <Text style={styles.cardSub}>اختر طريقة تسجيل الدخول المفضلة</Text>
-
-          <TouchableOpacity activeOpacity={0.9} style={styles.btnWhite} onPress={() => router.replace('/(tabs)')}>
-            <Image source={GOOGLE_ICON} style={styles.googleIcon} />
-            <Text style={styles.btnWhiteText}>متابعة بـ Google</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity activeOpacity={0.9} style={styles.btnFB} onPress={() => router.replace('/(tabs)')}>
-            <View style={styles.iconLeft}><Ionicons name="logo-facebook" size={18} color="#fff" /></View>
-            <Text style={styles.btnFBText}>متابعة بـ Facebook</Text>
-          </TouchableOpacity>
-
-          {/* divider and mobile login box */}
-          <View style={styles.dividerRow}>
-            <View style={styles.divider} />
-            <Text style={styles.dividerText}>أو استخدام رقم الهاتف</Text>
-            <View style={styles.divider} />
-          </View>
-
-          <View style={styles.phoneRow}>
-            <View style={styles.flagBox}>
-              <Text style={{ fontSize: 18 }}>🇸🇦</Text>
-              <Text style={{ fontSize: 15, marginLeft: 6, color: '#111827', fontWeight: '700' }}>+966</Text>
-            </View>
-            <TextInput
-              style={styles.phoneInput}
-              placeholder="5xxxxxxxx"
-              placeholderTextColor="#9CA3AF"
-              keyboardType="phone-pad"
-              value={phone}
-              onChangeText={setPhone}
-              maxLength={9}
+        {/* logo only (NO 'Dreams' title) */}
+        <View style={styles.logoWrap}>
+          <View style={styles.logoBackground}>
+            <Image
+              source={require('../assets/images/logo.png')}
+              resizeMode="contain"
+              style={styles.logo}
             />
           </View>
+          <Text style={styles.subtitle}>غرف الدردشة الصوتية</Text>
         </View>
-      </View>
 
-      <Text style={styles.terms}>باستمرارك، أنت توافق على الشروط وسياسة الخصوصية</Text>
-    </ImageBackground>
+        {/* actions */}
+        <View style={styles.actions}>
+          <TouchableOpacity
+            style={styles.googleBtn}
+            activeOpacity={0.9}
+            onPress={() => router.replace('/shell')}
+          >
+            {/* Revert to using the Google icon image */}
+            <Image
+              source={require('../assets/icons/google.png')}
+              resizeMode="contain"
+              style={styles.googleIcon}
+            />
+            <Text style={styles.googleText}>متابعة بـ Google</Text>
+          </TouchableOpacity>
+
+          {/* Facebook button (brand-style, below Google) */}
+          <View style={{ height: 12 }} />
+          <TouchableOpacity
+            style={styles.facebookBtn}
+            activeOpacity={0.9}
+            onPress={() => router.replace('/shell')}
+          >
+            <Image
+              source={require('../assets/icons/facebook.png')}
+              resizeMode="contain"
+              style={styles.facebookIcon}
+            />
+            <Text style={styles.facebookText}>متابعة بـ Facebook</Text>
+          </TouchableOpacity>
+
+          <View style={{ height: 18 }} />
+
+          <TouchableOpacity style={styles.phoneBtn} activeOpacity={0.9}>
+            {/* Vector phone icon (no white background) */}
+            <Ionicons name="call" size={32} color="#12B76A" />
+          </TouchableOpacity>
+        </View>
+
+        {/* consent */}
+        <Text style={styles.legal}>
+          بالاستمرار، أنت توافق على الشروط وسياسة الخصوصية
+        </Text>
+      </SafeAreaView>
+    </View>
   );
 }
 
+const { height, width } = require('react-native').Dimensions.get('window');
+
 const styles = StyleSheet.create({
-  bg: { flex: 1, justifyContent: 'space-between', backgroundColor: '#000' },
-  dim: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.06)' },
+  bg: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  bgImage: {
+    position: 'absolute',
+    top: 0, left: 0, right: 0, bottom: 0,
+    width: '100%',
+    height: '100%',
+  },
 
-  topRow: { paddingTop: 44, paddingHorizontal: 18, alignItems: 'flex-end' },
-  topLink: { color: 'rgba(255,255,255,0.95)', fontWeight: '700' },
+  safe: {
+    flex: 1,
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+  },
 
-  // pushed up by using a negative marginTop so logo sits higher on the screen
-  center: { alignItems: 'center', marginTop: -92 },
-  logo: { width: 140, height: 140, borderRadius: 18, backgroundColor: 'transparent' },
-  subtitle: { color: 'rgba(255,255,255,0.95)', marginTop: 12, fontWeight: '600' },
+  topRight: {
+    position: 'absolute',
+    right: 14,
+    top: Platform.OS === 'android' ? 14 : 36,
+    zIndex: 20,
+  },
+  topRightText: { color: '#fff', fontSize: 13 },
 
-  cardWrap: { alignItems: 'center', paddingHorizontal: 20 },
-  card: {
-    width: '94%',
-    backgroundColor: 'rgba(255,255,255,0.80)',
-    borderRadius: 16,
-    paddingVertical: 18,
-    paddingHorizontal: 14,
+  topCircle: {
+    position: 'absolute',
+    width: width * 1.5,
+    height: width * 1.5,
+    top: -width * 0.7,
+    alignSelf: 'center',
+    borderRadius: (width * 1.5) / 2,
+    backgroundColor: 'rgba(226, 27, 115, 0.18)', // soft pink halo
+  },
+
+  logoWrap: { marginTop: Platform.OS === 'android' ? 56 : 84, alignItems: 'center' },
+  logoBackground: {
+    width: 140,
+    height: 140,
+    borderRadius: 32, // Changed from 70 to create a rounded square
+    backgroundColor: 'white', // Changed to a solid, opaque white
+    justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    elevation: 8
+    shadowOffset: { width: 0, height: 4 }, // Made shadow softer
+    shadowOpacity: 0.1, // Made shadow softer
+    shadowRadius: 12, // Made shadow softer
+    elevation: 8,
   },
-  cardTitle: { fontWeight: '800', fontSize: 16, color: '#111827', marginBottom: 6 },
-  cardSub: { color: '#6B7280', marginBottom: 12 },
+  // Make the logo bigger; assumes transparent PNG in ../assets/images/logo.png
+  logo: { width: 125, height: 125 },
+  subtitle: { marginTop: 10, color: 'rgba(255,255,255,0.9)', fontSize: 13 },
 
-  btnWhite: {
-    width: '100%',
-    backgroundColor: 'rgba(255,255,255,0.98)',
-    borderRadius: 12,
+  actions: {
+    position: 'absolute',
+    bottom: Math.max(56, height * 0.16),
+    width: '86%',
+    alignItems: 'center',
+  },
+
+  googleBtn: {
+    width: '78%',
+    maxWidth: 440,
+    borderRadius: 14,
     paddingVertical: 12,
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
+    backgroundColor: 'rgba(255,255,255,0.9)',
     flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+  // Restore style for the Google image icon
+  googleIcon: { width: 24, height: 24, marginRight: 12 },
+  googleText: { flex: 1, textAlign: 'center', fontSize: 15, fontWeight: '600', color: '#0b2433' },
+
+  // Facebook button — brand blue, white text/icons
+  facebookBtn: {
+    width: '78%',
+    maxWidth: 440,
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    backgroundColor: '#1877F2',
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+  // Use image for Facebook icon
+  facebookIcon: { width: 24, height: 24, marginRight: 12 },
+  facebookText: { flex: 1, textAlign: 'center', fontSize: 15, fontWeight: '700', color: '#fff' },
+
+  phoneBtn: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: 'rgba(255,255,255,0.9)',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#E6E6E9',
-    marginBottom: 10
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 6,
   },
-  btnWhiteText: { color: '#111', fontWeight: '800', fontSize: 15 },
-  googleIcon: { width: 20, height: 20, position: 'absolute', left: 12 },
+  // Restore style for the phone image icon
+  phoneIcon: { width: 36, height: 36 },
 
-  btnFB: {
-    width: '100%',
-    backgroundColor: '#1877F2',
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center'
+  legal: {
+    position: 'absolute',
+    bottom: 18,
+    textAlign: 'center',
+    color: 'rgba(255,255,255,0.92)',
+    fontSize: 11,
   },
-  btnFBText: { color: '#fff', fontWeight: '800', fontSize: 15 },
-  iconLeft: { position: 'absolute', left: 12 },
-
-  dividerRow: { flexDirection: 'row', alignItems: 'center', width: '100%', marginTop: 10, marginBottom: 10 },
-  divider: { flex: 1, height: 1, backgroundColor: '#E6E6E9' },
-  dividerText: { color: '#6B7280', marginHorizontal: 8, fontSize: 12, fontWeight: '700' },
-
-  phoneRow: {
-    width: '100%',
-    backgroundColor: '#F3F4F6',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E6E6E9',
-    height: 48,
-    paddingHorizontal: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between'
-  },
-  flagBox: { flexDirection: 'row', alignItems: 'center' },
-  phoneInput: { flex: 1, textAlign: 'right', direction: 'ltr', fontSize: 15, color: '#111827' },
-
-  terms: { color: 'rgba(255,255,255,0.9)', textAlign: 'center', padding: 14, fontSize: 12 }
 });
