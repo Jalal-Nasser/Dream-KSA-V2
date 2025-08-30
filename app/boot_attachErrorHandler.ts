@@ -62,7 +62,5 @@ if (typeof (global as any).process !== "undefined" && (global as any).process.on
   } catch (e) {}
 }
 
-export default {};
-
 
 
