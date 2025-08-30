@@ -74,7 +74,7 @@ export default function LoginScreen(): JSX.Element {
           <TouchableOpacity
             style={styles.googleBtn}
             activeOpacity={0.9}
-            onPress={() => router.replace('/(tabs)')}
+            onPress={() => router.replace('/shell')}
           >
             {/* Revert to using the Google icon image */}
             <Image
@@ -90,7 +90,7 @@ export default function LoginScreen(): JSX.Element {
           <TouchableOpacity
             style={styles.facebookBtn}
             activeOpacity={0.9}
-            onPress={() => router.replace('/(tabs)')}
+            onPress={() => router.replace('/shell')}
           >
             <Image
               source={require('../assets/icons/facebook.png')}
