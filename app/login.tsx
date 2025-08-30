@@ -4,13 +4,16 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 
+// local assets
 const BG_LOCAL = require('../assets/images/login-bg.jpg');
+const LOGO = require('../assets/images/logo.png');
+const GOOGLE_ICON = require('../assets/icons/google.png');
 
 export default function Login() {
   const router = useRouter();
   return (
     <ImageBackground source={BG_LOCAL} style={styles.bg} resizeMode="cover">
-      <LinearGradient
+    <LinearGradient
         colors={['rgba(234,88,206,0.30)', 'rgba(123,82,255,0.22)', 'rgba(20,150,255,0.18)']}
         start={[0, 0]}
         end={[1, 1]}
@@ -20,12 +23,13 @@ export default function Login() {
 
       <View style={styles.topRow}>
         <Text style={styles.topLink}>Can't login?</Text>
-      </View>
+        </View>
 
+      {/* logo pushed upward (near top) */}
       <View style={styles.center}>
-        <Image source={require('../assets/images/logo.png')} style={styles.logo} resizeMode="contain" />
+        <Image source={LOGO} style={styles.logo} resizeMode="contain" />
         <Text style={styles.subtitle}>غرف الدردشة الصوتية</Text>
-      </View>
+        </View>
 
       <View style={styles.cardWrap}>
         <View style={styles.card}>
@@ -33,7 +37,7 @@ export default function Login() {
           <Text style={styles.cardSub}>اختر طريقة تسجيل الدخول المفضلة</Text>
 
           <TouchableOpacity activeOpacity={0.9} style={styles.btnWhite} onPress={() => router.replace('/(tabs)')}>
-            <View style={styles.iconLeft}><Ionicons name="logo-google" size={18} color="#DB4437" /></View>
+            <Image source={GOOGLE_ICON} style={styles.googleIcon} />
             <Text style={styles.btnWhiteText}>متابعة بـ Google</Text>
           </TouchableOpacity>
 
@@ -41,12 +45,12 @@ export default function Login() {
             <View style={styles.iconLeft}><Ionicons name="logo-facebook" size={18} color="#fff" /></View>
             <Text style={styles.btnFBText}>متابعة بـ Facebook</Text>
           </TouchableOpacity>
-        </View>
+          </View>
 
         <TouchableOpacity activeOpacity={0.9} style={styles.fab} onPress={() => router.replace('/(tabs)')}>
-          <Ionicons name="call" size={22} color="#00B050" />
+          <Ionicons name="call" size={26} color="#00B050" />
         </TouchableOpacity>
-      </View>
+          </View>
 
       <Text style={styles.terms}>باستمرارك، أنت توافق على الشروط وسياسة الخصوصية</Text>
     </ImageBackground>
@@ -60,9 +64,10 @@ const styles = StyleSheet.create({
   topRow: { paddingTop: 44, paddingHorizontal: 18, alignItems: 'flex-end' },
   topLink: { color: 'rgba(255,255,255,0.95)', fontWeight: '700' },
 
-  center: { alignItems: 'center', marginTop: 6 },
-  logo: { width: 120, height: 120, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.9)', padding: 8 },
-  subtitle: { color: 'rgba(255,255,255,0.95)', marginTop: 10, fontWeight: '600' },
+  // pushed up by using a negative marginTop so logo sits higher on the screen
+  center: { alignItems: 'center', marginTop: -72 },
+  logo: { width: 140, height: 140, borderRadius: 18, backgroundColor: 'transparent' },
+  subtitle: { color: 'rgba(255,255,255,0.95)', marginTop: 12, fontWeight: '600' },
 
   cardWrap: { alignItems: 'center', paddingHorizontal: 20 },
   card: {
@@ -94,7 +99,7 @@ const styles = StyleSheet.create({
     marginBottom: 10
   },
   btnWhiteText: { color: '#111', fontWeight: '800', fontSize: 15 },
-  iconLeft: { position: 'absolute', left: 12 },
+  googleIcon: { width: 20, height: 20, position: 'absolute', left: 12 },
 
   btnFB: {
     width: '100%',
@@ -107,10 +112,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   btnFBText: { color: '#fff', fontWeight: '800', fontSize: 15 },
+  iconLeft: { position: 'absolute', left: 12 },
 
   fab: {
     marginTop: 14,
-    width: 64, height: 64, borderRadius: 32,
+    width: 72, height: 72, borderRadius: 36,
     alignItems: 'center', justifyContent: 'center',
     backgroundColor: 'rgba(255,255,255,0.96)',
     shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 8, elevation: 6
