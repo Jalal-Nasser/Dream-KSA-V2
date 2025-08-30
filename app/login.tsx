@@ -48,7 +48,7 @@ export default function Login() {
         </View>
 
         <TouchableOpacity activeOpacity={0.9} style={styles.fab} onPress={() => router.replace('/(tabs)')}>
-          <Ionicons name="call" size={32} color="#00B050" />
+          <Ionicons name="phone-portrait" size={32} color="#00B050" />
         </TouchableOpacity>
       </View>
 
