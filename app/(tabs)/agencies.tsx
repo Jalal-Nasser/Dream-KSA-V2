@@ -1,7 +1,7 @@
 import React from 'react';
 import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { colors } from '../binmo-theme';
+import { colors } from '../_binmo-theme';
 
 export default function Agencies() {
   const router = useRouter();
@@ -28,3 +28,4 @@ const styles = StyleSheet.create({
   bigBtn:{ backgroundColor:'#FFF', borderWidth:1, borderColor:colors.border, borderRadius:16, paddingVertical:18, alignItems:'center', marginBottom:12 },
   bigBtnTxt:{ fontWeight:'800', color: colors.text }
 });
+

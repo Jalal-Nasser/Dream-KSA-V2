@@ -1,7 +1,7 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import { colors } from '../binmo-theme';
+import { colors } from '../_binmo-theme';
 
 export default function TabLayout() {
   return (
@@ -29,3 +29,4 @@ export default function TabLayout() {
     />
   );
 }
+

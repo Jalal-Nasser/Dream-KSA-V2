@@ -1,6 +1,6 @@
 import React from 'react';
 import { SafeAreaView, View, Text, StyleSheet } from 'react-native';
-import { colors } from '../binmo-theme';
+import { colors } from '../_binmo-theme';
 
 export default function Me(){
   return (
@@ -25,3 +25,4 @@ const styles = StyleSheet.create({
   card:{ backgroundColor:'#fff', borderRadius:14, marginHorizontal:16, marginBottom:10, paddingVertical:16, paddingHorizontal:14, borderWidth:1, borderColor:colors.border },
   item:{ color: colors.text, fontWeight:'700' }
 });
+

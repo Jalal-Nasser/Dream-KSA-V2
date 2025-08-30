@@ -1,7 +1,7 @@
 import React from 'react';
 import { SafeAreaView, View, Text, StyleSheet, FlatList } from 'react-native';
 import RoomCard from '../components/RoomCard';
-import { colors } from '../binmo-theme';
+import { colors } from '../_binmo-theme';
 
 const MOCK = [
   { id: '1', title: 'ساحة الدردشة العامة', listeners: 248, agency: undefined },
@@ -35,3 +35,4 @@ const styles = StyleSheet.create({
   search: { marginTop: 12, backgroundColor: colors.card, borderRadius: 12, paddingVertical: 10, paddingHorizontal: 12, borderWidth: 1, borderColor: colors.border },
   searchTxt: { color: '#9CA3AF' }
 });
+

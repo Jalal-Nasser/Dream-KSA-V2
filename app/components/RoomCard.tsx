@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { colors } from '../binmo-theme';
+import { colors } from '../_binmo-theme';
 
 export default function RoomCard({
   title,
@@ -70,3 +70,4 @@ const styles = StyleSheet.create({
   join: { marginTop: 8, backgroundColor: colors.brand, borderRadius: 12, paddingVertical: 8, paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', gap: 8 },
   joinTxt: { color: '#fff', fontWeight: '800', fontSize: 13 },
 });
+
