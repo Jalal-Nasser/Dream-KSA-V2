@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
   topLink: { color: 'rgba(255,255,255,0.95)', fontWeight: '700' },
 
   // pushed up by using a negative marginTop so logo sits higher on the screen
-  center: { alignItems: 'center', marginTop: -72 },
+  center: { alignItems: 'center', marginTop: -92 },
   logo: { width: 140, height: 140, borderRadius: 18, backgroundColor: 'transparent' },
   subtitle: { color: 'rgba(255,255,255,0.95)', marginTop: 12, fontWeight: '600' },
 
