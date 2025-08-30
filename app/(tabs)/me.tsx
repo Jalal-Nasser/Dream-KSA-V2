@@ -16,12 +16,10 @@ function Stat({ label, value }: { label: string; value: number | string }) {
 function ListRow({ title, icon, onPress }: { title: string; icon: React.ReactNode; onPress?: () => void }) {
   return (
     <TouchableOpacity activeOpacity={0.85} style={styles.row} onPress={onPress}>
-      {/* Right side (title + icon) in RTL */}
-      <Text style={styles.rowTitle}>{title}</Text>
-      <View style={styles.rowRight}>
+      <View style={styles.rowRightGroup}>
+        <Text style={styles.rowTitle}>{title}</Text>
         <View style={styles.rowIcon}>{icon}</View>
       </View>
-      {/* Left chevron */}
       <View style={styles.rowLeft}>
         <Ionicons name="chevron-back" size={18} color="#C7CDD5" />
       </View>
@@ -130,7 +128,7 @@ export default function Me() {
 
 const styles = StyleSheet.create({
   pageTopRow: { paddingHorizontal: 16, paddingBottom: 4, alignItems: 'flex-start' },
-  header: { flexDirection: 'row-reverse', alignItems: 'center', paddingHorizontal: 16, paddingTop: 4, paddingBottom: 6 },
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 4, paddingBottom: 6, justifyContent: 'space-between' },
   headerLeft: { flex: 1, alignItems: 'flex-end' },
   avatar: { width: 72, height: 72, borderRadius: 36, backgroundColor: '#00C853', alignItems: 'center', justifyContent: 'center' },
   nameRow: { color: colors.text, fontSize: 18, fontWeight: '900' },
@@ -174,8 +172,8 @@ const styles = StyleSheet.create({
   },
   coinsRow: { alignSelf: 'flex-start', flexDirection: 'row-reverse', alignItems: 'center', marginTop: 8, marginBottom: 4, marginHorizontal: 12, backgroundColor: '#F8FAFC', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 },
 
-  row: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 14, paddingVertical: 14 },
-  rowRight: { flexDirection: 'row', alignItems: 'center' },
+  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 14, paddingVertical: 14 },
+  rowRightGroup: { flexDirection: 'row-reverse', alignItems: 'center', gap: 10 },
   rowIcon: { width: 28, height: 28, borderRadius: 6, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F2F6FA' },
   rowTitle: { color: colors.text, fontWeight: '800', fontSize: 15 },
   rowLeft: { width: 20, alignItems: 'center' },
