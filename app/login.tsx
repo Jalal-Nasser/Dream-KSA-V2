@@ -10,6 +10,7 @@ import {
   StyleSheet,
   Platform,
 } from 'react-native';
+import { Ionicons, AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function LoginScreen(): JSX.Element {
   return (
@@ -41,22 +42,23 @@ export default function LoginScreen(): JSX.Element {
         {/* actions */}
         <View style={styles.actions}>
           <TouchableOpacity style={styles.googleBtn} activeOpacity={0.9}>
-            <Image
-              source={require('../assets/icons/google.png')}
-              resizeMode="contain"
-              style={styles.googleIcon}
-            />
+            {/* Google icon without white background */}
+            <AntDesign name="google" size={22} color="#EA4335" style={styles.googleIconFix} />
             <Text style={styles.googleText}>متابعة بـ Google</Text>
+          </TouchableOpacity>
+
+          {/* Facebook button (brand-style, below Google) */}
+          <View style={{ height: 12 }} />
+          <TouchableOpacity style={styles.facebookBtn} activeOpacity={0.9}>
+            <MaterialCommunityIcons name="facebook" size={22} color="#fff" style={styles.facebookIcon} />
+            <Text style={styles.facebookText}>متابعة بـ Facebook</Text>
           </TouchableOpacity>
 
           <View style={{ height: 18 }} />
 
           <TouchableOpacity style={styles.phoneBtn} activeOpacity={0.9}>
-            <Image
-              source={require('../assets/icons/phone.png')}
-              resizeMode="contain"
-              style={styles.phoneIcon}
-            />
+            {/* Vector phone icon (no white background) */}
+            <Ionicons name="call" size={26} color="#12B76A" />
           </TouchableOpacity>
         </View>
 
@@ -100,7 +102,8 @@ const styles = StyleSheet.create({
   },
 
   logoWrap: { marginTop: Platform.OS === 'android' ? 56 : 84, alignItems: 'center' },
-  logo: { width: 108, height: 108 },
+  // Make the logo bigger; assumes transparent PNG in ../assets/images/logo.png
+  logo: { width: 140, height: 140 },
   subtitle: { marginTop: 10, color: 'rgba(255,255,255,0.9)', fontSize: 13 },
 
   actions: {
@@ -125,8 +128,28 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 6,
   },
-  googleIcon: { width: 24, height: 24, marginRight: 12 },
+  // Using vector icons; keep spacing similar to previous image
+  googleIconFix: { marginRight: 12 },
   googleText: { flex: 1, textAlign: 'center', fontSize: 15, fontWeight: '600', color: '#0b2433' },
+
+  // Facebook button — brand blue, white text/icons
+  facebookBtn: {
+    width: '78%',
+    maxWidth: 440,
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    backgroundColor: '#1877F2',
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+  facebookIcon: { marginRight: 12 },
+  facebookText: { flex: 1, textAlign: 'center', fontSize: 15, fontWeight: '700', color: '#fff' },
 
   phoneBtn: {
     width: 66,
@@ -141,7 +164,6 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 6,
   },
-  phoneIcon: { width: 28, height: 28 },
 
   legal: {
     position: 'absolute',
