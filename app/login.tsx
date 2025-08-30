@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
 
   fab: {
     marginTop: 14,
-    width: 56, height: 56, borderRadius: 28,
+    width: 52, height: 52, borderRadius: 26,
     alignItems: 'center', justifyContent: 'center',
     backgroundColor: 'rgba(255,255,255,0.96)',
     shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 8, elevation: 6
