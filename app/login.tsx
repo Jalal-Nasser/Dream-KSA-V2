@@ -48,7 +48,7 @@ export default function Login() {
         </View>
 
         <TouchableOpacity activeOpacity={0.9} style={styles.fab} onPress={() => router.replace('/(tabs)')}>
-          <Ionicons name="call" size={26} color="#00B050" />
+          <Ionicons name="call" size={32} color="#00B050" />
         </TouchableOpacity>
       </View>
 
@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
 
   fab: {
     marginTop: 14,
-    width: 60, height: 60, borderRadius: 30,
+    width: 56, height: 56, borderRadius: 28,
     alignItems: 'center', justifyContent: 'center',
     backgroundColor: 'rgba(255,255,255,0.96)',
     shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 8, elevation: 6
