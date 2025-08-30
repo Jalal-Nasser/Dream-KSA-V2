@@ -1,7 +1,11 @@
-import React from 'react';
-import LoginScreen from './login';
+import React, { useEffect } from 'react';
+import { View } from 'react-native';
+import { useRouter } from 'expo-router';
 
-// Render the login screen directly from the app root to avoid navigation-before-mount races.
-export default function Index() {
-  return <LoginScreen />;
+export default function IndexRedirect() {
+  const router = useRouter();
+  useEffect(() => {
+    router.replace('/login');
+  }, []);
+  return <View style={{ flex: 1, backgroundColor: '#fff' }} />;
 }

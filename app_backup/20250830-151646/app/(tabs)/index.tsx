@@ -1,7 +1,6 @@
 import React from 'react';
 import { SafeAreaView, View, Text, StyleSheet, FlatList } from 'react-native';
 import RoomCard from '../components/RoomCard';
-import { colors } from '../binmo-theme';
 
 const MOCK = [
   { id: '1', title: 'ساحة الدردشة العامة', listeners: 248, agency: undefined },
@@ -14,9 +13,12 @@ export default function Explore() {
     <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
         <Text style={styles.hi}>اكتشف الغرف</Text>
-        <Text style={styles.sub}>مميزة • نشطة الآن</Text>
-        <View style={styles.search}><Text style={styles.searchTxt}>ابحث عن غرفة…</Text></View>
+        <Text style={styles.subDark}>مميزة • نشطة الآن</Text>
+        <View style={styles.search}>
+          <Text style={styles.searchTxtDark}>ابحث عن غرفة…</Text>
+        </View>
       </View>
+
       <FlatList
         data={MOCK}
         keyExtractor={(i) => i.id}
@@ -28,10 +30,11 @@ export default function Explore() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
+  safe: { flex: 1, backgroundColor: '#F5F7FB' },
   header: { paddingTop: 16, paddingHorizontal: 16, paddingBottom: 12 },
-  hi: { color: colors.text, fontSize: 22, fontWeight: '800' },
-  sub: { color: colors.textMuted, marginTop: 6 },
-  search: { marginTop: 12, backgroundColor: colors.card, borderRadius: 12, paddingVertical: 10, paddingHorizontal: 12, borderWidth: 1, borderColor: colors.border },
-  searchTxt: { color: '#9CA3AF' }
+  hi: { color: '#111827', fontSize: 22, fontWeight: '800' },
+  subDark: { color: '#6B7280', marginTop: 6 },
+  search: { marginTop: 12, backgroundColor: '#FFFFFF', borderRadius: 12, paddingVertical: 10, paddingHorizontal: 12, borderWidth: 1, borderColor: '#ECEFF3' },
+  searchTxtDark: { color: '#9CA3AF' }
 });
+

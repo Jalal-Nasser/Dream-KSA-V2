@@ -1,18 +1,12 @@
 import React from 'react';
-import { Slot } from 'expo-router';
-import { SafeAreaView, StatusBar, StyleSheet } from 'react-native';
+import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 
-// Minimal root layout for Expo Router — must render a Slot on first render.
 export default function RootLayout() {
   return (
-    <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="light-content" />
-      <Slot />
-    </SafeAreaView>
+    <>
+      <StatusBar style="dark" />
+      <Stack screenOptions={{ headerShown: false }} />
+    </>
   );
 }
-
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#071021' },
-});
-
