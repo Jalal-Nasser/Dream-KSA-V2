@@ -21,7 +21,8 @@ export default function TabLayout() {
           if (name === 'index') return <Ionicons name="planet" color={color} size={size} />;
           if (name === 'live') return <Ionicons name="radio" color={color} size={size} />;
           if (name === 'agencies') return <MaterialIcons name="groups" color={color} size={size} />;
-          if (name === 'profile') return <Ionicons name="person-circle" color={color} size={size} />;
+          // support both 'profile' and 'me' (if either exists); prefer 'me' now
+          if (name === 'profile' || name === 'me') return <Ionicons name="person-circle" color={color} size={size} />;
           return null;
         },
       })}

@@ -28,7 +28,7 @@ export default function Shell() {
           <Text style={styles.btnTxt}>Open Agencies</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.btn} onPress={() => router.push('/(tabs)/profile')}>
+        <TouchableOpacity style={styles.btn} onPress={() => router.push('/(tabs)/me')}>
           <Ionicons name="person" size={18} color="#fff" />
           <Text style={styles.btnTxt}>Open Profile (may still crash if route duplicates exist)</Text>
         </TouchableOpacity>
