@@ -2,7 +2,6 @@ import React from 'react';
 import { Tabs } from 'expo-router';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 
-// Light Binmo-style bottom tab: white rounded bar, green active color.
 export default function TabLayout() {
   return (
     <Tabs
@@ -21,7 +20,7 @@ export default function TabLayout() {
           shadowRadius: 12,
           elevation: 6,
         },
-        tabBarActiveTintColor: '#00C853', // lively green like Binmo accents
+        tabBarActiveTintColor: '#00C853',
         tabBarInactiveTintColor: '#7A7A7A',
         tabBarLabelStyle: { fontSize: 12, marginBottom: 2, fontWeight: '700' },
         tabBarIcon: ({ color, size }) => {
