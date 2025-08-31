@@ -91,14 +91,35 @@ export default function MeScreen() {
   );
 }
 
-function MenuItem({ icon, label, onPress, isLast = false }: { icon: any; label: string; onPress: () => void; isLast?: boolean }) {
+function MenuItem({
+  icon,
+  label,
+  onPress,
+  isLast = false,
+  iconColor,          // optional: default to current palette color
+}: {
+  icon: any;
+  label: string;
+  onPress: () => void;
+  isLast?: boolean;
+  iconColor?: string;
+}) {
   return (
     <Pressable onPress={onPress} style={[styles.menuItem, isLast && { borderBottomWidth: 0 }]}>
+      {/* LEFTMOST: chevron (arrow) */}
       <Ionicons name="chevron-back" size={18} color="#B4B8BF" style={{ opacity: 0.8 }} />
+
+      {/* MIDDLE: label (RTL aligned) */}
       <View style={{ flex: 1, alignItems: 'flex-end' }}>
         <Text style={styles.menuLabel}>{label}</Text>
       </View>
-      <MaterialCommunityIcons name={icon} size={20} color={PALETTE.primary} />
+
+      {/* RIGHTMOST: icon (keep existing color) */}
+      <MaterialCommunityIcons
+        name={icon}
+        size={20}
+        color={iconColor ?? PALETTE.primary}  // keeps your current app color
+      />
     </Pressable>
   );
 }
