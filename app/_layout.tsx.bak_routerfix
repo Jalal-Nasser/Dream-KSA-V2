@@ -2,13 +2,16 @@ import React from 'react';
 import { Slot } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
+import ErrorBoundary from './_error-boundary';
 
+// Minimal root layout for Expo Router — must render a Slot on first render.
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
-      <StatusBar style="light" />
-      <Slot />
+      <StatusBar style="dark" />
+      <ErrorBoundary>
+        <Slot />
+      </ErrorBoundary>
     </SafeAreaProvider>
   );
 }
-

@@ -1,0 +1,1 @@
+This is the previous login screen that was under app/(auth)/login.tsx. It has been quarantined to prevent Expo Router from scanning additional routes during boot minimal tests.

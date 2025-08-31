@@ -1,0 +1,15 @@
+import React from 'react';
+import { View, Text, StatusBar } from 'react-native';
+
+export default function App() {
+  return (
+    <View style={{ flex: 1, backgroundColor: '#ffffff', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+      <StatusBar barStyle="dark-content" />
+      <Text style={{ fontSize: 18, fontWeight: '800', color: '#111' }}>Dreams KSA — Safe Entry</Text>
+      <Text style={{ marginTop: 8, color: '#444', textAlign: 'center' }}>
+        If you can see this, the crash is inside the Router/routes.
+        {'\n'}If you still get a red screen now, the crash is outside Router (devtools/deps).
+      </Text>
+    </View>
+  );
+}
