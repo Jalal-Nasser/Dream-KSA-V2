@@ -59,7 +59,7 @@ export default function SettingsScreen() {
           <SettingRow label="سياسة خاصة" icon="file-document-lock-outline" onPress={() => {}} />
           <SettingRow label="سياسة الاسترجاع" icon="cash-refund" onPress={() => {}} />
           <SettingRow label="شروط الخدمة" icon="hand-heart-outline" onPress={() => {}} />
-          <SettingRow label="رقم النسخة" icon="information-outline" subLeft="V 2.37.2(984)" last />
+          <SettingRow label="رقم النسخة" icon="information-outline" subLeft="V 1.0.0" last />
         </View>
 
         {/* Logout */}
