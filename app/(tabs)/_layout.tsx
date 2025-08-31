@@ -49,7 +49,7 @@ export default function TabsLayout() {
       tabBar={(props) => <MyTabBar {...props} />}
     >
       {/* Keep index screen routable but hidden from the tab bar */}
-      <Tabs.Screen name="index" options={{ href: null, tabBarButton: () => null }} />
+      <Tabs.Screen name="index" options={{ href: null }} />
       <Tabs.Screen name="me" options={{ title: 'أنا' }} />
       <Tabs.Screen name="messages" options={{ title: 'الرسائل' }} />
       <Tabs.Screen name="moments" options={{ title: 'لحظات' }} />
