@@ -96,29 +96,29 @@ function MenuItem({
   label,
   onPress,
   isLast = false,
-  iconColor,          // optional: default to current palette color
+  iconColor,
 }: {
   icon: any;
   label: string;
   onPress: () => void;
   isLast?: boolean;
-  iconColor?: string;
+  iconColor?: string; // if you already pass a color, it will be used
 }) {
   return (
     <Pressable onPress={onPress} style={[styles.menuItem, isLast && { borderBottomWidth: 0 }]}>
       {/* LEFTMOST: chevron (arrow) */}
       <Ionicons name="chevron-back" size={18} color="#B4B8BF" style={{ opacity: 0.8 }} />
 
-      {/* MIDDLE: label (RTL aligned) */}
+      {/* MIDDLE: label (RTL, right-aligned) */}
       <View style={{ flex: 1, alignItems: 'flex-end' }}>
         <Text style={styles.menuLabel}>{label}</Text>
       </View>
 
-      {/* RIGHTMOST: icon (keep existing color) */}
+      {/* RIGHTMOST: icon — KEEP EXISTING COLOR */}
       <MaterialCommunityIcons
         name={icon}
         size={20}
-        color={iconColor ?? PALETTE.primary}  // keeps your current app color
+        color={iconColor /* keeps passed color */ }
       />
     </Pressable>
   );
@@ -153,8 +153,19 @@ const styles = StyleSheet.create({
   badgeEmpty: { alignSelf: 'flex-end', flexDirection: 'row-reverse', gap: 6, backgroundColor: PALETTE.soft2, borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4 },
   badgeEmptyTxt: { color: PALETTE.primary, fontWeight: '700' },
   card: { backgroundColor: '#FFFFFF', marginTop: 12, marginHorizontal: 12, borderRadius: 16, overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.03, shadowRadius: 8, elevation: 1 },
-  menuItem: { flexDirection: 'row-reverse', alignItems: 'center', gap: 10, paddingVertical: 12, paddingHorizontal: 14, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: PALETTE.soft2 },
-  menuLabel: { fontSize: 15 },
+  menuItem: {
+    flexDirection: 'row',            // IMPORTANT: no row-reverse
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: PALETTE.soft2,
+  },
+  menuLabel: {
+    fontSize: 15,
+    textAlign: 'right',              // keep RTL alignment
+  },
   fab: { position: 'absolute', right: 12, bottom: 24, backgroundColor: PALETTE.soft2, borderRadius: 18, flexDirection: 'row-reverse', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: PALETTE.cherry150 },
   fabTxt: { fontWeight: '700', color: PALETTE.primaryDark },
 });
