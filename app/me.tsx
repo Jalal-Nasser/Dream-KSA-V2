@@ -3,9 +3,11 @@ import { View, Text, StyleSheet, ScrollView, Image, Pressable, Alert } from 'rea
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useRouter } from 'expo-router';
 import { PALETTE } from '../lib/theme';
 
 export default function MeScreen() {
+  const router = useRouter();
   const onMenu = (name: string) => Alert.alert('', `(${name}) قادم لاحقًا`);
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: PALETTE.soft1 }}>
@@ -65,17 +67,17 @@ export default function MeScreen() {
         </View>
 
         <View style={styles.card}>
-          <MenuItem icon="wallet" label="محفظة" onPress={() => onMenu('محفظة')} />
-          <MenuItem icon="storefront-outline" label="متجر" onPress={() => onMenu('متجر')} />
+          <MenuItem icon="wallet" label="محفظة" onPress={() => router.push('/(tabs)/me/wallet')} />
+          <MenuItem icon="storefront-outline" label="متجر" onPress={() => router.push('/(tabs)/me/store')} />
           <MenuItem icon="account-tie" label="وكالة" onPress={() => onMenu('وكالة')} />
-          <MenuItem icon="calendar-check-outline" label="مهام" onPress={() => onMenu('مهام')} isLast />
+          <MenuItem icon="calendar-check-outline" label="مهام" onPress={() => router.push('/(tabs)/me/tasks')} isLast />
         </View>
 
         <View style={styles.card}>
-          <MenuItem icon="clock-time-four-outline" label="الزيارات الأخيرة" onPress={() => onMenu('الزيارات الأخيرة')} />
-          <MenuItem icon="file-document-edit-outline" label="خدمة العملاء" onPress={() => onMenu('خدمة العملاء')} />
-          <MenuItem icon="translate" label="اللغة" onPress={() => onMenu('اللغة')} />
-          <MenuItem icon="cog-outline" label="إعدادات" onPress={() => onMenu('إعدادات')} isLast />
+          <MenuItem icon="clock-time-four-outline" label="الزيارات الأخيرة" onPress={() => router.push('/(tabs)/me/recent')} />
+          <MenuItem icon="file-document-edit-outline" label="خدمة العملاء" onPress={() => router.push('/(tabs)/me/support')} />
+          <MenuItem icon="translate" label="اللغة" onPress={() => router.push('/(tabs)/me/language')} />
+          <MenuItem icon="cog-outline" label="إعدادات" onPress={() => router.push('/(tabs)/me/settings')} isLast />
         </View>
 
         <View style={{ height: 32 }} />
