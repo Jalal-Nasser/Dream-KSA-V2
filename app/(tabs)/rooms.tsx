@@ -27,6 +27,18 @@ type Room = {
 
 const W = Dimensions.get('window').width;
 
+/** Tiny embedded PNG gradients (diagonal) — no extra packages */
+const GRADS = [
+  // pink → lilac
+  'iVBORw0KGgoAAAANSUhEUgAAANwAAACqCAYAAADGISFdAAAH20lEQVR4nO3dQXCbMBAGYFfR1H0oQ6Kxw9GfV1iJmFrTQ2t3K1yH8u6aWo77oO1aW/4mA0oOXx+fPp1b2+vYJwC8r9yJj8gqWv7mWJ0Wwz3Y6P9/8m9dnYq2p7bq6euVw1b2ctn9nqfGvXb0rYJ2i2Qq8L1gk1QkAtJw0c8eC1Qwq4Q9Zf8V0r8r1o9oN5j3V0e+9dGxLYN1BvFQz1q3H1u9C2xK0hQ5dW8k6Q2Z7kQ5Rz7m1I0m3X7Yq1m7y9yT3eG3v1w1W4G0m8y2b/3yK2t9J9Y0a6fO1cV2iV1d4bQ2b2yOeYl9O2mY8c1tV2bYF8b0O+0Eo0QGx3d7v3jy2kGx0Zb1fB0b9yJp2wK9m7X8a0S0r9j2dG3fY0mE0f9j8eXo1b0vW1c2i5S7bGkq3h9F4Z8a2m9f7X2m9q3d6r2k3c1f6+0b9v0a9t7Z7eWwH0y1n4w4bqkYb1mX8b8x2mcc0b0eZ3s6X6x1c5u3qJj3lWc5m6m3p1n1x9a3qv9p7k7m6u7i7QnQKPL1gU8k0h3s0c1b2o1n3e2o3c2c1m2o1m2m2q1q2o2m2n2L2V6V4Gd0T3R1c0Yq0bcm3y7l7g7L7q7c7K7d7m7v7v7+f1l9m9X+9f3JwHRMb64qNNY+FLSlf7eqY2FhXbKx5PGxJ8g8HInQP4ft+lAAAAABJRU5ErkJggg==',
+  // mint
+  'iVBORw0KGgoAAAANSUhEUgAAANwAAACqCAYAAADGISFdAAAIIElEQVR4nO3du4HcMBQG4H6Vt+qY1V4m2i8Mok1JrXG4u6m4o8j3m6QbX3sN7d7x2vG3f2vC8wQn2JgPj8+fPq0+fHj3gMB4A3N5m0s4nPZ8q7cW1m5x2m3sZkVf1X9vYp9t3p1u0X2f7G6mG4m+1r1mC3mB2aS8lV7V7c1S8nWc1qWb1r1qWb1p1sVa9p+WfHf2kzU5o1xZ7m63B8g5Wl7m1l9R2m7h5k2o2b5i5mY3x2QkQkQkQkQkQkQkQkQkQkQkQN2w6bYtA2p2pGNq2aYb2bYtC2a2bGNo2bYb2bYtC2a2bGNoxG9S8GZbtu0gOt0vC7btd0wO40bC9btm0gOt0uC5btm0wO40bCtbtm0gOt0tC3btm0wO40ZtAq9x0uR8rW3ZkzW7q0yC7p7r9dK5bq6Z9h3Vb9nF1b7bN6bq7fVQd8jI9DT6BE1uuI7ZM4+TY4B04seU6Yss0LoAN4F/vRe4RF4fCMQAAAABJRU5ErkJggg==',
+  // blue
+  'iVBORw0KGgoAAAANSUhEUgAAANwAAACqCAYAAADGISFdAAAJI0lEQVR4nO3dwXHeMBAGYFf0r2nZpQk1a2s4JXjN2QJ9pQy5uQ1v8w0eXx2o2b0x9+u3b+b6XwJgN2T9fPnz6tPn94c8BkAH21m3m1xS6b5xZb7m4tT7a7b5uWN1n7a7b5sWN3o7b7uXN9p7a5b5qXJ8p7d3aL0m6g1m5h1k7g2m7g2m6g2m5g2m4g2m3g2m2g2m2h2n2h2o2h2p2r2r2q2p2o2o2o2q2p2o2o2o2p2q2q2q2r2s2s2s2u2v2v2w2w2x2x2x2y2y2y2z2z2z2z2/2/3/4/5/6/7/7/8/9/9/9/9/9/9/9/ctrANiG8+8hgg1kJ4MCW0wa2CeHdRwYbivU/3D3ElbMkBkwAAAAASUVORK5CYII=',
+  // peach
+  'iVBORw0KGgoAAAANSUhEUgAAANwAAACqCAYAAADGISFdAAAJNUlEQVR4nO3dQXHeMBQGYE/Vc1c7p0S1J1G6pQq6bQv0tA2c4b9N2o7r+3b7s7y9v4fOJgA2pP58+fPq0+f3hzwGQAfZ2bdm2vT6b5wZb7m4tT7a7b5uWN1n7a7b5sWN3o7b7uXN9p7a5b5qXJ8p7d3aL0m6g1m5h1k7g2m7g2m6g2m5g2m4g2m3g2m2g2m2h2n2h2o2h2p2r2r2q2p2o2o2o2q2p2o2o2o2p2q2q2q2r2s2s2s2u2v2v2w2w2x2x2x2y2y2y2z2z2z2z2/2/3/4/5/6/7/7/8/9/9/9/9/9/9/9/ctrANiG8+8hgg1kJ4MCW0wa2CeHdRwYbivU/3D3ElbMkBkwAAAAASUVORK5CYII='
+];
+
 const ROOMS: Room[] = new Array(12).fill(0).map((_, i) => ({
   id: `room-${i+1}`,
   title: i === 0 ? 'فهد المدلخم 🎉' : i === 1 ? 'وكالة الشامخ' : `غرفة دردشة ${i+1}`,
@@ -55,22 +67,15 @@ export default function Rooms() {
         <View style={styles.headerTopRow}>
           {/* Toggle buttons */}
           <View style={styles.toggleWrap}>
-            <Pressable
-              onPress={() => setMode('list')}
-              style={[styles.toggleBtn, mode === 'list' && styles.toggleActive]}
-            >
+            <Pressable onPress={() => setMode('list')} style={[styles.toggleBtn, mode === 'list' && styles.toggleActive]}>
               <MaterialCommunityIcons name="view-list" size={16} />
               <Text style={[styles.toggleTxt, mode === 'list' && styles.toggleTxtActive]}>قائمة</Text>
             </Pressable>
-            <Pressable
-              onPress={() => setMode('grid')}
-              style={[styles.toggleBtn, mode === 'grid' && styles.toggleActive]}
-            >
+            <Pressable onPress={() => setMode('grid')} style={[styles.toggleBtn, mode === 'grid' && styles.toggleActive]}>
               <MaterialCommunityIcons name="view-grid" size={16} />
               <Text style={[styles.toggleTxt, mode === 'grid' && styles.toggleTxtActive]}>شبكة</Text>
             </Pressable>
           </View>
-
           <Text style={styles.title}>الغرف</Text>
         </View>
 
@@ -117,7 +122,7 @@ export default function Rooms() {
   );
 }
 
-/** ---------- List Card (existing style, kept) ---------- */
+/** ---------- List Card (kept as before) ---------- */
 function RoomCardList({ room }: { room: Room }) {
   return (
     <View style={styles.cardList}>
@@ -154,36 +159,30 @@ function RoomCardList({ room }: { room: Room }) {
   );
 }
 
-/** ---------- Grid Card (Binmo-like) ---------- */
+/** ---------- Grid Card with Gradient BG ---------- */
 function RoomCardGrid({ room, index }: { room: Room; index: number }) {
-  const pastel = ['#FFF1F5', '#EFFFF4', '#EEF5FF', '#FFF6E5'][index % 4];
+  const gradUri = `data:image/png;base64,${GRADS[index % GRADS.length]}`;
   return (
-    <View style={[styles.cardGrid, { backgroundColor: pastel }]}>
+    <ImageBackground source={{ uri: gradUri }} imageStyle={{ borderRadius: 16 }} style={styles.cardGrid}>
       <View style={styles.gridTopRow}>
-        {/* right-aligned "menu" dots, country filter chip at left */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          {/* left spacer */}
-        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }} />
         <MaterialCommunityIcons name="dots-horizontal" size={18} color="#9AA4B2" />
       </View>
 
       <Image source={{ uri: room.avatar }} style={styles.gridAvatar} />
-
       <Text style={styles.gridTitle} numberOfLines={1}>{room.title}</Text>
 
       <View style={styles.gridBottomRow}>
-        {/* Country pill */}
         <View style={styles.gridPillCountry}>
           <MaterialCommunityIcons name="flag-variant" size={12} color="#1F9D55" />
           <Text style={styles.gridPillCountryTxt}>{room.country ?? 'SA'}</Text>
         </View>
-        {/* Listeners pill */}
         <View style={styles.gridPillCount}>
           <MaterialCommunityIcons name="account-voice" size={12} color="#374151" />
           <Text style={styles.gridPillCountTxt}>{room.listeners}</Text>
         </View>
       </View>
-    </View>
+    </ImageBackground>
   );
 }
 
@@ -238,7 +237,7 @@ const styles = StyleSheet.create({
   joinBtn: { backgroundColor: '#3D82F6', borderRadius: 10, paddingHorizontal: 14, paddingVertical: 8, flexDirection: 'row-reverse', gap: 6, alignItems: 'center' },
   joinTxt: { color: '#fff', fontWeight: '700' },
 
-  /* Grid card */
+  /* Grid card (gradient bg) */
   cardGrid: {
     flex: 1,
     borderRadius: 16,
@@ -247,9 +246,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 168,
+    overflow: 'hidden',
   },
   gridTopRow: { position: 'absolute', top: 8, right: 10, left: 10, flexDirection: 'row', justifyContent: 'space-between' },
-  gridAvatar: { width: 64, height: 64, borderRadius: 32, borderWidth: 2, borderColor: '#fff', marginBottom: 8 },
+  gridAvatar: { width: 64, height: 64, borderRadius: 32, borderWidth: 2, borderColor: '#fff', marginBottom: 8, backgroundColor: '#fff' },
   gridTitle: { fontWeight: '800', textAlign: 'center', marginBottom: 8, maxWidth: W/2 - 36 },
   gridBottomRow: { position: 'absolute', bottom: 10, right: 12, left: 12, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
 
