@@ -28,7 +28,7 @@ function SettingRow({ label, icon, onPress, showAlert, subLeft, last }: RowProps
 
       {/* RIGHT: icon THEN label (RTL order) */}
       <View style={styles.rowRight}>
-        <MaterialCommunityIcons name={icon} size={20} color="#111827" />
+        <MaterialCommunityIcons name={icon} size={20} color={PALETTE.primaryDark} />
         <Text style={styles.rowLabel} numberOfLines={1}>{label}</Text>
       </View>
     </Pressable>

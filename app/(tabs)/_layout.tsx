@@ -24,7 +24,7 @@ function MyTabBar({ state, descriptors, navigation }: any) {
           const iconName = (iconMap as any)[route.name] ?? 'circle-outline';
           return (
             <TouchableOpacity key={route.key} onPress={onPress} style={styles.item}>
-              <MaterialCommunityIcons name={iconName} size={22} color={isFocused ? PALETTE.primaryDark : '#222'} />
+              <MaterialCommunityIcons name={iconName} size={22} color={PALETTE.primaryDark} />
               <Text style={[styles.txt, isFocused && styles.txtActive]}>{label}</Text>
             </TouchableOpacity>
           );

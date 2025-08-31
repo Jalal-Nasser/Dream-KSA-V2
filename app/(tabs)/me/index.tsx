@@ -118,7 +118,7 @@ function MenuItem({
       <MaterialCommunityIcons
         name={icon}
         size={20}
-        color={iconColor /* keeps passed color */ }
+        color={iconColor ?? PALETTE.primaryDark}
       />
     </Pressable>
   );
