@@ -42,15 +42,30 @@ export const BrandGradient = ['#8B5CF6', '#6C5CE7'];
 export const TabColors = { active: BaseTheme.colors.tabActive, inactive: BaseTheme.colors.tabInactive };
 
 export const PALETTE = {
+  // Cherry Blossom scale
+  cherry900: '#590D22',
+  cherry800: '#800F2F',
+  cherry700: '#A4133C', // requested replacement for all greens
+  cherry600: '#C9184A',
+  cherry500: '#FF4D6D',
+  cherry300: '#FF758F',
+  cherry200: '#FF8FA3',
+  cherry150: '#FFB3C1',
+  cherry100: '#FFCCD5',
+  cherry50:  '#FFF0F3', // requested replacement for all grays
+
+  // Role aliases (keep previous keys so screens don't break)
   primaryDark: '#800F2F',
-  primary:     '#B3163E',
-  accent:      '#FF6B8A',
-  soft1:       '#FFF1F5',
-  soft2:       '#FCE4EC',
-  soft3:       '#FFE0E7',
+  primary:     '#A4133C',
+  accent:      '#FF4D6D',
+  soft1:       '#FFF0F3',
+  soft2:       '#FFCCD5',
+  soft3:       '#FFCCD5',
   textDark:    '#111827',
   textDim:     '#6B7280',
-  okGreen:     '#10B981',
+
+  // Back-compat: anything green now maps to cherry
+  okGreen:     '#A4133C',
 };
 
 

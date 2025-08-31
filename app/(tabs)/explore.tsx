@@ -8,7 +8,7 @@ export default function Explore() {
   const banners = ['https://picsum.photos/seed/dksa1/900/400','https://picsum.photos/seed/dksa2/900/400'];
   const cards = new Array(8).fill(0).map((_,i)=>({ id:`c${i}`, title:`محتوى ${i+1}`, img:`https://picsum.photos/seed/e${i}/600/400` }));
   return (
-    <SafeAreaView style={{ flex:1, backgroundColor:'#F5F7FA' }}>
+    <SafeAreaView style={{ flex:1, backgroundColor: PALETTE.soft1 }}>
       <ScrollView contentContainerStyle={{ paddingBottom:24 }}>
         <Text style={styles.title}>اكتشاف</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.hlist}>

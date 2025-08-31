@@ -3,29 +3,29 @@ import { View, Text, StyleSheet, ScrollView, Image, Pressable, Alert } from 'rea
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { PALETTE } from '../lib/theme';
 
 export default function MeScreen() {
   const onMenu = (name: string) => Alert.alert('', `(${name}) قادم لاحقًا`);
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#F2F5F7' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: PALETTE.soft1 }}>
       <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
         <View style={styles.headerCard}>
           <Pressable style={styles.editIcon} onPress={() => onMenu('تعديل الملف')}>
-            <MaterialCommunityIcons name="pencil" size={18} color="#8B8B8B" />
+            <MaterialCommunityIcons name="pencil" size={18} color={PALETTE.textDim} />
           </Pressable>
 
           <View style={styles.headerTopRow}>
             <View style={styles.nameBlock}>
               <View style={styles.nameRow}>
-                <MaterialCommunityIcons name="gender-female" size={16} color="#C35E6E" />
+                <MaterialCommunityIcons name="gender-female" size={16} color={PALETTE.primary} />
                 <Text style={styles.name}>مريم</Text>
               </View>
               <View style={styles.idRow}>
-                <MaterialCommunityIcons name="clipboard-text-outline" size={14} color="#8E8E93" />
+                <MaterialCommunityIcons name="clipboard-text-outline" size={14} color={PALETTE.textDim} />
                 <Text style={styles.idTxt}>ID: 23733397</Text>
               </View>
             </View>
-
             <Image source={{ uri: 'https://i.pravatar.cc/120?img=5' }} style={styles.avatar} />
           </View>
 
@@ -58,7 +58,7 @@ export default function MeScreen() {
 
           <View style={styles.badgeArea}>
             <View style={styles.badgeEmpty}>
-              <MaterialCommunityIcons name="emoticon-happy-outline" size={16} color="#FFB300" />
+              <MaterialCommunityIcons name="emoticon-happy-outline" size={16} color={PALETTE.accent} />
               <Text style={styles.badgeEmptyTxt}>0</Text>
             </View>
           </View>
@@ -82,7 +82,7 @@ export default function MeScreen() {
       </ScrollView>
 
       <Pressable style={styles.fab} onPress={() => onMenu('اول شحنة')}>
-        <Ionicons name="cash-outline" size={16} />
+        <Ionicons name="cash-outline" size={16} color={PALETTE.primaryDark}/>
         <Text style={styles.fabTxt}>اول شحنة</Text>
       </Pressable>
     </SafeAreaView>
@@ -96,7 +96,7 @@ function MenuItem({ icon, label, onPress, isLast = false }: { icon: any; label: 
       <View style={{ flex: 1, alignItems: 'flex-end' }}>
         <Text style={styles.menuLabel}>{label}</Text>
       </View>
-      <MaterialCommunityIcons name={icon} size={20} color="#6FAD97" />
+      <MaterialCommunityIcons name={icon} size={20} color={PALETTE.primary} />
     </Pressable>
   );
 }
@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
   idRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 6 },
   idTxt: { color: '#8E8E93' },
   avatar: { width: 60, height: 60, borderRadius: 30, backgroundColor: '#EEE' },
-  statsRow: { flexDirection: 'row-reverse', justifyContent: 'space-between', backgroundColor: '#F7F9FA', borderRadius: 12, paddingVertical: 10, paddingHorizontal: 16 },
+  statsRow: { flexDirection: 'row-reverse', justifyContent: 'space-between', backgroundColor: PALETTE.soft1, borderRadius: 12, paddingVertical: 10, paddingHorizontal: 16 },
   statBox: { alignItems: 'center', minWidth: 80 },
   statNum: { fontSize: 18, fontWeight: '700' },
   statLbl: { color: '#7C8794', marginTop: 2 },
@@ -123,15 +123,15 @@ const styles = StyleSheet.create({
   segmentRow: { flexDirection: 'row-reverse', gap: 10, marginTop: 4 },
   segment: { flex: 1, paddingVertical: 10, borderRadius: 10, alignItems: 'center' },
   segmentActive: { backgroundColor: '#FDE7EA' },
-  segmentDim: { backgroundColor: '#F7F4E8' },
-  segmentTxtActive: { color: '#C35E6E', fontWeight: '700' },
-  segmentTxtDim: { color: '#C3A34F', fontWeight: '700' },
+  segmentDim: { backgroundColor: PALETTE.soft2 },
+  segmentTxtActive: { color: PALETTE.primary, fontWeight: '700' },
+  segmentTxtDim: { color: PALETTE.primaryDark, opacity: 0.7, fontWeight: '700' },
   badgeArea: { backgroundColor: '#FFFFFF', paddingVertical: 8, gap: 8 },
-  badgeEmpty: { alignSelf: 'flex-end', flexDirection: 'row-reverse', gap: 6, backgroundColor: '#FFF8E1', borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4 },
-  badgeEmptyTxt: { color: '#FFB300', fontWeight: '700' },
+  badgeEmpty: { alignSelf: 'flex-end', flexDirection: 'row-reverse', gap: 6, backgroundColor: PALETTE.soft2, borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4 },
+  badgeEmptyTxt: { color: PALETTE.primary, fontWeight: '700' },
   card: { backgroundColor: '#FFFFFF', marginTop: 12, marginHorizontal: 12, borderRadius: 16, overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.03, shadowRadius: 8, elevation: 1 },
-  menuItem: { flexDirection: 'row-reverse', alignItems: 'center', gap: 10, paddingVertical: 12, paddingHorizontal: 14, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#E8EDF3' },
+  menuItem: { flexDirection: 'row-reverse', alignItems: 'center', gap: 10, paddingVertical: 12, paddingHorizontal: 14, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: PALETTE.soft2 },
   menuLabel: { fontSize: 15 },
-  fab: { position: 'absolute', right: 12, bottom: 24, backgroundColor: '#E9F8EC', borderRadius: 18, flexDirection: 'row-reverse', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: '#BDE6C5' },
-  fabTxt: { fontWeight: '700' },
+  fab: { position: 'absolute', right: 12, bottom: 24, backgroundColor: PALETTE.soft2, borderRadius: 18, flexDirection: 'row-reverse', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: PALETTE.cherry150 },
+  fabTxt: { fontWeight: '700', color: PALETTE.primaryDark },
 });

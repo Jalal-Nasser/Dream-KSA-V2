@@ -46,7 +46,7 @@ export default function Rooms() {
   // Shared header for all tabs (gradient + tabs + search + toggle)
   const Header = React.useCallback(() => (
     <>
-      <LinearGradient colors={[PALETTE.soft1, PALETTE.soft3]} start={{x:0,y:0}} end={{x:1,y:0}} style={styles.headerGrad}>
+      <LinearGradient colors={[PALETTE.soft1, PALETTE.soft2]} start={{x:0,y:0}} end={{x:1,y:0}} style={styles.headerGrad}>
         <View style={styles.headerRow}>
           {/* Left side: bigger home icon + search icon bubble */}
           <View style={styles.leftIcons}>
@@ -77,11 +77,11 @@ export default function Rooms() {
 
       {/* Search row + view toggle (outside any ScrollView) */}
       <View style={styles.searchWrap}>
-        <Ionicons name="search" size={16} color="#8E8E93" />
+        <Ionicons name="search" size={16} color={PALETTE.textDim} />
         <TextInput
           style={styles.searchInput}
           placeholder="ابحث عن غرفة"
-          placeholderTextColor="#A1A1A1"
+          placeholderTextColor={PALETTE.textDim}
           value={query}
           onChangeText={setQuery}
           textAlign="right"
@@ -134,7 +134,7 @@ export default function Rooms() {
     );
 
     return mode === 'list' ? (
-      <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F7FA' }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: PALETTE.soft1 }}>
         <FlatList
           key={'my-list'}
           data={data}
@@ -146,7 +146,7 @@ export default function Rooms() {
         />
       </SafeAreaView>
     ) : (
-      <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F7FA' }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: PALETTE.soft1 }}>
         <FlatList
           key={'my-grid'}
           data={data}
@@ -168,7 +168,7 @@ export default function Rooms() {
     const listHeader = (<Header />);
 
     return mode === 'list' ? (
-      <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F7FA' }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: PALETTE.soft1 }}>
         <FlatList
           key={'trend-list'}
           data={data}
@@ -180,7 +180,7 @@ export default function Rooms() {
         />
       </SafeAreaView>
     ) : (
-      <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F7FA' }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: PALETTE.soft1 }}>
         <FlatList
           key={'trend-grid'}
           data={data}
@@ -234,7 +234,7 @@ export default function Rooms() {
   const data = BASE_ROOMS.filter(r => r.title.includes(query));
 
   return mode === 'list' ? (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F7FA' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: PALETTE.soft1 }}>
       <FlatList
         key={'celeb-list'}
         data={data}
@@ -243,10 +243,10 @@ export default function Rooms() {
         contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 28 }}
         ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
         renderItem={({ item }) => <ListCard room={item} />}
-      />
-    </SafeAreaView>
+        />
+      </SafeAreaView>
   ) : (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F7FA' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: PALETTE.soft1 }}>
       <FlatList
         key={'celeb-grid'}
         data={data}
@@ -293,7 +293,7 @@ function ListCard({ room }: { room: Room }) {
 function GridCard({ room }: { room: Room }) {
   return (
     <Pressable onPress={() => router.push({ pathname: '/room/[id]', params: { id: room.id } })}>
-      <LinearGradient colors={['#FFF1F5', '#FFE0E7']} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.skinCard}>
+      <LinearGradient colors={[PALETTE.soft1, PALETTE.soft2]} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.skinCard}>
         <Image source={{ uri: room.avatar }} style={styles.skinAvatar}/>
         <Text style={styles.skinTitle} numberOfLines={1}>{room.title}</Text>
         <View style={styles.skinMetaRow}>
@@ -314,13 +314,13 @@ const styles = StyleSheet.create({
   headerRow: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between' },
 
   leftIcons: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  homeBubble: { backgroundColor: '#FFE7EE', borderRadius: 12, padding: 8, borderWidth: 1, borderColor: '#FFD4E0' },
-  iconBtn: { backgroundColor: '#F2F4F7', borderRadius: 10, padding: 6 },
+  homeBubble: { backgroundColor: PALETTE.soft2, borderRadius: 12, padding: 8, borderWidth: 1, borderColor: PALETTE.cherry150 },
+  iconBtn: { backgroundColor: PALETTE.soft1, borderRadius: 10, padding: 6 },
 
   // RTL tabs: push to right edge
   segments: { flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'flex-end', gap: 24, flex: 1, marginRight: 8 },
   segItem: { alignItems: 'center' },
-  segTxt: { fontWeight: '700', color: '#8A95A3', fontSize: 18 },
+  segTxt: { fontWeight: '700', color: PALETTE.textDim, fontSize: 18 },
   segTxtActive: { color: PALETTE.primaryDark, fontWeight: '900' },
   segUnderline: { height: 3, width: 30, backgroundColor: 'transparent', marginTop: 6, borderRadius: 2 },
   segUnderlineActive: { backgroundColor: PALETTE.primaryDark },
@@ -328,11 +328,11 @@ const styles = StyleSheet.create({
   searchWrap: { paddingHorizontal: 12, paddingTop: 8, paddingBottom: 8, flexDirection:'row-reverse', alignItems:'center', gap: 8 },
   searchInput: { flex: 1, fontSize: 14, paddingVertical: 0, textAlign: 'right' },
 
-  toggleWrap: { flexDirection:'row', gap: 6, backgroundColor: '#EFF3F8', padding: 4, borderRadius: 999 },
+  toggleWrap: { flexDirection:'row', gap: 6, backgroundColor: PALETTE.soft1, padding: 4, borderRadius: 999 },
   toggleBtn: { flexDirection:'row', gap: 6, alignItems:'center', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999 },
   toggleActive: { backgroundColor: '#FFFFFF', shadowColor:'#000', shadowOpacity:0.06, shadowRadius:6, elevation:1 },
-  toggleTxt: { fontWeight: '700', color: '#6B7280' },
-  toggleTxtActive: { color: '#111827' },
+  toggleTxt: { fontWeight: '700', color: PALETTE.textDim },
+  toggleTxtActive: { color: PALETTE.textDark },
 
   // Maryam card
   myCard: { backgroundColor:'#FFFFFF', borderRadius:16, overflow:'hidden', paddingBottom:10 },
@@ -343,7 +343,7 @@ const styles = StyleSheet.create({
   sectionTitle: { fontWeight:'900', color:PALETTE.primaryDark, textAlign:'right', marginHorizontal:12, marginTop:16, marginBottom:8 },
 
   // Shared pills/counters
-  metaPill: { backgroundColor:'#FFE7EE', paddingHorizontal:8, paddingVertical:3, borderRadius:999 },
+  metaPill: { backgroundColor: PALETTE.soft2, paddingHorizontal:8, paddingVertical:3, borderRadius:999 },
   metaPillTxt: { color: PALETTE.primaryDark, fontWeight:'700', fontSize:12 },
   metaCount: { fontWeight:'700' },
 
@@ -371,7 +371,7 @@ const styles = StyleSheet.create({
   featureTitle: { textAlign:'right', fontWeight:'800', marginTop:8, marginHorizontal:10 },
   featureMeta: { flexDirection:'row-reverse', justifyContent:'space-between', alignItems:'center', marginTop:6, marginHorizontal:10 },
 
-  storyRing: { padding:2, borderRadius:999, backgroundColor:'#FFE7EE' },
+  storyRing: { padding:2, borderRadius:999, backgroundColor: PALETTE.soft2 },
   storyAvatar: { width:48, height:48, borderRadius:24, backgroundColor:'#fff' },
   storyName: { fontSize:11, marginTop:4, maxWidth:60, textAlign:'center' },
 });

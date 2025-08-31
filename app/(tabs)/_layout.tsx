@@ -3,26 +3,25 @@ import { Tabs } from 'expo-router';
 import { View, Text, TouchableOpacity, SafeAreaView, StyleSheet } from 'react-native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { PALETTE } from '../../lib/theme';
-import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
-function MyTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
+function MyTabBar({ state, descriptors, navigation }: any) {
   return (
     <SafeAreaView style={{ backgroundColor: '#fff' }}>
       <View style={styles.bar}>
-        {state.routes.map((route, index) => {
-          if (route.name === 'index') return null; // keep hidden
+        {state.routes.map((route: any, index: any) => {
+          if (route.name === 'index') return null;
           const isFocused = state.index === index;
           const onPress = () => {
             const event = navigation.emit({ type:'tabPress', target: route.key, canPreventDefault:true });
             if (!isFocused && !event.defaultPrevented) navigation.navigate(route.name);
           };
-          const labelMap: Record<string, string> = { me:'أنا', messages:'الرسائل', moments:'لحظات', explore:'اكتشاف', rooms:'الغرف' };
-          const iconMap: Record<string, string> = { me:'account-circle', messages:'message-text', moments:'flash', explore:'compass', rooms:'account-voice' };
-          const label = labelMap[route.name] ?? route.name;
-          const iconName = iconMap[route.name] ?? 'circle-outline';
+          const labelMap = { me:'أنا', messages:'الرسائل', moments:'لحظات', explore:'اكتشاف', rooms:'الغرف' };
+          const iconMap  = { me:'account-circle', messages:'message-text', moments:'flash', explore:'compass', rooms:'account-voice' };
+          const label = (labelMap as any)[route.name] ?? route.name;
+          const iconName = (iconMap as any)[route.name] ?? 'circle-outline';
           return (
             <TouchableOpacity key={route.key} onPress={onPress} style={styles.item}>
-              <MaterialCommunityIcons name={iconName as any} size={22} color={isFocused ? PALETTE.primaryDark : '#222'} />
+              <MaterialCommunityIcons name={iconName} size={22} color={isFocused ? PALETTE.primaryDark : '#222'} />
               <Text style={[styles.txt, isFocused && styles.txtActive]}>{label}</Text>
             </TouchableOpacity>
           );
@@ -46,7 +45,7 @@ export default function TabsLayout() {
 }
 
 const styles = StyleSheet.create({
-  bar: { flexDirection:'row', alignItems:'center', justifyContent:'space-between', paddingHorizontal: 14, paddingVertical: 8, borderTopWidth: 0.5, borderTopColor: '#EBEEF2' },
+  bar: { flexDirection:'row', alignItems:'center', justifyContent:'space-between', paddingHorizontal: 14, paddingVertical: 8, borderTopWidth: 0.5, borderTopColor: PALETTE.soft2, backgroundColor:'#fff' },
   item: { flex:1, alignItems:'center', gap: 4, paddingVertical: 4 },
   txt: { fontSize: 11, opacity: 0.65, fontWeight:'700' },
   txtActive: { opacity: 1, color: PALETTE.primaryDark },

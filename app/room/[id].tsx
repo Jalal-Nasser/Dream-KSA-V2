@@ -19,7 +19,7 @@ export default function RoomScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#000' }}>
-      <LinearGradient colors={['#0E4B5C', '#0B675B']} start={{x:0,y:0}} end={{x:0,y:1}} style={{ flex: 1 }}>
+      <LinearGradient colors={['#590D22', '#C9184A']} start={{x:0,y:0}} end={{x:0,y:1}} style={{ flex: 1 }}>
         {/* TOP BAR */}
         <View style={styles.topBar}>
           <Pressable onPress={() => router.back()} style={styles.topBtn}>
@@ -114,12 +114,12 @@ export default function RoomScreen() {
                 { label:'الخلفية', icon:'image-outline' },
                 { label:'إدارة المايك', icon:'microphone-settings' },
                 { label:'تعديل الغرفة', icon:'cog-outline' },
-                { label:'الديكور', icon:'brush-outline' },
+                { label:'الديكور', icon:'brush' },
                 { label:'أنشطة الغرفة', icon:'account-group-outline' },
                 { label:'موسيقى', icon:'music' },
                 { label:'صرف', icon:'cash' },
                 { label:'تأثيرات المايك', icon:'waveform' },
-                { label:'تأثيرات الهوية', icon:'account-badge' },
+                { label:'تأثيرات الهوية', icon:'account-badge-outline' },
                 { label:'شاشة واضحة', icon:'monitor-eye' },
                 { label:'كتم الصوت', icon:'microphone-off' },
                 { label:'مغير الصوت', icon:'tune-variant' },
