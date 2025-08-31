@@ -1,60 +1,127 @@
 import * as React from 'react';
-import { View, Text, StyleSheet, ScrollView, Switch } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import CherryHeader from '../../components/CherryHeader';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { PALETTE } from '../../../lib/theme';
 
-export default function SettingsScreen() {
-  const [privacy,setPrivacy]=React.useState(true);
-  const [reqs,setReqs]=React.useState(true);
-  const [notifMentions,setNotifMentions]=React.useState(true);
-  const [notifFollows,setNotifFollows]=React.useState(false);
-  const [dark,setDark]=React.useState(false);
+type RowProps = {
+  label: string;
+  icon: React.ComponentProps<typeof MaterialCommunityIcons>['name'];
+  onPress?: () => void;
+  showAlert?: boolean;
+  subLeft?: string;      // small text aligned left (e.g., version)
+  last?: boolean;
+};
 
+function SettingRow({ label, icon, onPress, showAlert, subLeft, last }: RowProps) {
   return (
-    <SafeAreaView style={{ flex:1, backgroundColor: PALETTE.soft1 }}>
+    <Pressable onPress={onPress} style={[styles.row, last && { borderBottomWidth: 0 }]}>
+      {/* left side (chevron + optional sub text) */}
+      <View style={styles.rowLeft}>
+        {subLeft ? <Text style={styles.subLeft}>{subLeft}</Text> : null}
+        <MaterialCommunityIcons name="chevron-left" size={20} color="#B3B8BF" />
+      </View>
+
+      {/* right side (label + icon + optional red alert) */}
+      <View style={styles.rowRight}>
+        {showAlert ? (
+          <View style={styles.alertDot}>
+            <MaterialCommunityIcons name="alert-circle-outline" size={16} color="#E11D48" />
+          </View>
+        ) : (
+          <View style={{ width: 16, height: 16 }} />
+        )}
+        <Text style={styles.rowLabel}>{label}</Text>
+        <MaterialCommunityIcons name={icon} size={20} color="#111827" />
+      </View>
+    </Pressable>
+  );
+}
+
+export default function SettingsScreen() {
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: PALETTE.soft1 }}>
       <CherryHeader title="إعدادات" />
-      <ScrollView contentContainerStyle={{ padding:12, gap:10, paddingBottom:24 }}>
-        <Section title="الخصوصية">
-          <SettingRow label="حساب خاص" value={privacy} onChange={setPrivacy} />
-          <SettingRow label="السماح بطلبات الصداقة" value={reqs} onChange={setReqs} last />
-        </Section>
+      <ScrollView contentContainerStyle={{ padding: 12, gap: 12, paddingBottom: 28 }}>
+        {/* Group 1 */}
+        <View style={styles.group}>
+          <SettingRow label="إدارة الحساب" icon="account-cog-outline" showAlert onPress={() => {}} />
+          <SettingRow label="امتيازات VIP" icon="crown-outline" onPress={() => {}} />
+          <SettingRow label="إعدادات الرسائل" icon="cog-outline" last onPress={() => {}} />
+        </View>
 
-        <Section title="الإشعارات">
-          <SettingRow label="إشعارات الذِكر @ " value={notifMentions} onChange={setNotifMentions} />
-          <SettingRow label="إشعارات المتابعة" value={notifFollows} onChange={setNotifFollows} last />
-        </Section>
+        {/* Group 2 */}
+        <View style={styles.group}>
+          <SettingRow label="خدمة العملاء" icon="headset" onPress={() => {}} />
+          <SettingRow label="معلومات عنا" icon="information-outline" onPress={() => {}} />
+          <SettingRow label="اتصل بنا" icon="phone-outline" onPress={() => {}} />
+          <SettingRow label="سياسة خاصة" icon="file-document-lock-outline" onPress={() => {}} />
+          <SettingRow label="سياسة الاسترجاع" icon="cash-refund" onPress={() => {}} />
+          <SettingRow label="شروط الخدمة" icon="hand-heart-outline" onPress={() => {}} />
+          <SettingRow label="رقم النسخة" icon="information-outline" subLeft="V 2.37.2(984)" last />
+        </View>
 
-        <Section title="المظهر">
-          <SettingRow label="الوضع الداكن" value={dark} onChange={setDark} last />
-        </Section>
+        {/* Logout */}
+        <Pressable style={styles.logoutBtn} onPress={() => {}}>
+          <Text style={styles.logoutTxt}>خروج</Text>
+        </Pressable>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-function Section({ title, children }: any) {
-  return (
-    <View style={styles.section}>
-      <Text style={styles.sectionTitle}>{title}</Text>
-      <View style={styles.card}>{children}</View>
-    </View>
-  );
-}
-
-function SettingRow({ label, value, onChange, last=false }: { label:string; value:boolean; onChange:(v:boolean)=>void; last?:boolean }) {
-  return (
-    <View style={[styles.row, last && { borderBottomWidth:0 }]}>
-      <Switch value={value} onValueChange={onChange} trackColor={{ false: PALETTE.soft2, true: PALETTE.primary }} thumbColor={'#fff'} />
-      <Text style={styles.label}>{label}</Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
-  section:{ gap:8 },
-  sectionTitle:{ textAlign:'right', fontWeight:'900', color:PALETTE.primaryDark },
-  card:{ backgroundColor:'#fff', borderRadius:16, overflow:'hidden' },
-  row:{ flexDirection:'row-reverse', alignItems:'center', justifyContent:'space-between', paddingVertical:12, paddingHorizontal:12, borderBottomWidth:StyleSheet.hairlineWidth, borderBottomColor:PALETTE.soft2 },
-  label:{ fontWeight:'800' },
+  group: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: PALETTE.soft2,
+  },
+  rowRight: {
+    flex: 1,
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: 10,
+  },
+  rowLeft: {
+    minWidth: 90,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  rowLabel: {
+    flex: 1,
+    textAlign: 'right',
+    fontWeight: '800',
+    color: '#111827',
+  },
+  subLeft: {
+    color: '#6B7280',
+  },
+  alertDot: {
+    width: 20,
+    height: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  logoutBtn: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  logoutTxt: {
+    color: '#E11D48', // strong red similar to screenshot emphasis
+    fontWeight: '900',
+    fontSize: 16,
+  },
 });
