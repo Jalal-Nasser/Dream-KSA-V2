@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {
   View, Text, StyleSheet, FlatList, Image, Pressable, TextInput,
-  ImageBackground, Dimensions, ScrollView,
+  ImageBackground, Dimensions, ScrollView
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -15,19 +15,18 @@ type Room = {
   cover?: string;
   avatar: string;
   listeners: number;
-  lang?: string;
   country?: string;
 };
 
 const W = Dimensions.get('window').width;
 
-const RECENTS: Room[] = new Array(8).fill(0).map((_, i) => ({
-  id: `r${i+1}`,
-  title: `غرفة زرتها ${i+1}`,
-  avatar: `https://i.pravatar.cc/120?img=${(i%60)+1}`,
+const BASE_ROOMS: Room[] = new Array(12).fill(0).map((_, i) => ({
+  id: `r${i + 1}`,
+  title: `غرفة زرتها ${i + 1}`,
+  avatar: `https://i.pravatar.cc/120?img=${(i % 60) + 1}`,
   cover: `https://picsum.photos/seed/rc${i}/1200/600`,
   listeners: 60 + i * 9,
-  country: ['SA','LB','KW','SY'][i%4],
+  country: ['SA', 'LB', 'KW', 'SY'][i % 4],
 }));
 
 const FEATURED: Room[] = [
@@ -35,41 +34,33 @@ const FEATURED: Room[] = [
   { id:'f2', title:'نقطة و سطر جديد...', avatar:'https://i.pravatar.cc/120?img=22', cover:'https://picsum.photos/seed/f2/800/600', listeners:65, country:'SA' },
 ];
 
-const HOSTS = new Array(8).fill(0).map((_,i)=>({
-  id:`h${i}`, name:`مضيف ${i+1}`, avatar:`https://i.pravatar.cc/100?img=${(i%60)+1}`,
-}));
+const HOSTS = new Array(10).fill(0).map((_,i)=>({ id:`h${i}`, name:`مضيف ${i+1}`, avatar:`https://i.pravatar.cc/100?img=${(i%60)+1}` }));
 
 export default function Rooms() {
-  const [mode, setMode] = React.useState<'list' | 'grid'>('grid'); // keep your toggle
-  const [tab, setTab] = React.useState<'my' | 'trend' | 'celeb'>('my'); // RTL order handled in UI
+  const [mode, setMode] = React.useState<'list' | 'grid'>('grid');
+  const [tab, setTab]   = React.useState<'my' | 'trend' | 'celeb'>('my');
   const [query, setQuery] = React.useState('');
 
-  const filtered = React.useMemo(() => {
-    const q = query.trim();
-    if (!q) return RECENTS;
-    return RECENTS.filter(r => r.title.includes(q));
-  }, [query]);
-
-  return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F7FA' }}>
-      {/* --- Cherry header with RTL top tabs --- */}
+  // Shared header for all tabs (gradient + tabs + search + toggle)
+  const Header = React.useCallback(() => (
+    <>
       <LinearGradient colors={[PALETTE.soft1, PALETTE.soft3]} start={{x:0,y:0}} end={{x:1,y:0}} style={styles.headerGrad}>
         <View style={styles.headerRow}>
-          {/* Left side: bigger home icon + search */}
+          {/* Left side: bigger home icon + search icon bubble */}
           <View style={styles.leftIcons}>
             <View style={styles.homeBubble}>
               <MaterialCommunityIcons name="home-variant" size={22} color={PALETTE.primaryDark} />
             </View>
-            <Pressable style={styles.iconBtn}><Ionicons name="search" size={18} color={PALETTE.textDark} /></Pressable>
+            <View style={styles.iconBtn}><Ionicons name="search" size={18} color={PALETTE.textDark} /></View>
           </View>
 
-          {/* Tabs: RTL order: المشاهير | ترند | الخاص بي (rightmost is first) */}
+          {/* Tabs — RTL order and alignment */}
           <View style={styles.segments}>
             {[
               { key: 'my',    label: 'الخاص بي' },
               { key: 'trend', label: 'ترند' },
               { key: 'celeb', label: 'المشاهير' },
-            ].map((t) => {
+            ].map(t => {
               const active = tab === (t.key as any);
               return (
                 <Pressable key={t.key} onPress={() => setTab(t.key as any)} style={styles.segItem}>
@@ -82,7 +73,7 @@ export default function Rooms() {
         </View>
       </LinearGradient>
 
-      {/* Search (kept) */}
+      {/* Search row + view toggle (outside any ScrollView) */}
       <View style={styles.searchWrap}>
         <Ionicons name="search" size={16} color="#8E8E93" />
         <TextInput
@@ -93,7 +84,6 @@ export default function Rooms() {
           onChangeText={setQuery}
           textAlign="right"
         />
-        {/* View mode toggle */}
         <View style={styles.toggleWrap}>
           <Pressable onPress={() => setMode('list')} style={[styles.toggleBtn, mode === 'list' && styles.toggleActive]}>
             <MaterialCommunityIcons name="view-list" size={16} />
@@ -105,84 +95,110 @@ export default function Rooms() {
           </Pressable>
         </View>
       </View>
+    </>
+  ), [mode, tab, query]);
 
-      {/* Body by top tab */}
-      {tab === 'my' && <MyTab filtered={filtered} mode={mode} />}
-      {tab === 'trend' && <TrendTab mode={mode} />}
-      {tab === 'celeb' && <CelebTab mode={mode} />}
-    </SafeAreaView>
-  );
-}
-
-/* -------- Tab: الخاص بي (مريم) -------- */
-function MyTab({ filtered, mode }: { filtered: Room[]; mode: 'list'|'grid' }) {
-  // مريم + غرفتها أعلى القائمة
-  const myRoom: Room = {
-    id:'maryam-room',
-    title:'غرفتي - مريم',
-    avatar:'https://i.pravatar.cc/120?img=5',
-    cover:'https://picsum.photos/seed/maryam/1200/600',
-    listeners: 132,
-    country:'SA',
-  };
-
-  return (
-    <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
-      {/* My room card */}
-      <View style={{ paddingHorizontal: 12, paddingTop: 12 }}>
-        <View style={styles.myCard}>
-          <Image source={{ uri: myRoom.cover! }} style={styles.myCover} />
-          <Image source={{ uri: myRoom.avatar }} style={styles.myAvatar} />
-          <Text style={styles.myTitle} numberOfLines={1}>{myRoom.title}</Text>
-          <View style={styles.myMetaRow}>
-            <View style={styles.metaPill}><Text style={styles.metaPillTxt}>{myRoom.country}</Text></View>
-            <View style={{flexDirection:'row-reverse', alignItems:'center', gap:4}}>
-              <Ionicons name="radio" size={12} color={PALETTE.okGreen}/>
-              <Text style={styles.metaCount}>{myRoom.listeners}</Text>
+  // Switch per tab: each returns ONE FlatList (no outer ScrollView)
+  if (tab === 'my') {
+    const myRoom: Room = {
+      id:'maryam-room',
+      title:'غرفتي - مريم',
+      avatar:'https://i.pravatar.cc/120?img=5',
+      cover:'https://picsum.photos/seed/maryam/1200/600',
+      listeners: 132,
+      country:'SA',
+    };
+    const data = BASE_ROOMS.filter(r => r.title.includes(query));
+    const listHeader = (
+      <>
+        <Header />
+        {/* Maryam room card */}
+        <View style={{ paddingHorizontal: 12, paddingTop: 12 }}>
+          <View style={styles.myCard}>
+            <Image source={{ uri: myRoom.cover! }} style={styles.myCover} />
+            <Image source={{ uri: myRoom.avatar }} style={styles.myAvatar} />
+            <Text style={styles.myTitle} numberOfLines={1}>{myRoom.title}</Text>
+            <View style={styles.myMetaRow}>
+              <View style={styles.metaPill}><Text style={styles.metaPillTxt}>{myRoom.country}</Text></View>
+              <View style={{flexDirection:'row-reverse', alignItems:'center', gap:4}}>
+                <Ionicons name="radio" size={12} color={PALETTE.okGreen}/>
+                <Text style={styles.metaCount}>{myRoom.listeners}</Text>
+              </View>
             </View>
           </View>
         </View>
-      </View>
+        <Text style={styles.sectionTitle}>الزيارات الأخيرة</Text>
+      </>
+    );
 
-      {/* Recently visited by مريم */}
-      <Text style={styles.sectionTitle}>الزيارات الأخيرة</Text>
-      {mode === 'list'
-        ? <FlatList
-            data={filtered}
-            key={'list-my'}
-            keyExtractor={(r)=>r.id}
-            contentContainerStyle={{ paddingHorizontal: 12 }}
-            ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-            renderItem={({ item }) => <ListCard room={item} />}
-          />
-        : <FlatList
-            data={filtered}
-            key={'grid-my'}
-            keyExtractor={(r)=>r.id}
-            numColumns={2}
-            contentContainerStyle={{ paddingHorizontal: 10 }}
-            columnWrapperStyle={{ gap: 10 }}
-            ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-            renderItem={({ item }) => <GridCard room={item} />}
-          />
-      }
-    </ScrollView>
-  );
-}
+    return mode === 'list' ? (
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F7FA' }}>
+        <FlatList
+          key={'my-list'}
+          data={data}
+          keyExtractor={(r) => r.id}
+          ListHeaderComponent={listHeader}
+          contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 28 }}
+          ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+          renderItem={({ item }) => <ListCard room={item} />}
+        />
+      </SafeAreaView>
+    ) : (
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F7FA' }}>
+        <FlatList
+          key={'my-grid'}
+          data={data}
+          keyExtractor={(r) => r.id}
+          numColumns={2}
+          ListHeaderComponent={listHeader}
+          contentContainerStyle={{ paddingHorizontal: 10, paddingBottom: 28 }}
+          columnWrapperStyle={{ gap: 10 }}
+          ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+          renderItem={({ item }) => <GridCard room={item} />}
+        />
+      </SafeAreaView>
+    );
+  }
 
-/* -------- Tab: ترند -------- */
-function TrendTab({ mode }: { mode: 'list'|'grid' }) {
-  const data = RECENTS.map((r, i) => ({ ...r, title: i%2? 'وكالة أرز لبنان':'بوليفارد سيتي الرياض'}));
-  return mode === 'list'
-    ? <FlatList data={data} key={'list-tr'} keyExtractor={(r)=>r.id} contentContainerStyle={{ padding:12, paddingBottom: 28 }} ItemSeparatorComponent={()=><View style={{height:10}}/>} renderItem={({item})=> <ListCard room={item}/> }/>
-    : <FlatList data={data} key={'grid-tr'} keyExtractor={(r)=>r.id} numColumns={2} contentContainerStyle={{ paddingBottom:28, paddingHorizontal:10 }} columnWrapperStyle={{gap:10}} ItemSeparatorComponent={()=><View style={{height:10}}/>} renderItem={({item})=> <GridCard room={item}/> }/>;
-}
+  if (tab === 'trend') {
+    const data = BASE_ROOMS.map((r, i) => ({ ...r, title: i%2? 'وكالة أرز لبنان':'بوليفارد سيتي الرياض'}))
+                           .filter(r => r.title.includes(query));
+    const listHeader = (<Header />);
 
-/* -------- Tab: المشاهير (RTL + المضيفين المقترحين) -------- */
-function CelebTab({ mode }: { mode: 'list'|'grid' }) {
-  return (
-    <ScrollView contentContainerStyle={{ paddingBottom: 28 }}>
-      {/* Featured programs row */}
+    return mode === 'list' ? (
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F7FA' }}>
+        <FlatList
+          key={'trend-list'}
+          data={data}
+          keyExtractor={(r)=>r.id}
+          ListHeaderComponent={listHeader}
+          contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 28 }}
+          ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+          renderItem={({ item }) => <ListCard room={item} />}
+        />
+      </SafeAreaView>
+    ) : (
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F7FA' }}>
+        <FlatList
+          key={'trend-grid'}
+          data={data}
+          keyExtractor={(r)=>r.id}
+          numColumns={2}
+          ListHeaderComponent={listHeader}
+          contentContainerStyle={{ paddingBottom:28, paddingHorizontal:10 }}
+          columnWrapperStyle={{gap:10}}
+          ItemSeparatorComponent={() => <View style={{height:10}}/>}
+          renderItem={({item})=> <GridCard room={item}/> }
+        />
+      </SafeAreaView>
+    );
+  }
+
+  // celeb tab
+  const listHeader = (
+    <>
+      <Header />
+      {/* Featured programs row (horizontal is OK inside header) */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.hlist}>
         {FEATURED.map((f)=>(
           <View key={f.id} style={styles.featureCard}>
@@ -199,7 +215,7 @@ function CelebTab({ mode }: { mode: 'list'|'grid' }) {
         ))}
       </ScrollView>
 
-      {/* المضيفين المقترحين (RTL) */}
+      {/* المضيفين المقترحين — RTL row */}
       <Text style={styles.subHeader}>المضيفين المقترحين</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={[styles.hlist,{paddingVertical:6, flexDirection:'row-reverse'}]}>
         {HOSTS.map(h=>(
@@ -211,17 +227,40 @@ function CelebTab({ mode }: { mode: 'list'|'grid' }) {
           </View>
         ))}
       </ScrollView>
+    </>
+  );
+  const data = BASE_ROOMS.filter(r => r.title.includes(query));
 
-      {/* Grid/List below */}
-      {mode === 'list'
-        ? <FlatList data={RECENTS} key={'list-ce'} keyExtractor={(r)=>r.id} contentContainerStyle={{ padding:12 }} ItemSeparatorComponent={()=><View style={{height:10}}/>} renderItem={({item})=> <ListCard room={item}/> }/>
-        : <FlatList data={RECENTS} key={'grid-ce'} keyExtractor={(r)=>r.id} numColumns={2} contentContainerStyle={{ paddingHorizontal:10 }} columnWrapperStyle={{gap:10}} ItemSeparatorComponent={()=><View style={{height:10}}/>} renderItem={({item})=> <GridCard room={item}/> }/>
-      }
-    </ScrollView>
+  return mode === 'list' ? (
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F7FA' }}>
+      <FlatList
+        key={'celeb-list'}
+        data={data}
+        keyExtractor={(r)=>r.id}
+        ListHeaderComponent={listHeader}
+        contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 28 }}
+        ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+        renderItem={({ item }) => <ListCard room={item} />}
+      />
+    </SafeAreaView>
+  ) : (
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F7FA' }}>
+      <FlatList
+        key={'celeb-grid'}
+        data={data}
+        keyExtractor={(r)=>r.id}
+        numColumns={2}
+        ListHeaderComponent={listHeader}
+        contentContainerStyle={{ paddingHorizontal:10, paddingBottom:28 }}
+        columnWrapperStyle={{gap:10}}
+        ItemSeparatorComponent={() => <View style={{height:10}}/>}
+        renderItem={({item})=> <GridCard room={item}/> }
+      />
+    </SafeAreaView>
   );
 }
 
-/* ---- Shared small components (use cherry accents) ---- */
+/* Shared cards */
 function ListCard({ room }: { room: Room }) {
   return (
     <View style={styles.cardList}>
@@ -263,7 +302,7 @@ function GridCard({ room }: { room: Room }) {
   );
 }
 
-/* ---------------- Styles (Cherry Blossom) ---------------- */
+/* Styles */
 const styles = StyleSheet.create({
   headerGrad: { paddingTop: 10, paddingBottom: 12, paddingHorizontal: 12 },
   headerRow: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between' },
@@ -272,9 +311,10 @@ const styles = StyleSheet.create({
   homeBubble: { backgroundColor: '#FFE7EE', borderRadius: 12, padding: 8, borderWidth: 1, borderColor: '#FFD4E0' },
   iconBtn: { backgroundColor: '#F2F4F7', borderRadius: 10, padding: 6 },
 
-  segments: { flexDirection: 'row-reverse', alignItems: 'flex-end', gap: 24 },
+  // RTL tabs: push to right edge
+  segments: { flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'flex-end', gap: 24, flex: 1, marginRight: 8 },
   segItem: { alignItems: 'center' },
-  segTxt: { fontWeight: '700', color: PALETTE.textDim, fontSize: 18 },
+  segTxt: { fontWeight: '700', color: '#8A95A3', fontSize: 18 },
   segTxtActive: { color: PALETTE.primaryDark, fontWeight: '900' },
   segUnderline: { height: 3, width: 30, backgroundColor: 'transparent', marginTop: 6, borderRadius: 2 },
   segUnderlineActive: { backgroundColor: PALETTE.primaryDark },
@@ -288,21 +328,20 @@ const styles = StyleSheet.create({
   toggleTxt: { fontWeight: '700', color: '#6B7280' },
   toggleTxtActive: { color: '#111827' },
 
-  /* My room */
+  // Maryam card
   myCard: { backgroundColor:'#FFFFFF', borderRadius:16, overflow:'hidden', paddingBottom:10 },
   myCover: { width:'100%', height:120 },
   myAvatar: { width:48, height:48, borderRadius:12, position:'absolute', top: 90, right: 12, borderWidth:2, borderColor:'#fff' },
   myTitle: { textAlign:'right', fontWeight:'800', marginTop: 18, marginHorizontal:12 },
   myMetaRow: { flexDirection:'row-reverse', alignItems:'center', justifyContent:'space-between', marginTop:6, marginHorizontal:12 },
-
   sectionTitle: { fontWeight:'900', color:PALETTE.primaryDark, textAlign:'right', marginHorizontal:12, marginTop:16, marginBottom:8 },
 
-  /* Pills & counts */
+  // Shared pills/counters
   metaPill: { backgroundColor:'#FFE7EE', paddingHorizontal:8, paddingVertical:3, borderRadius:999 },
   metaPillTxt: { color: PALETTE.primaryDark, fontWeight:'700', fontSize:12 },
   metaCount: { fontWeight:'700' },
 
-  /* List cards */
+  // List card
   cardList: { backgroundColor:'#FFFFFF', borderRadius:16, overflow:'hidden' },
   cover: { width:'100%', height:120 },
   badgeLive: { position:'absolute', top:8, right:8, backgroundColor:'rgba(0,0,0,0.6)', flexDirection:'row-reverse', alignItems:'center', gap:4, paddingHorizontal:8, paddingVertical:4, borderRadius:12 },
@@ -313,20 +352,19 @@ const styles = StyleSheet.create({
   joinBtn: { backgroundColor: PALETTE.primary, borderRadius:10, paddingHorizontal:14, paddingVertical:8, flexDirection:'row-reverse', gap:6, alignItems:'center' },
   joinTxt: { color:'#fff', fontWeight:'700' },
 
-  /* Grid skin cards */
+  // Grid card
   skinCard: { width:(W-30)/2, borderRadius:16, padding:12, minHeight:160, alignItems:'center', justifyContent:'center', overflow:'hidden' },
   skinAvatar: { width:64, height:64, borderRadius:32, backgroundColor:'#fff', marginBottom:8 },
   skinTitle: { fontWeight:'800', textAlign:'center', maxWidth:(W-30)/2 - 24 },
   skinMetaRow: { position:'absolute', bottom:10, right:12, left:12, flexDirection:'row', justifyContent:'space-between', alignItems:'center' },
 
-  /* Featured row */
+  // Featured & hosts header blocks
   hlist: { paddingHorizontal: 12, gap: 10, paddingTop: 8 },
   featureCard: { width: W*0.6, backgroundColor:'#fff', borderRadius:16, overflow:'hidden', paddingBottom:8 },
   featureImg: { width:'100%', height:120 },
   featureTitle: { textAlign:'right', fontWeight:'800', marginTop:8, marginHorizontal:10 },
   featureMeta: { flexDirection:'row-reverse', justifyContent:'space-between', alignItems:'center', marginTop:6, marginHorizontal:10 },
 
-  /* Stories (RTL) */
   storyRing: { padding:2, borderRadius:999, backgroundColor:'#FFE7EE' },
   storyAvatar: { width:48, height:48, borderRadius:24, backgroundColor:'#fff' },
   storyName: { fontSize:11, marginTop:4, maxWidth:60, textAlign:'center' },
