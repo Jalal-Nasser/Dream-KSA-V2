@@ -1,0 +1,30 @@
+import React, { Suspense } from 'react';
+import { View, Text } from 'react-native';
+
+const SafeLogin = React.lazy(async () => {
+  const mod = await import('./login');
+  // Prefer default export; fallback to named Login; otherwise stub to avoid redbox
+  const Component =
+    (mod as any).default && typeof (mod as any).default === 'function'
+      ? (mod as any).default
+      : (mod as any).Login && typeof (mod as any).Login === 'function'
+      ? (mod as any).Login
+      : (() => (
+          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 20, backgroundColor: '#fff' }}>
+            <Text style={{ fontWeight: '800', fontSize: 16, marginBottom: 6 }}>Login screen export is invalid</Text>
+            <Text style={{ color: '#555', textAlign: 'center' }}>
+              Ensure app/login.tsx exports a default React component. Example:
+              {'\n'}export default function Login() {'{ return <View/> }'}
+            </Text>
+          </View>
+        ));
+  return { default: Component };
+});
+
+export default function Index() {
+  return (
+    <Suspense fallback={<View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}><Text>Loading…</Text></View>}>
+      <SafeLogin />
+    </Suspense>
+  );
+}

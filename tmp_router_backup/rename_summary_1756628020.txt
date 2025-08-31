@@ -1,0 +1,7 @@
+backup_path: tmp_router_backup/app_backup_1756628020
+branch: router/quarantine-1756628020
+
+Found matches (first matching line shown):
+match: app/index.tsx
+  - SKIP (safe file)
+→ app/_layout.tsx already contains Slot; leaving intact.
