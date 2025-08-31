@@ -41,4 +41,16 @@ export const BaseTheme: AppTheme = {
 export const BrandGradient = ['#8B5CF6', '#6C5CE7'];
 export const TabColors = { active: BaseTheme.colors.tabActive, inactive: BaseTheme.colors.tabInactive };
 
+export const PALETTE = {
+  primaryDark: '#800F2F',
+  primary:     '#B3163E',
+  accent:      '#FF6B8A',
+  soft1:       '#FFF1F5',
+  soft2:       '#FCE4EC',
+  soft3:       '#FFE0E7',
+  textDark:    '#111827',
+  textDim:     '#6B7280',
+  okGreen:     '#10B981',
+};
+
 

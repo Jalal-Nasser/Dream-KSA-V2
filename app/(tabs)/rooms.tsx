@@ -4,10 +4,11 @@ import {
   ImageBackground, Dimensions, ScrollView
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { PALETTE } from '../_dksa-theme';
+import { PALETTE } from '../../lib/theme';
 
 type Room = {
   id: string;
@@ -37,6 +38,7 @@ const FEATURED: Room[] = [
 const HOSTS = new Array(10).fill(0).map((_,i)=>({ id:`h${i}`, name:`مضيف ${i+1}`, avatar:`https://i.pravatar.cc/100?img=${(i%60)+1}` }));
 
 export default function Rooms() {
+  const router = useRouter();
   const [mode, setMode] = React.useState<'list' | 'grid'>('grid');
   const [tab, setTab]   = React.useState<'my' | 'trend' | 'celeb'>('my');
   const [query, setQuery] = React.useState('');
@@ -113,7 +115,7 @@ export default function Rooms() {
       <>
         <Header />
         {/* Maryam room card */}
-        <View style={{ paddingHorizontal: 12, paddingTop: 12 }}>
+        <Pressable onPress={() => router.push({ pathname: '/room/[id]', params: { id: myRoom.id } })} style={{ paddingHorizontal: 12, paddingTop: 12 }}>
           <View style={styles.myCard}>
             <Image source={{ uri: myRoom.cover! }} style={styles.myCover} />
             <Image source={{ uri: myRoom.avatar }} style={styles.myAvatar} />
@@ -126,7 +128,7 @@ export default function Rooms() {
               </View>
             </View>
           </View>
-        </View>
+        </Pressable>
         <Text style={styles.sectionTitle}>الزيارات الأخيرة</Text>
       </>
     );
@@ -263,42 +265,46 @@ export default function Rooms() {
 /* Shared cards */
 function ListCard({ room }: { room: Room }) {
   return (
-    <View style={styles.cardList}>
-      <ImageBackground source={{ uri: room.cover! }} style={styles.cover} imageStyle={{ borderTopLeftRadius: 16, borderTopRightRadius: 16 }}>
-        <View style={styles.badgeLive}>
-          <Ionicons name="radio" size={12} color="#fff" />
-          <Text style={styles.badgeTxt}>{room.listeners} مستمع</Text>
+    <Pressable onPress={() => router.push({ pathname: '/room/[id]', params: { id: room.id } })}>
+      <View style={styles.cardList}>
+        <ImageBackground source={{ uri: room.cover! }} style={styles.cover} imageStyle={{ borderTopLeftRadius: 16, borderTopRightRadius: 16 }}>
+          <View style={styles.badgeLive}>
+            <Ionicons name="radio" size={12} color="#fff" />
+            <Text style={styles.badgeTxt}>{room.listeners} مستمع</Text>
+          </View>
+        </ImageBackground>
+        <View style={styles.cardBody}>
+          <Text style={styles.roomTitle} numberOfLines={1}>{room.title}</Text>
+          <View style={{ flexDirection: 'row-reverse', alignItems: 'center', gap: 6 }}>
+            <View style={styles.metaPill}><Text style={styles.metaPillTxt}>{room.country ?? 'SA'}</Text></View>
+          </View>
         </View>
-      </ImageBackground>
-      <View style={styles.cardBody}>
-        <Text style={styles.roomTitle} numberOfLines={1}>{room.title}</Text>
-        <View style={{ flexDirection: 'row-reverse', alignItems: 'center', gap: 6 }}>
-          <View style={styles.metaPill}><Text style={styles.metaPillTxt}>{room.country ?? 'SA'}</Text></View>
+        <View style={styles.cardFooter}>
+          <Pressable style={styles.joinBtn} onPress={() => {}}>
+            <MaterialCommunityIcons name="microphone" size={16} color="#fff" />
+            <Text style={styles.joinTxt}>انضم</Text>
+          </Pressable>
         </View>
       </View>
-      <View style={styles.cardFooter}>
-        <Pressable style={styles.joinBtn} onPress={() => {}}>
-          <MaterialCommunityIcons name="microphone" size={16} color="#fff" />
-          <Text style={styles.joinTxt}>انضم</Text>
-        </Pressable>
-      </View>
-    </View>
+    </Pressable>
   );
 }
 
 function GridCard({ room }: { room: Room }) {
   return (
-    <LinearGradient colors={['#FFF1F5', '#FFE0E7']} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.skinCard}>
-      <Image source={{ uri: room.avatar }} style={styles.skinAvatar}/>
-      <Text style={styles.skinTitle} numberOfLines={1}>{room.title}</Text>
-      <View style={styles.skinMetaRow}>
-        <View style={styles.metaPill}><Text style={styles.metaPillTxt}>{room.country ?? 'SA'}</Text></View>
-        <View style={{flexDirection:'row-reverse', alignItems:'center', gap:4}}>
-          <Ionicons name="radio" size={12} color={PALETTE.okGreen}/>
-          <Text style={styles.metaCount}>{room.listeners}</Text>
+    <Pressable onPress={() => router.push({ pathname: '/room/[id]', params: { id: room.id } })}>
+      <LinearGradient colors={['#FFF1F5', '#FFE0E7']} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.skinCard}>
+        <Image source={{ uri: room.avatar }} style={styles.skinAvatar}/>
+        <Text style={styles.skinTitle} numberOfLines={1}>{room.title}</Text>
+        <View style={styles.skinMetaRow}>
+          <View style={styles.metaPill}><Text style={styles.metaPillTxt}>{room.country ?? 'SA'}</Text></View>
+          <View style={{flexDirection:'row-reverse', alignItems:'center', gap:4}}>
+            <Ionicons name="radio" size={12} color={PALETTE.okGreen}/>
+            <Text style={styles.metaCount}>{room.listeners}</Text>
+          </View>
         </View>
-      </View>
-    </LinearGradient>
+      </LinearGradient>
+    </Pressable>
   );
 }
 

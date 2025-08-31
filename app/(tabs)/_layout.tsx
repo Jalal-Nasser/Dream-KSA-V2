@@ -2,7 +2,7 @@ import React from 'react';
 import { Tabs } from 'expo-router';
 import { View, Text, TouchableOpacity, SafeAreaView, StyleSheet } from 'react-native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { PALETTE } from '../_dksa-theme';
+import { PALETTE } from '../../lib/theme';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
 function MyTabBar({ state, descriptors, navigation }: BottomTabBarProps) {

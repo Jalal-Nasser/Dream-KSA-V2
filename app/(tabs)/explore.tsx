@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { PALETTE } from '../_dksa-theme';
+import { PALETTE } from '../../lib/theme';
 const W = Dimensions.get('window').width;
 
 export default function Explore() {
