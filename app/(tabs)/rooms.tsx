@@ -79,8 +79,7 @@ export default function Rooms() {
           <Text style={styles.title}>الغرف</Text>
         </View>
 
-        {/* Categories / chips (design only) */}
-        <ScrollChips />
+
 
         {/* Search */}
         <View style={styles.searchBox}>
@@ -186,21 +185,7 @@ function RoomCardGrid({ room, index }: { room: Room; index: number }) {
   );
 }
 
-/** ---------- Chips Row ---------- */
-function ScrollChips() {
-  const chips = ['All','UNO','Carrom','Ludo','SA'];
-  return (
-    <View style={styles.chipsRow}>
-      {chips.map((c, i) => (
-        <Pressable key={c} style={[styles.chip, i === 0 && styles.chipActive]}>
-          <Text style={[styles.chipTxt, i === 0 && styles.chipTxtActive]}>{c}</Text>
-        </Pressable>
-      ))}
-      <View style={{ flex: 1 }} />
-      <MaterialCommunityIcons name="menu" size={18} color="#6B7280" />
-    </View>
-  );
-}
+
 
 const styles = StyleSheet.create({
   /* Header */
@@ -214,11 +199,7 @@ const styles = StyleSheet.create({
   toggleTxt: { fontWeight: '700', color: '#6B7280' },
   toggleTxtActive: { color: '#111827' },
 
-  chipsRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8, width: '100%' },
-  chip: { backgroundColor: '#EEF2F7', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999 },
-  chipActive: { backgroundColor: '#DDE8FF' },
-  chipTxt: { fontWeight: '700', color: '#697586' },
-  chipTxtActive: { color: '#2957D2' },
+
 
   searchBox: { flexDirection: 'row', gap: 8, alignItems: 'center', backgroundColor: '#FFFFFF', borderRadius: 12, paddingHorizontal: 10, paddingVertical: 8, width: '100%', borderWidth: 1, borderColor: '#ECF0F4' },
   searchInput: { flex: 1, fontSize: 14, paddingVertical: 0 },
