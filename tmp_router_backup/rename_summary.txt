@@ -1,8 +1,7 @@
 ﻿Router quarantine summary
-Backup path: tmp_router_backup\app_backup_1756638048.31055
+Backup path: tmp_router_backup/app_backup_1756638048.31055
 Matches:
- - C:/Users/jnass/Projects/dreams-ksa/app/index.tsx => const router = useRouter();
- - C:/Users/jnass/Projects/dreams-ksa/app/login.tsx => const router = useRouter();
-Renamed:
- - C:/Users/jnass/Projects/dreams-ksa/app/index.tsx -> C:/Users/jnass/Projects/dreams-ksa/app/index.tsx.disabled
- - C:/Users/jnass/Projects/dreams-ksa/app/login.tsx -> C:/Users/jnass/Projects/dreams-ksa/app/login.tsx.disabled
+ - app/index.tsx: useRouter
+ - app/login.tsx: useRouter
+Renamed (after safe exclusions):
+ - none
