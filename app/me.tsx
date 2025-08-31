@@ -18,11 +18,11 @@ export default function MeScreen() {
           <View style={styles.headerTopRow}>
             <View style={styles.nameBlock}>
               <View style={styles.nameRow}>
-                <MaterialCommunityIcons name="gender-male" size={16} color="#3A83F1" />
-                <Text style={styles.name}>Jalal JJ</Text>
-                <View style={styles.flagPill}>
-                  <Text style={styles.flagPillTxt}>🇸🇦</Text>
-                </View>
+                {/* female icon */}
+                <MaterialCommunityIcons name="gender-female" size={16} color="#C35E6E" />
+                {/* name changed to مريم */}
+                <Text style={styles.name}>مريم</Text>
+                {/* flag pill removed */}
               </View>
               <View style={styles.idRow}>
                 <MaterialCommunityIcons name="clipboard-text-outline" size={14} color="#8E8E93" />
@@ -151,13 +151,6 @@ const styles = StyleSheet.create({
   nameBlock: { flex: 1, alignItems: 'flex-end', paddingRight: 8, gap: 6 },
   nameRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 6 },
   name: { fontSize: 18, fontWeight: '700' },
-  flagPill: {
-    backgroundColor: '#E9F5EE',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 8,
-  },
-  flagPillTxt: { fontSize: 12 },
   idRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 6 },
   idTxt: { color: '#8E8E93' },
   avatar: { width: 60, height: 60, borderRadius: 30, backgroundColor: '#EEE' },
@@ -190,27 +183,14 @@ const styles = StyleSheet.create({
   },
   vipBtnTxt: { fontWeight: '700' },
 
-  segmentRow: {
-    flexDirection: 'row-reverse',
-    gap: 10,
-    marginTop: 4,
-  },
-  segment: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
+  segmentRow: { flexDirection: 'row-reverse', gap: 10, marginTop: 4 },
+  segment: { flex: 1, paddingVertical: 10, borderRadius: 10, alignItems: 'center' },
   segmentActive: { backgroundColor: '#FDE7EA' },
   segmentDim: { backgroundColor: '#F7F4E8' },
   segmentTxtActive: { color: '#C35E6E', fontWeight: '700' },
   segmentTxtDim: { color: '#C3A34F', fontWeight: '700' },
 
-  badgeArea: {
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 8,
-    gap: 8,
-  },
+  badgeArea: { backgroundColor: '#FFFFFF', paddingVertical: 8, gap: 8 },
   badgeEmpty: {
     alignSelf: 'flex-end',
     flexDirection: 'row-reverse',
