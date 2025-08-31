@@ -37,12 +37,12 @@ export default function Login() {
           <Text style={styles.cardTitle}>انضم إلى مجتمع Dream KSA</Text>
           <Text style={styles.cardSub}>اختر طريقة تسجيل الدخول المفضلة</Text>
 
-          <TouchableOpacity activeOpacity={0.9} style={styles.btnWhite} onPress={() => router.replace('/(tabs)')}>
+          <TouchableOpacity activeOpacity={0.9} style={styles.btnWhite} onPress={() => { console.log('[login] Google pressed -> /(tabs)/index'); router.replace('/(tabs)/index'); }}>
             <Image source={GOOGLE_ICON} style={styles.googleIcon} />
             <Text style={styles.btnWhiteText}>متابعة بـ Google</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity activeOpacity={0.9} style={styles.btnFB} onPress={() => router.replace('/(tabs)')}>
+          <TouchableOpacity activeOpacity={0.9} style={styles.btnFB} onPress={() => { console.log('[login] Facebook pressed -> /(tabs)/index'); router.replace('/(tabs)/index'); }}>
             <View style={styles.iconLeft}><Ionicons name="logo-facebook" size={18} color="#fff" /></View>
             <Text style={styles.btnFBText}>متابعة بـ Facebook</Text>
           </TouchableOpacity>
