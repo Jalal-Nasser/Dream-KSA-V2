@@ -5,10 +5,13 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { PALETTE } from '../../lib/theme';
 
 function MyTabBar({ state, descriptors, navigation }: any) {
+  // Filter out nested route names that include "/"
+  const topLevelRoutes = state.routes.filter((r: any) => !r.name.includes('/'));
+  
   return (
     <SafeAreaView style={{ backgroundColor: '#fff' }}>
       <View style={styles.bar}>
-        {state.routes.map((route: any, index: any) => {
+        {topLevelRoutes.map((route: any, index: any) => {
           if (route.name === 'index') return null;
           const isFocused = state.index === index;
           const onPress = () => {
