@@ -44,6 +44,16 @@ export default function Login() {
         </Pressable>
       </View>
 
+      {/* center brand with logo and slug */}
+      <View style={styles.brandSection}>
+        <ImageBackground
+          source={require('../assets/images/logo.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
+        <Text style={styles.slug}>الدردشة الصوتية</Text>
+      </View>
+
       <View style={styles.bottomWrap}>
         {Platform.OS === 'ios' && (
           <Pressable style={[styles.bigBtn, styles.apple]} onPress={() => signInOAuth('apple')}>
@@ -96,6 +106,9 @@ export default function Login() {
 const styles = StyleSheet.create({
   topRow:{ position:'absolute', right:16, top:14 },
   help:{ color:'#fff', fontWeight:'800', opacity:0.95, textShadowColor:'rgba(0,0,0,0.45)', textShadowRadius:10 },
+  brandSection:{ position:'absolute', left:16, right:16, top:'50%', transform:[{ translateY:-60 }], alignItems:'center' },
+  logo:{ width:120, height:120, marginBottom:16 },
+  slug:{ color:'#fff', fontSize:18, fontWeight:'800', textAlign:'center', opacity:0.95, textShadowColor:'rgba(0,0,0,0.6)', textShadowRadius:8 },
   bottomWrap:{ position:'absolute', left:16, right:16, bottom:24, alignItems:'center' },
   bigBtn:{ height:54, borderRadius:16, width:'100%', marginBottom:12, alignItems:'center', justifyContent:'center', flexDirection:'row', gap:10, shadowColor:'#000', shadowOpacity:0.3, shadowRadius:10, elevation:4 },
   bigTxt:{ color:'#fff', fontWeight:'900', fontSize:16 },
