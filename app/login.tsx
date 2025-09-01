@@ -29,12 +29,12 @@ export default function Login() {
 
   return (
     <View style={{ flex:1 }}>
-      <ImageBackground
-        source={{ uri: BG_URI }}
-        style={StyleSheet.absoluteFill}
-        imageStyle={{ opacity:0.96 }}
-        resizeMode="cover"
-      >
+                    <ImageBackground
+                source={BG_URI}
+                style={StyleSheet.absoluteFill}
+                imageStyle={{ opacity:0.96 }}
+                resizeMode="cover"
+              >
         <View style={[StyleSheet.absoluteFill, { backgroundColor:'rgba(0,0,0,0.25)'}]} />
       </ImageBackground>
 
