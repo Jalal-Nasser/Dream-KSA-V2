@@ -10,10 +10,10 @@ type Room = { id: string; title: string; created_at: string };
 
 export default function Rooms() {
   const router = useRouter();
+  const supabase = getSupabase();
   const [rooms, setRooms] = React.useState<Room[]>([]);
   const [title, setTitle] = React.useState('');
   const [loading, setLoading] = React.useState(false);
-  const supabase = getSupabase();
 
   const fetchRooms = React.useCallback(async () => {
     const { data, error } = await supabase

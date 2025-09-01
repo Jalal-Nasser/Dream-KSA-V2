@@ -11,8 +11,8 @@ const uid = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice
 export default function RoomChat() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const chanRef = React.useRef<ReturnType<typeof getSupabase>['channel'] | null>(null);
   const supabase = getSupabase();
+  const chanRef = React.useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   const [messages, setMessages] = React.useState<Msg[]>([]);
   const [text, setText] = React.useState('');

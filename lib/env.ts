@@ -9,5 +9,3 @@ export const SUPABASE_ANON = fromEnv('EXPO_PUBLIC_SUPABASE_ANON_KEY');
 if (!SUPABASE_URL || !SUPABASE_ANON) {
   console.warn('[env] Missing EXPO_PUBLIC_SUPABASE_URL / EXPO_PUBLIC_SUPABASE_ANON_KEY. Put real values in .env and restart with cache clear.');
 }
-
-

@@ -31,7 +31,9 @@ yarn-error.*
 *.pem
 
 # local env files
+.env
 .env*.local
+app.json.bak_20250901
 
 # typescript
 *.tsbuildinfo

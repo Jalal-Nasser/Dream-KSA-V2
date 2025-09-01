@@ -12,10 +12,10 @@ const GOOGLE_ICON = require('../assets/icons/google.png');
 
 export default function Login() {
   const router = useRouter();
+  const supabase = getSupabase();
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const supabase = getSupabase();
 
   useEffect(() => {
     let mounted = true;
