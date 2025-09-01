@@ -8,7 +8,7 @@ let client: SupabaseClient | null = null;
 export function getSupabase() {
   if (!client) {
     if (!SUPABASE_URL || !SUPABASE_ANON) {
-      throw new Error('[supabase] Missing URL/ANON key. Set EXPO_PUBLIC_SUPABASE_* in .env and restart (npx expo start -c).');
+      throw new Error('[supabase] Missing URL/ANON key. Ensure .env is set and expo started with cache clear.');
     }
     client = createClient(SUPABASE_URL, SUPABASE_ANON, {
       auth: { storage: AsyncStorage, persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
