@@ -16,18 +16,18 @@ export default function OTP() {
     setErr(null);
     if (!/^\d{4,8}$/.test(code.trim())) return setErr('رمز التحقق غير صحيح');
     setVerifying(true);
-    const { data, error } = await supabase.auth.verifyOtp({ phone: String(phone), token: code.trim(), type: 'sms' });
+    const { data, error } = await supabase.auth.verifyOtp({ phone: String(phone||''), token: code.trim(), type: 'sms' });
     setVerifying(false);
     if (error) return setErr(error.message);
     if (data?.user) router.replace('/(tabs)/rooms');
   };
 
   return (
-    <View style={styles.root}>
-      <Text style={styles.h}>Enter verification code</Text>
-      <Text style={styles.sub}>{phone}</Text>
+    <View style={s.root}>
+      <Text style={s.h}>Enter verification code</Text>
+      <Text style={s.sub}>{phone}</Text>
       <TextInput
-        style={styles.code}
+        style={s.code}
         value={code}
         onChangeText={setCode}
         placeholder="●●●●●●"
@@ -36,20 +36,19 @@ export default function OTP() {
         maxLength={6}
         textAlign="center"
       />
-      {err ? <Text style={styles.err}>{err}</Text> : null}
-      <Pressable disabled={verifying} onPress={verify} style={styles.btn}>
-        <Text style={styles.btnTxt}>{verifying ? '...' : 'Confirm'}</Text>
+      {err ? <Text style={s.err}>{err}</Text> : <View style={{ height:8 }} />}
+      <Pressable disabled={verifying} onPress={verify} style={s.btn}>
+        <Text style={s.btnTxt}>{verifying ? '...' : 'Confirm'}</Text>
       </Pressable>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  root:{ flex:1, backgroundColor:'#FFF', padding:16, gap:12, alignItems:'center', justifyContent:'center' },
+const s = StyleSheet.create({
+  root:{ flex:1, backgroundColor:'#FFF', alignItems:'center', justifyContent:'center', padding:16, gap:12 },
   h:{ fontWeight:'900', fontSize:18 },
   sub:{ opacity:0.7, fontWeight:'700' },
-  code:{ backgroundColor:'#F3F4F6', borderRadius:12, paddingHorizontal:12, paddingVertical:10, width:'60%', fontWeight:'900', letterSpacing:4 },
-  btn:{ backgroundColor:PALETTE.primary, borderRadius:12, paddingVertical:10, paddingHorizontal:18 },
+  code:{ backgroundColor:'#F3F4F6', borderRadius:12, paddingHorizontal:12, paddingVertical:12, width:'60%', fontWeight:'900', letterSpacing:4 },
+  btn:{ backgroundColor:PALETTE.primary, borderRadius:12, paddingVertical:12, paddingHorizontal:20 },
   btnTxt:{ color:'#fff', fontWeight:'900' },
   err:{ color:'#dc2626', fontWeight:'800' }
 });
