@@ -12,20 +12,16 @@ export default function RootLayout() {
       if (url) {
         const { queryParams, path } = Linking.parse(url);
         if (path?.endsWith('auth-callback') && typeof queryParams?.code === 'string') {
-          await supabase.auth.exchangeCodeForSession({ code: String(queryParams.code) }).catch(e =>
-            console.warn('[auth initialURL exchange]', e?.message)
-          );
+          await supabase.auth.exchangeCodeForSession({ code: String(queryParams.code) }).catch(e => console.warn('[auth initialURL]', e?.message));
         }
       }
     })();
 
     const sub = Linking.addEventListener('url', async ({ url }) => {
       const { queryParams, path } = Linking.parse(url);
-      if (path?.endsWith('auth-callback') && typeof queryParams?.code === 'string') {
-        await supabase.auth.exchangeCodeForSession({ code: String(queryParams.code) }).catch(e =>
-          console.warn('[auth listener exchange]', e?.message)
-        );
-      }
+              if (path?.endsWith('auth-callback') && typeof queryParams?.code === 'string') {
+          await supabase.auth.exchangeCodeForSession({ code: String(queryParams.code) }).catch(e => console.warn('[auth listener]', e?.message));
+        }
     });
     return () => sub.remove();
   }, []);

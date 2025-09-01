@@ -5,16 +5,16 @@ import Constants from 'expo-constants';
 
 WebBrowser.maybeCompleteAuthSession();
 
-// Use proxy in Expo Go; use scheme in dev/prod builds
-export const authRedirectUri = AuthSession.makeRedirectUri({
-  scheme: 'dream-ksa',
-  preferLocalhost: true,
-  useProxy: Constants.appOwnership === 'expo',
-});
+// In Expo Go, MUST use the proxy redirect (https://auth.expo.io/@username/slug)
+export const authRedirectUri =
+  Constants.appOwnership === 'expo'
+    ? AuthSession.makeRedirectUri({ useProxy: true })
+    : Linking.createURL('/auth-callback', { scheme: 'dream-ksa' });
 
-// Android often resolves to a triple-slash variant; we'll allow both
-export const redirectDouble = Linking.createURL('/auth-callback', { scheme: 'dream-ksa' }); // usually dream-ksa:///auth-callback
-export const redirectSingle = 'dream-ksa://auth-callback';
+// Helpful variants you must add to Supabase (Auth → URL Configuration → Redirect URLs)
+export const expoProxyUri = AuthSession.makeRedirectUri({ useProxy: true }); // proxy form
+export const routerTriple = Linking.createURL('/auth-callback', { scheme: 'dream-ksa' }); // usually dream-ksa:///auth-callback
+export const schemeSingle = 'dream-ksa://auth-callback'; // single-slash variant
 
 export function parseCode(url?: string) {
   if (!url) return '';
@@ -23,6 +23,6 @@ export function parseCode(url?: string) {
 }
 
 export function logRedirects(tag='[oauth]') {
-  console.log(tag, 'authRedirectUri:', authRedirectUri);
-  console.log(tag, 'also accept:', redirectDouble, 'and', redirectSingle, 'ownership:', Constants.appOwnership);
+  console.log(tag, 'USING redirect:', authRedirectUri, 'ownership:', Constants.appOwnership);
+  console.log(tag, 'Add these in Supabase:', expoProxyUri, routerTriple, schemeSingle);
 }

@@ -7,7 +7,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { getSupabase } from '../lib/supabase';
 import { PALETTE } from '../lib/theme';
 import * as AuthSession from 'expo-auth-session';
-import { authRedirectUri, parseCode, logRedirects } from '../lib/linking';
+import { authRedirectUri, parseCode, logRedirects, expoProxyUri, routerTriple, schemeSingle } from '../lib/linking';
 
 // couples background (soft blur) – local asset
 const BG_URI = require('../assets/images/login-bg.jpg');
@@ -16,43 +16,37 @@ export default function Login() {
   const supabase = getSupabase();
   const [showTips, setShowTips] = React.useState(false);
 
+  React.useEffect(() => { logRedirects('[oauth]'); }, []);
+
   React.useEffect(() => {
-    logRedirects('[oauth]');
     const sub = supabase.auth.onAuthStateChange((_e, s) => { if (s?.user) router.replace('/(tabs)/rooms'); });
     return () => sub.data.subscription.unsubscribe();
   }, []);
 
-  const signInOAuth = async (provider: 'google' | 'facebook' | 'apple') => {
-    if (provider === 'apple' && Platform.OS !== 'ios') return;
+const signInOAuth = async (provider: 'google' | 'facebook' | 'apple') => {
+  if (provider === 'apple' && Platform.OS !== 'ios') return;
+  console.log('[oauth] start', provider, '→', authRedirectUri);
 
-    console.log('[oauth] start', provider, '→', authRedirectUri);
-    // 1) ask supabase for the provider URL but DO NOT auto-open
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider,
-      options: {
-        redirectTo: authRedirectUri,
-        skipBrowserRedirect: true, // we open it ourselves
-        scopes: provider === 'google' ? 'email profile' : undefined,
-      },
-    });
-    if (error) { console.warn('[oauth] signInWithOAuth error', error.message); return; }
-    if (!data?.url) { console.warn('[oauth] no url from supabase'); return; }
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider,
+    options: { redirectTo: authRedirectUri, skipBrowserRedirect: true, scopes: provider === 'google' ? 'email profile' : undefined },
+  });
+  if (error) { console.warn('[oauth] signInWithOAuth error', error.message); return; }
+  if (!data?.url) { console.warn('[oauth] no provider url'); return; }
 
-    // 2) open auth session via AuthSession (more reliable than WebBrowser on some Androids)
-    const result = await AuthSession.startAsync({ authUrl: data.url, returnUrl: authRedirectUri });
-    console.log('[oauth] result', result?.type, (result as any)?.url?.slice(0, 120) || '<no-url>');
+  const res = await AuthSession.startAsync({ authUrl: data.url, returnUrl: authRedirectUri });
+  console.log('[oauth] result', res?.type, (res as any)?.url?.slice(0,120) || '<no-url>');
 
-    // 3) exchange the code if present
-    const code = parseCode((result as any)?.url);
-    if (code) {
-      const { error: exErr } = await supabase.auth.exchangeCodeForSession({ code });
-      if (exErr) { console.warn('[oauth] exchange error', exErr.message); return; }
-      console.log('[oauth] session established');
-      router.replace('/(tabs)/rooms');
-    } else {
-      console.warn('[oauth] no code – ensure Supabase Redirect URLs include BOTH: dream-ksa://auth-callback AND dream-ksa:///auth-callback; if using Expo Go also add the Expo proxy (see /dev/oauth).');
-    }
-  };
+  const code = parseCode((res as any)?.url);
+  if (code) {
+    const { error: exErr } = await supabase.auth.exchangeCodeForSession({ code });
+    if (exErr) { console.warn('[oauth] exchange error', exErr.message); return; }
+    console.log('[oauth] session established');
+    router.replace('/(tabs)/rooms');
+  } else {
+    console.warn('[oauth] no code. Ensure Supabase Redirect URLs include:', expoProxyUri, routerTriple, schemeSingle);
+  }
+};
 
   return (
     <View style={{ flex:1 }}>

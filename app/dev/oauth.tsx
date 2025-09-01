@@ -1,18 +1,19 @@
 import * as React from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
-import { authRedirectUri, redirectDouble, redirectSingle } from '../../lib/linking';
+import { authRedirectUri, expoProxyUri, routerTriple, schemeSingle } from '../../lib/linking';
 
 export default function OAuthDebug() {
   return (
     <View style={s.root}>
-      <Text style={s.h}>OAuth Redirects</Text>
-      <Text style={s.k}>AuthSession makeRedirectUri</Text>
+      <Text style={s.h}>OAuth Redirects to add in Supabase:</Text>
+      <Text style={s.k}>Expo Proxy (Expo Go):</Text>
+      <Text style={s.code}>{expoProxyUri}</Text>
+      <Text style={s.k}>Android triple-slash:</Text>
+      <Text style={s.code}>{routerTriple}</Text>
+      <Text style={s.k}>Single-slash:</Text>
+      <Text style={s.code}>{schemeSingle}</Text>
+      <Text style={[s.k,{opacity:0.7}]}>AuthSession returnUrl used now:</Text>
       <Text style={s.code}>{authRedirectUri}</Text>
-      <Text style={s.k}>Linking.createURL (Android triple-slash form)</Text>
-      <Text style={s.code}>{redirectDouble}</Text>
-      <Text style={s.k}>Single-slash form</Text>
-      <Text style={s.code}>{redirectSingle}</Text>
-      <Text style={[s.k,{opacity:0.7}]}>Add ALL above to Supabase → Auth → URL Configuration → Redirect URLs.</Text>
     </View>
   );
 }
