@@ -62,7 +62,9 @@ export default function Login() {
           </Pressable>
         )}
         <Pressable style={[styles.bigBtn, styles.google]} onPress={() => signInOAuth('google')}>
-          <Ionicons name="logo-google" size={20} color="#111827" />
+          <View style={styles.googleIcon}>
+            <Text style={styles.googleG}>G</Text>
+          </View>
           <Text style={[styles.bigTxt, { color:'#111827' }]}>Google</Text>
         </Pressable>
 
@@ -126,6 +128,8 @@ const styles = StyleSheet.create({
   facebookOuter:{ width:32, height:32, borderRadius:16, backgroundColor:'#1877F2', alignItems:'center', justifyContent:'center' },
   facebookInner:{ width:24, height:24, borderRadius:12, backgroundColor:'#fff', alignItems:'center', justifyContent:'center' },
   facebookF:{ color:'#1877F2', fontSize:18, fontWeight:'bold', textAlign:'center', lineHeight:18 },
+  googleIcon:{ width:20, height:20, alignItems:'center', justifyContent:'center' },
+  googleG:{ color:'#111827', fontSize:16, fontWeight:'bold', textAlign:'center', lineHeight:16 },
   legal:{ color:'#fff', opacity:0.95, textAlign:'center', fontWeight:'700', textShadowColor:'rgba(0,0,0,0.45)', textShadowRadius:10 },
   link:{ textDecorationLine:'underline' },
   backdrop:{ flex:1, backgroundColor:'rgba(0,0,0,0.5)', alignItems:'center', justifyContent:'center' },
