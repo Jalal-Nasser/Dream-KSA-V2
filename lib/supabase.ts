@@ -11,13 +11,12 @@ export function getSupabase() {
       throw new Error('[supabase] Missing URL/ANON key. Ensure .env is set and expo started with cache clear.');
     }
     client = createClient(SUPABASE_URL, SUPABASE_ANON, {
-              auth: {
+                      auth: {
           storage: AsyncStorage,
           persistSession: true,
           autoRefreshToken: true,
-          detectSessionInUrl: false, // RN: we'll handle the exchange
+          detectSessionInUrl: false, // we'll exchange ?code=… manually
         },
-      realtime: { params: { eventsPerSecond: 5 } }
     });
   }
   return client;
