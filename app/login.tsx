@@ -8,7 +8,7 @@ import { getSupabase } from '../lib/supabase';
 import { PALETTE } from '../lib/theme';
 import { authRedirectUri, logRedirects } from '../lib/linking';
 import { SUPABASE_URL } from '../lib/env';
-import { openAndExchange } from './login.oauth';
+import { openAndExchange } from '../lib/auth/oauthHelper';
 
 // couples background (soft blur) – local asset
 const BG_URI = require('../assets/images/login-bg.jpg');
