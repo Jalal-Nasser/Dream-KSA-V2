@@ -15,7 +15,7 @@ export function getSupabase() {
           storage: AsyncStorage,
           persistSession: true,
           autoRefreshToken: true,
-          detectSessionInUrl: false, // we'll exchange ?code=… manually
+          detectSessionInUrl: false,
         },
     });
   }

@@ -7,24 +7,24 @@ export default function RootLayout() {
   React.useEffect(() => {
     const supabase = getSupabase();
 
-    // Handle cold start
     (async () => {
       const url = await Linking.getInitialURL();
       if (url) {
         const { queryParams, path } = Linking.parse(url);
         if (path?.endsWith('auth-callback') && typeof queryParams?.code === 'string') {
-          const { error } = await supabase.auth.exchangeCodeForSession({ code: String(queryParams.code) });
-          if (error) console.warn('[auth initialURL exchange]', error.message);
+          await supabase.auth.exchangeCodeForSession({ code: String(queryParams.code) }).catch(e =>
+            console.warn('[auth initialURL exchange]', e?.message)
+          );
         }
       }
     })();
 
-    // Handle runtime redirect
     const sub = Linking.addEventListener('url', async ({ url }) => {
       const { queryParams, path } = Linking.parse(url);
       if (path?.endsWith('auth-callback') && typeof queryParams?.code === 'string') {
-        const { error } = await supabase.auth.exchangeCodeForSession({ code: String(queryParams.code) });
-        if (error) console.warn('[auth listener exchange]', error.message);
+        await supabase.auth.exchangeCodeForSession({ code: String(queryParams.code) }).catch(e =>
+          console.warn('[auth listener exchange]', e?.message)
+        );
       }
     });
     return () => sub.remove();
