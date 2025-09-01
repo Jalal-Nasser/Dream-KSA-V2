@@ -19,9 +19,9 @@ const read = (k) => {
 let EXPO_PUBLIC_SUPABASE_URL = read('EXPO_PUBLIC_SUPABASE_URL');
 let EXPO_PUBLIC_SUPABASE_ANON_KEY = read('EXPO_PUBLIC_SUPABASE_ANON_KEY');
 
-// --- OPTIONAL EMERGENCY FALLBACK (uncomment and paste your real values) ---
-// EXPO_PUBLIC_SUPABASE_URL = EXPO_PUBLIC_SUPABASE_URL || 'https://kgcpeoidouajwytndtqi.supabase.co';
-// EXPO_PUBLIC_SUPABASE_ANON_KEY = EXPO_PUBLIC_SUPABASE_ANON_KEY || 'PASTE_YOUR_ANON_JWT_HERE';
+// --- OPTIONAL EMERGENCY FALLBACK (now enabled as requested) ---
+EXPO_PUBLIC_SUPABASE_URL = EXPO_PUBLIC_SUPABASE_URL || 'https://kgcpeoidouajwytndtqi.supabase.co';
+EXPO_PUBLIC_SUPABASE_ANON_KEY = EXPO_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtnY3Blb2lkb3Vhand5dG5kdHFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI5NTc2MzgsImV4cCI6MjA2ODUzMzYzOH0.eV1GRnbrDIQ4xzZ6EsdNOzgGdxUoSFtOXJWoV71wxW4';
 
 console.log('[app.config.js] URL prefix:', (EXPO_PUBLIC_SUPABASE_URL || '').slice(0, 40), '…  ANON len:', (EXPO_PUBLIC_SUPABASE_ANON_KEY || '').length);
 
