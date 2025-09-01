@@ -6,10 +6,9 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 import { getSupabase } from '../lib/supabase';
 import { PALETTE } from '../lib/theme';
-import * as AuthSession from 'expo-auth-session';
-import * as WebBrowser from 'expo-web-browser';
-import { authRedirectUri, parseCode, logRedirects, expoProxyUri, routerTriple, schemeSingle } from '../lib/linking';
+import { authRedirectUri, logRedirects } from '../lib/linking';
 import { SUPABASE_URL } from '../lib/env';
+import { openAndExchange } from './login.oauth';
 
 // couples background (soft blur) – local asset
 const BG_URI = require('../assets/images/login-bg.jpg');
@@ -24,52 +23,29 @@ export default function Login() {
     return ()=>sub.data.subscription.unsubscribe(); 
   }, []);
 
-const signInOAuth = async (provider: 'google' | 'facebook' | 'apple') => {
-  if (provider === 'apple' && Platform.OS !== 'ios') return;
-
-  console.log('[oauth] start', provider, 'returnUrl:', authRedirectUri);
-  // 1) Normal path – ask Supabase for provider URL (no auto redirect)
-  const resp = await supabase.auth.signInWithOAuth({
-    provider,
-    options: {
-      redirectTo: authRedirectUri,
-      skipBrowserRedirect: true,
-      scopes: provider === 'google' ? 'email profile' : undefined,
-    },
-  });
-
-  let authUrl = resp?.data?.url;
-  if (resp?.error) console.warn('[oauth] signInWithOAuth error:', resp.error.message);
-  if (authUrl) console.log('[oauth] provider url:', authUrl.slice(0, 180), '…');
-
-  // 2) Hard fallback – build authorize URL manually if needed
-  if (!authUrl) {
-    authUrl = `${SUPABASE_URL}/auth/v1/authorize?provider=${encodeURIComponent(provider)}&redirect_to=${encodeURIComponent(authRedirectUri)}`;
-    console.warn('[oauth] fallback authorize url:', authUrl.slice(0, 180), '…');
-  }
-
-  // 3) Try opening with AuthSession first
-  const result = await AuthSession.startAsync({ authUrl, returnUrl: authRedirectUri });
-  console.log('[oauth] AuthSession result:', result?.type, (result as any)?.url?.slice(0, 160) || '<no-url>');
-  let code = parseCode((result as any)?.url);
-
-  // 4) If no code came back, try WebBrowser fallback (root listener will catch)
-  if (!code) {
-    console.warn('[oauth] no code from AuthSession – opening browser fallback …');
-    const rb = await WebBrowser.openBrowserAsync(authUrl);
-    console.log('[oauth] openBrowserAsync closed with:', rb?.type);
-    return; // root listener/initialURL will exchange when app resumes
-  }
-
-  // 5) Exchange code for session
-  const ex = await supabase.auth.exchangeCodeForSession({ code });
-  if (ex.error) {
-    console.warn('[oauth] exchange error:', ex.error.message);
-    return;
-  }
-  console.log('[oauth] session established');
-  router.replace('/(tabs)/rooms');
-};
+  const signInOAuth = async (provider: 'google' | 'facebook' | 'apple') => {
+    if (provider === 'apple' && Platform.OS !== 'ios') return;
+    console.log('[oauth] start', provider, 'returnUrl:', authRedirectUri);
+  
+    // Ask Supabase for the provider URL (no auto redirect)
+    const resp = await supabase.auth.signInWithOAuth({
+      provider,
+      options: { redirectTo: authRedirectUri, skipBrowserRedirect: true, scopes: provider === 'google' ? 'email profile' : undefined },
+    });
+  
+    let authUrl = resp?.data?.url;
+    if (resp?.error) console.warn('[oauth] signInWithOAuth error:', resp.error.message);
+    if (!authUrl) {
+      // Build manual authorize URL as fallback
+      authUrl = `${SUPABASE_URL}/auth/v1/authorize?provider=${encodeURIComponent(provider)}&redirect_to=${encodeURIComponent(authRedirectUri)}`;
+      console.warn('[oauth] fallback authorize url:', authUrl.slice(0,160), '…');
+    } else {
+      console.log('[oauth] provider url:', authUrl.slice(0,160), '…');
+    }
+  
+    const how = await openAndExchange(authUrl);
+    console.log('[oauth] flow completed via:', how, '(if "await:listener", the root listener will exchange on resume)');
+  };
 
   return (
     <View style={{ flex:1 }}>
