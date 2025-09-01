@@ -5,16 +5,14 @@ import Constants from 'expo-constants';
 
 WebBrowser.maybeCompleteAuthSession();
 
-// In Expo Go, MUST use the proxy redirect (https://auth.expo.io/@username/slug)
 export const authRedirectUri =
   Constants.appOwnership === 'expo'
     ? AuthSession.makeRedirectUri({ useProxy: true })
     : Linking.createURL('/auth-callback', { scheme: 'dream-ksa' });
 
-// Helpful variants you must add to Supabase (Auth → URL Configuration → Redirect URLs)
-export const expoProxyUri = AuthSession.makeRedirectUri({ useProxy: true }); // proxy form
-export const routerTriple = Linking.createURL('/auth-callback', { scheme: 'dream-ksa' }); // usually dream-ksa:///auth-callback
-export const schemeSingle = 'dream-ksa://auth-callback'; // single-slash variant
+export const expoProxyUri = AuthSession.makeRedirectUri({ useProxy: true });
+export const routerTriple = Linking.createURL('/auth-callback', { scheme: 'dream-ksa' });
+export const schemeSingle = 'dream-ksa://auth-callback';
 
 export function parseCode(url?: string) {
   if (!url) return '';
