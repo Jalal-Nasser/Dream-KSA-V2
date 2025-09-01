@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
   apple:{ backgroundColor:'#000' },
   google:{ backgroundColor:'#fff' },
   iconRow:{ flexDirection:'row', justifyContent:'center', gap:24, marginTop:6, marginBottom:10 },
-  roundBtn:{ width:64, height:64, borderRadius:32, backgroundColor:'#fff', alignItems:'center', justifyContent:'center', shadowColor:'#000', shadowOpacity:0.2, shadowRadius:8, elevation:3 },
+  roundBtn:{ width:48, height:48, borderRadius:24, backgroundColor:'#fff', alignItems:'center', justifyContent:'center', shadowColor:'#000', shadowOpacity:0.2, shadowRadius:8, elevation:3 },
   facebookIcon:{ width:32, height:32, alignItems:'center', justifyContent:'center' },
   facebookOuter:{ width:32, height:32, borderRadius:16, backgroundColor:'#1877F2', alignItems:'center', justifyContent:'center' },
   facebookInner:{ width:24, height:24, borderRadius:12, backgroundColor:'#fff', alignItems:'center', justifyContent:'center' },
