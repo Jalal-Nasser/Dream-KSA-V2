@@ -15,8 +15,7 @@ export function getSupabase() {
           storage: AsyncStorage,
           persistSession: true,
           autoRefreshToken: true,
-          // RN has no window.location, we will exchange the code ourselves
-          detectSessionInUrl: false,
+          detectSessionInUrl: false, // RN: we'll handle the exchange
         },
       realtime: { params: { eventsPerSecond: 5 } }
     });

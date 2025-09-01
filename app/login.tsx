@@ -3,9 +3,11 @@ import { View, Text, Pressable, StyleSheet, Platform, Modal, ImageBackground, Im
 import { router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import * as WebBrowser from 'expo-web-browser';
+import * as Linking from 'expo-linking';
 import { getSupabase } from '../lib/supabase';
 import { PALETTE } from '../lib/theme';
-import { authRedirectUri } from '../lib/linking';
+import { authRedirectUri, getCodeFromUrl } from '../lib/linking';
 
 // couples background (soft blur) – local asset
 const BG_URI = require('../assets/images/login-bg.jpg');
@@ -20,14 +22,33 @@ export default function Login() {
   }, []);
 
   const signInOAuth = async (provider: 'google' | 'facebook' | 'apple') => {
-    console.log('[oauth] Attempting to sign in with:', provider);
     if (provider === 'apple' && Platform.OS !== 'ios') return;
-    const { error } = await supabase.auth.signInWithOAuth({
+
+    console.log('[oauth] Attempting to sign in with:', provider);
+    const { data, error } = await supabase.auth.signInWithOAuth({
       provider,
-      options: { redirectTo: authRedirectUri },
+      options: {
+        redirectTo: authRedirectUri,
+        skipBrowserRedirect: true, // important on native
+        scopes: provider === 'google' ? 'email profile' : undefined,
+      },
     });
-    if (error) console.log('[oauth]', provider, error.message);
-    else console.log('[oauth]', provider, 'redirect initiated');
+    if (error) { console.warn('[oauth] signInWithOAuth error', error.message); return; }
+    if (!data?.url) { console.warn('[oauth] no url returned'); return; }
+
+    // open the auth session
+    const res = await WebBrowser.openAuthSessionAsync(data.url, authRedirectUri);
+    // both iOS/Android: res.url contains the final redirect when type === 'success'
+    const code = getCodeFromUrl(res?.url);
+    if (code) {
+      const { error: exErr } = await supabase.auth.exchangeCodeForSession({ code });
+      if (exErr) { console.warn('[oauth] exchange error', exErr.message); return; }
+      router.replace('/(tabs)/rooms');
+      return;
+    }
+
+    // Fallback: if no res.url, rely on a global Linking listener
+    console.log('[oauth] no code in WebBrowser result; waiting for Linking event');
   };
 
   return (

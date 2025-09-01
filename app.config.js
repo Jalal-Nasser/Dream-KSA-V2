@@ -31,6 +31,9 @@ module.exports = {
   scheme: 'dream-ksa',
   orientation: 'portrait',
   platforms: ['ios','android'],
+  plugins: [
+    'expo-web-browser'
+  ],
   extra: {
     EXPO_PUBLIC_SUPABASE_URL,
     EXPO_PUBLIC_SUPABASE_ANON_KEY,
