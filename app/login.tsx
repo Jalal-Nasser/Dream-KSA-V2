@@ -106,7 +106,7 @@ export default function Login() {
 const styles = StyleSheet.create({
   topRow:{ position:'absolute', right:16, top:14 },
   help:{ color:'#fff', fontWeight:'800', opacity:0.95, textShadowColor:'rgba(0,0,0,0.45)', textShadowRadius:10 },
-  brandSection:{ position:'absolute', left:16, right:16, top:'50%', transform:[{ translateY:-60 }], alignItems:'center' },
+  brandSection:{ position:'absolute', left:16, right:16, top:80, alignItems:'center' },
   logo:{ width:120, height:120, marginBottom:16 },
   slug:{ color:'#fff', fontSize:18, fontWeight:'800', textAlign:'center', opacity:0.95, textShadowColor:'rgba(0,0,0,0.6)', textShadowRadius:8 },
   bottomWrap:{ position:'absolute', left:16, right:16, bottom:24, alignItems:'center' },
