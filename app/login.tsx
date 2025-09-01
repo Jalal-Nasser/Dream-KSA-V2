@@ -6,8 +6,8 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { getSupabase } from '../lib/supabase';
 import { PALETTE } from '../lib/theme';
 
-// couples background (soft blur) – replace with your local asset if you prefer
-const BG_URI = 'https://images.unsplash.com/photo-1519098901900-5f2f24c3f61b?q=80&w=1200&auto=format&fit=crop';
+// couples background (soft blur) – local asset
+const BG_URI = require('../assets/images/login-bg.jpg');
 
 export default function Login() {
   const supabase = getSupabase();
