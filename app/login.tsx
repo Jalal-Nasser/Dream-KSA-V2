@@ -3,10 +3,12 @@ import { View, Text, Pressable, StyleSheet, Platform, Modal, ImageBackground, Im
 import { router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import * as AuthSession from 'expo-auth-session';
+import * as WebBrowser from 'expo-web-browser';
 
 import { getSupabase } from '../lib/supabase';
 import { PALETTE } from '../lib/theme';
-import { authRedirectUri, logRedirects } from '../lib/linking';
+import { authRedirectUri, parseCode, logRedirects, expoProxyUri, routerTriple, schemeSingle } from '../lib/linking';
 import { SUPABASE_URL } from '../lib/env';
 import { openAndExchange } from '../lib/auth/oauthHelper';
 
@@ -25,26 +27,40 @@ export default function Login() {
 
   const signInOAuth = async (provider: 'google' | 'facebook' | 'apple') => {
     if (provider === 'apple' && Platform.OS !== 'ios') return;
+
     console.log('[oauth] start', provider, 'returnUrl:', authRedirectUri);
-  
-    // Ask Supabase for the provider URL (no auto redirect)
+
+    // 1) Ask Supabase for a URL (no auto-redirect)
     const resp = await supabase.auth.signInWithOAuth({
       provider,
-      options: { redirectTo: authRedirectUri, skipBrowserRedirect: true, scopes: provider === 'google' ? 'email profile' : undefined },
+      options: {
+        redirectTo: authRedirectUri,
+        skipBrowserRedirect: true,
+        scopes: provider === 'google' ? 'email profile' : undefined,
+      },
     });
-  
-    let authUrl = resp?.data?.url;
-    if (resp?.error) console.warn('[oauth] signInWithOAuth error:', resp.error.message);
-    if (!authUrl) {
-      // Build manual authorize URL as fallback
-      authUrl = `${SUPABASE_URL}/auth/v1/authorize?provider=${encodeURIComponent(provider)}&redirect_to=${encodeURIComponent(authRedirectUri)}`;
-      console.warn('[oauth] fallback authorize url:', authUrl.slice(0,160), '…');
+
+    // 2) Prefer the returned URL ONLY if it already contains redirect_to=…
+    let authUrl = resp?.data?.url || '';
+    const hasRedirect = authUrl.includes('redirect_to=');
+
+    // 3) If missing (or empty), build a manual authorize URL that ALWAYS includes redirect_to
+    if (!authUrl || !hasRedirect) {
+      const base = `${SUPABASE_URL}/auth/v1/authorize`;
+      const qs = new URLSearchParams({
+        provider,
+        redirect_to: authRedirectUri,
+        ...(provider === 'google' ? { scopes: 'email profile' } : {}),
+      }).toString();
+      authUrl = `${base}?${qs}`;
+      console.warn('[oauth] using manual authorize url:', authUrl.slice(0, 180), '…');
     } else {
-      console.log('[oauth] provider url:', authUrl.slice(0,160), '…');
+      console.log('[oauth] provider url:', authUrl.slice(0, 180), '…');
     }
-  
+
+    // 4) Open & exchange (tries multiple strategies)
     const how = await openAndExchange(authUrl);
-    console.log('[oauth] flow completed via:', how, '(if "await:listener", the root listener will exchange on resume)');
+    console.log('[oauth] flow completed via:', how, ' (if "await:listener", root listener will exchange on resume)');
   };
 
   return (
