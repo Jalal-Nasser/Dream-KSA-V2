@@ -96,7 +96,6 @@
     "dotenv": "^17.2.1",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~9.2.0",
-    "expo-dev-client": "^5.2.4",
     "postinstall-postinstall": "^2.1.0",
     "react-native-svg-transformer": "^1.5.1",
     "typescript": "~5.8.3"

@@ -29,6 +29,22 @@ module.exports = {
   name: 'Dream KSA',
   slug: 'dream-ksa',
   scheme: 'dream-ksa',
+
+  // ✅ Add these:
+  android: {
+    package: 'app.dreamksa',          // keep this stable
+    intentFilters: [
+      {
+        action: 'VIEW',
+        data: [{ scheme: 'dream-ksa' }],
+        category: ['BROWSABLE', 'DEFAULT'],
+      },
+    ],
+  },
+  ios: {
+    bundleIdentifier: 'app.dreamksa',
+  },
+
   orientation: 'portrait',
   platforms: ['ios','android'],
   plugins: [
