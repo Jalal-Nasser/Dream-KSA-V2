@@ -8,14 +8,14 @@ let client: SupabaseClient | null = null;
 export function getSupabase() {
   if (!client) {
     if (!SUPABASE_URL || !SUPABASE_ANON) {
-      throw new Error('[supabase] Missing URL/ANON key. Ensure .env is set and expo started with cache clear.');
+      throw new Error('[supabase] Missing URL/ANON key.');
     }
     client = createClient(SUPABASE_URL, SUPABASE_ANON, {
                       auth: {
           storage: AsyncStorage,
           persistSession: true,
           autoRefreshToken: true,
-          detectSessionInUrl: false,
+          detectSessionInUrl: false, // RN: we will exchange ?code=… manually
         },
     });
   }

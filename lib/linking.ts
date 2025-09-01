@@ -5,14 +5,15 @@ import Constants from 'expo-constants';
 
 WebBrowser.maybeCompleteAuthSession();
 
+// Use proxy in Expo Go; use scheme in dev/prod builds
 export const authRedirectUri = AuthSession.makeRedirectUri({
   scheme: 'dream-ksa',
   preferLocalhost: true,
   useProxy: Constants.appOwnership === 'expo',
 });
 
-// Also generate both local forms we may see on Android
-export const redirectDouble = Linking.createURL('/auth-callback', { scheme: 'dream-ksa' });   // dream-ksa:///auth-callback
+// Android often resolves to a triple-slash variant; we'll allow both
+export const redirectDouble = Linking.createURL('/auth-callback', { scheme: 'dream-ksa' }); // usually dream-ksa:///auth-callback
 export const redirectSingle = 'dream-ksa://auth-callback';
 
 export function parseCode(url?: string) {
@@ -23,5 +24,5 @@ export function parseCode(url?: string) {
 
 export function logRedirects(tag='[oauth]') {
   console.log(tag, 'authRedirectUri:', authRedirectUri);
-  console.log(tag, 'allow also:', redirectDouble, 'and', redirectSingle);
+  console.log(tag, 'also accept:', redirectDouble, 'and', redirectSingle, 'ownership:', Constants.appOwnership);
 }
