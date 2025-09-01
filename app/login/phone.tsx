@@ -27,7 +27,7 @@ export default function PhoneLogin() {
   const [sending, setSending] = React.useState(false);
   const [err, setErr] = React.useState<string | null>(null);
 
-  const e164 = React.useMemo(() => `${cc.code}${(phone || '').replace(/\D/g,'')`, [cc, phone]);
+  const e164 = React.useMemo(() => `${cc.code}${(phone || '').replace(/\D/g, '')}`, [cc, phone]);
   const valid = /^\+\d{1,4}$/.test(cc.code) && /^\d{6,15}$/.test((phone || '').replace(/\D/g,''));
 
   const sendOtp = async () => {
