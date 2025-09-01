@@ -52,7 +52,7 @@ export default function Rooms() {
     router.push(`/room/${data!.id}`);
   };
 
-  return (
+              return (
     <View style={{ flex: 1, backgroundColor: PALETTE.soft1, padding: 12 }}>
       <View style={styles.creator}>
         <TextInput
@@ -66,13 +66,13 @@ export default function Rooms() {
         <Pressable disabled={loading} onPress={createRoom} style={styles.makeBtn}>
           <MaterialCommunityIcons name="plus" size={18} color="#fff" />
           <Text style={{ color: '#fff', fontWeight: '800' }}>{loading ? '...' : 'إنشاء'}</Text>
-        </Pressable>
-      </View>
+          </Pressable>
+        </View>
 
-      <FlatList
+        <FlatList
         data={rooms}
-        keyExtractor={(r) => r.id}
-        ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+          keyExtractor={(r) => r.id}
+          ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
         renderItem={({ item }) => (
           <Pressable onPress={() => router.push(`/room/${item.id}`)} style={styles.roomRow}>
             <MaterialCommunityIcons name="account-voice" size={20} color={PALETTE.primaryDark} />
@@ -81,7 +81,7 @@ export default function Rooms() {
           </Pressable>
         )}
       />
-    </View>
+        </View>
   );
 }
 

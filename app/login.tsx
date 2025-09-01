@@ -3,11 +3,10 @@ import { View, Text, Pressable, StyleSheet, Platform, Modal, ImageBackground, Im
 import { router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import * as WebBrowser from 'expo-web-browser';
-import * as Linking from 'expo-linking';
+
 import { getSupabase } from '../lib/supabase';
 import { PALETTE } from '../lib/theme';
-import { authRedirectUri, parseCode, logAuthInfo } from '../lib/linking';
+import { authRedirectUri } from '../lib/linking';
 
 // couples background (soft blur) – local asset
 const BG_URI = require('../assets/images/login-bg.jpg');
@@ -17,39 +16,22 @@ export default function Login() {
   const [showTips, setShowTips] = React.useState(false);
 
   React.useEffect(() => {
-    logAuthInfo('[oauth]');
     const sub = supabase.auth.onAuthStateChange((_e, s) => { if (s?.user) router.replace('/(tabs)/rooms'); });
     return () => sub.data.subscription.unsubscribe();
   }, []);
 
   const signInOAuth = async (provider: 'google' | 'facebook' | 'apple') => {
     if (provider === 'apple' && Platform.OS !== 'ios') return;
-    console.log('[oauth] Attempting to sign in with:', provider);
-
-    const { data, error } = await supabase.auth.signInWithOAuth({
+    console.log('[oauth] redirect:', authRedirectUri);
+    const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
         redirectTo: authRedirectUri,
-        skipBrowserRedirect: true, // MUST be true on native
+        // IMPORTANT: do NOT set skipBrowserRedirect on native
         scopes: provider === 'google' ? 'email profile' : undefined,
       },
     });
-    if (error) { console.warn('[oauth] signInWithOAuth error:', error.message); return; }
-
-    if (!data?.url) { console.warn('[oauth] no url returned from supabase'); return; }
-    console.log('[oauth] opening provider url…');
-
-    const result = await WebBrowser.openAuthSessionAsync(data.url, authRedirectUri);
-    console.log('[oauth] webbrowser result:', result?.type, result?.url?.slice(0, 120));
-    const code = parseCode(result?.url);
-    if (code) {
-      const { error: exErr } = await supabase.auth.exchangeCodeForSession({ code });
-      if (exErr) { console.warn('[oauth] exchange error:', exErr.message); return; }
-      console.log('[oauth] session established → rooms');
-      router.replace('/(tabs)/rooms');
-      return;
-    }
-    console.warn('[oauth] no code returned; check Supabase redirect URLs.');
+    if (error) console.warn('[oauth] signInWithOAuth error:', error.message);
   };
 
   return (
