@@ -5,6 +5,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { getSupabase } from '../lib/supabase';
 import { PALETTE } from '../lib/theme';
+import { authRedirectUri } from '../lib/linking';
 
 // couples background (soft blur) – local asset
 const BG_URI = require('../assets/images/login-bg.jpg');
@@ -22,7 +23,7 @@ export default function Login() {
     if (provider === 'apple' && Platform.OS !== 'ios') return;
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
-      options: { redirectTo: 'dream-ksa://auth-callback' }
+      options: { redirectTo: authRedirectUri },
     });
     if (error) console.log('[oauth]', provider, error.message);
   };
