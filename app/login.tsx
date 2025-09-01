@@ -68,7 +68,13 @@ export default function Login() {
 
         <View style={styles.iconRow}>
                             <Pressable style={styles.roundBtn} onPress={() => signInOAuth('facebook')}>
-                    <Ionicons name="logo-facebook" size={28} color="#1877F2" />
+                    <View style={styles.facebookIcon}>
+                      <View style={styles.facebookOuter}>
+                        <View style={styles.facebookInner}>
+                          <Text style={styles.facebookF}>f</Text>
+                        </View>
+                      </View>
+                    </View>
                   </Pressable>
                   <Pressable style={styles.roundBtn} onPress={() => setShowTips(true)}>
                     <MaterialCommunityIcons name="cellphone" size={28} color={PALETTE.primaryDark} />
@@ -116,6 +122,10 @@ const styles = StyleSheet.create({
   google:{ backgroundColor:'#fff' },
   iconRow:{ flexDirection:'row', justifyContent:'center', gap:24, marginTop:6, marginBottom:10 },
   roundBtn:{ width:64, height:64, borderRadius:32, backgroundColor:'#fff', alignItems:'center', justifyContent:'center', shadowColor:'#000', shadowOpacity:0.2, shadowRadius:8, elevation:3 },
+  facebookIcon:{ width:32, height:32, alignItems:'center', justifyContent:'center' },
+  facebookOuter:{ width:32, height:32, borderRadius:16, backgroundColor:'#1877F2', alignItems:'center', justifyContent:'center' },
+  facebookInner:{ width:24, height:24, borderRadius:12, backgroundColor:'#fff', alignItems:'center', justifyContent:'center' },
+  facebookF:{ color:'#1877F2', fontSize:18, fontWeight:'bold', textAlign:'center', lineHeight:18 },
   legal:{ color:'#fff', opacity:0.95, textAlign:'center', fontWeight:'700', textShadowColor:'rgba(0,0,0,0.45)', textShadowRadius:10 },
   link:{ textDecorationLine:'underline' },
   backdrop:{ flex:1, backgroundColor:'rgba(0,0,0,0.5)', alignItems:'center', justifyContent:'center' },
