@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, Text, Pressable, StyleSheet, Platform, Modal, ImageBackground } from 'react-native';
+import { View, Text, Pressable, StyleSheet, Platform, Modal, ImageBackground, Image } from 'react-native';
 import { router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
@@ -20,12 +20,14 @@ export default function Login() {
   }, []);
 
   const signInOAuth = async (provider: 'google' | 'facebook' | 'apple') => {
+    console.log('[oauth] Attempting to sign in with:', provider);
     if (provider === 'apple' && Platform.OS !== 'ios') return;
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: { redirectTo: authRedirectUri },
     });
     if (error) console.log('[oauth]', provider, error.message);
+    else console.log('[oauth]', provider, 'redirect initiated');
   };
 
   return (
@@ -63,7 +65,7 @@ export default function Login() {
           </Pressable>
         )}
         <Pressable style={[styles.bigBtn, styles.google]} onPress={() => signInOAuth('google')}>
-          <ImageBackground
+          <Image
             source={require('../assets/images/google.png')}
             style={styles.googleIcon}
             resizeMode="contain"
@@ -73,7 +75,7 @@ export default function Login() {
 
         <View style={styles.iconRow}>
                             <Pressable style={styles.roundBtn} onPress={() => signInOAuth('facebook')}>
-                    <ImageBackground
+                    <Image
                       source={require('../assets/images/facebook.png')}
                       style={styles.facebookIcon}
                       resizeMode="contain"
