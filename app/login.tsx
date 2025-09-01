@@ -67,12 +67,12 @@ export default function Login() {
         </Pressable>
 
         <View style={styles.iconRow}>
-          <Pressable style={styles.roundBtn} onPress={() => signInOAuth('facebook')}>
-            <Ionicons name="logo-facebook" size={22} color="#1877F2" />
-          </Pressable>
-          <Pressable style={styles.roundBtn} onPress={() => setShowTips(true)}>
-            <MaterialCommunityIcons name="cellphone" size={22} color={PALETTE.primaryDark} />
-          </Pressable>
+                            <Pressable style={styles.roundBtn} onPress={() => signInOAuth('facebook')}>
+                    <Ionicons name="logo-facebook" size={28} color="#1877F2" />
+                  </Pressable>
+                  <Pressable style={styles.roundBtn} onPress={() => setShowTips(true)}>
+                    <MaterialCommunityIcons name="cellphone" size={28} color={PALETTE.primaryDark} />
+                  </Pressable>
         </View>
 
         <Pressable onPress={() => router.push('/legal/terms')}>
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
   apple:{ backgroundColor:'#000' },
   google:{ backgroundColor:'#fff' },
   iconRow:{ flexDirection:'row', justifyContent:'center', gap:24, marginTop:6, marginBottom:10 },
-  roundBtn:{ width:56, height:56, borderRadius:28, backgroundColor:'#fff', alignItems:'center', justifyContent:'center', shadowColor:'#000', shadowOpacity:0.2, shadowRadius:8, elevation:3 },
+  roundBtn:{ width:64, height:64, borderRadius:32, backgroundColor:'#fff', alignItems:'center', justifyContent:'center', shadowColor:'#000', shadowOpacity:0.2, shadowRadius:8, elevation:3 },
   legal:{ color:'#fff', opacity:0.95, textAlign:'center', fontWeight:'700', textShadowColor:'rgba(0,0,0,0.45)', textShadowRadius:10 },
   link:{ textDecorationLine:'underline' },
   backdrop:{ flex:1, backgroundColor:'rgba(0,0,0,0.5)', alignItems:'center', justifyContent:'center' },
