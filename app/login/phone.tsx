@@ -1,22 +1,34 @@
 import * as React from 'react';
-import { View, Text, TextInput, Pressable, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, Pressable, StyleSheet, Modal, FlatList, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getSupabase } from '../../lib/supabase';
 import { PALETTE } from '../../lib/theme';
 
-const CC_LIST = ['+966', '+971', '+965', '+974', '+968', '+20', '+961', '+962', '+90'];
+// Minimal picker list (emoji flags like Binmo)
+const COUNTRIES = [
+  { flag:'🇸🇦', name:'Saudi Arabia', code:'+966' },
+  { flag:'🇦🇪', name:'UAE', code:'+971' },
+  { flag:'🇰🇼', name:'Kuwait', code:'+965' },
+  { flag:'🇶🇦', name:'Qatar', code:'+974' },
+  { flag:'🇴🇲', name:'Oman', code:'+968' },
+  { flag:'🇱🇧', name:'Lebanon', code:'+961' },
+  { flag:'🇯🇴', name:'Jordan', code:'+962' },
+  { flag:'🇪🇬', name:'Egypt', code:'+20' },
+  { flag:'🇹🇷', name:'Türkiye', code:'+90' },
+];
 
 export default function PhoneLogin() {
   const supabase = getSupabase();
   const router = useRouter();
-  const [cc, setCc] = React.useState('+966');
+  const [pickerOpen, setPickerOpen] = React.useState(false);
+  const [cc, setCc] = React.useState(COUNTRIES[0]);
   const [phone, setPhone] = React.useState('');
   const [sending, setSending] = React.useState(false);
   const [err, setErr] = React.useState<string | null>(null);
 
-  const e164 = React.useMemo(() => `${cc}${(phone || '').replace(/\D/g,'')}`, [cc, phone]);
-  const valid = /^\+\d{1,4}$/.test(cc) && /^\d{6,15}$/.test((phone || '').replace(/\D/g,''));
+  const e164 = React.useMemo(() => `${cc.code}${(phone || '').replace(/\D/g,'')`, [cc, phone]);
+  const valid = /^\+\d{1,4}$/.test(cc.code) && /^\d{6,15}$/.test((phone || '').replace(/\D/g,''));
 
   const sendOtp = async () => {
     setErr(null);
@@ -30,61 +42,82 @@ export default function PhoneLogin() {
 
   return (
     <KeyboardAvoidingView style={{ flex:1, backgroundColor:'#FFF' }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <View style={styles.header}>
+      <View style={s.header}>
         <Pressable hitSlop={10} onPress={() => router.back()}><Ionicons name="chevron-back" size={22} /></Pressable>
-        <Text style={styles.h}>Phone Log in/Register</Text>
-        <Pressable onPress={() => router.push('/login/help')}><Text style={styles.subLink}>Can't login?</Text></Pressable>
+        <Text style={s.h}>Phone Log in/Register</Text>
+        <Pressable onPress={() => router.push('/login/help')}><Text style={s.subLink}>Can't login?</Text></Pressable>
       </View>
 
-      <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
-        <Text style={styles.sub}>If not registered, a verification SMS will be sent automatically.</Text>
+      <View style={s.body}>
+        <Text style={s.sub}>If not registered, a verification SMS will be sent automatically.</Text>
 
-        <View style={styles.row}>
-          <View style={styles.ccBtn}><Text style={{ fontWeight:'900' }}>{cc}</Text></View>
+        <View style={s.row}>
+          <Pressable style={s.ccBtn} onPress={()=>setPickerOpen(true)}>
+            <Text style={{ fontSize:16 }}>{cc.flag}</Text>
+            <Text style={{ fontWeight:'900' }}>{cc.code}</Text>
+            <Ionicons name="chevron-down" size={16} />
+          </Pressable>
           <TextInput
             placeholder="Mobile number"
             placeholderTextColor="#9CA3AF"
             keyboardType="phone-pad"
             value={phone}
             onChangeText={setPhone}
-            style={styles.input}
+            style={s.input}
           />
         </View>
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.ccRow}>
-          {CC_LIST.map(code => (
-            <Pressable key={code} style={[styles.ccChip, cc===code && styles.ccChipActive]} onPress={() => setCc(code)}>
-              <Text style={[styles.ccChipTxt, cc===code && styles.ccChipTxtActive]}>{code}</Text>
-            </Pressable>
-          ))}
-        </ScrollView>
+        {err ? <Text style={s.err}>{err}</Text> : <View style={{ height:8 }} />}
 
-        {err ? <Text style={styles.err}>{err}</Text> : <View style={{ height:4 }} />}
-
-        <Pressable disabled={!valid || sending} onPress={sendOtp} style={[styles.nextBtn, (!valid || sending) && { opacity:0.5 }]}>
-          <Text style={styles.nextTxt}>Next</Text>
+        <Pressable disabled={!valid || sending} onPress={sendOtp} style={[s.nextBtn, (!valid || sending) && { opacity:0.5 }]}>
+          <Text style={s.nextTxt}>Next</Text>
         </Pressable>
-      </ScrollView>
+      </View>
+
+      {/* Country picker modal */}
+      <Modal visible={pickerOpen} transparent animationType="fade" onRequestClose={()=>setPickerOpen(false)}>
+        <View style={s.backdrop}>
+          <View style={s.picker}>
+            <View style={{ flexDirection:'row', alignItems:'center', justifyContent:'space-between' }}>
+              <Text style={{ fontWeight:'900', fontSize:16 }}>Select Country</Text>
+              <Pressable onPress={()=>setPickerOpen(false)}><Ionicons name="close" size={22} /></Pressable>
+            </View>
+            <FlatList
+              data={COUNTRIES}
+              keyExtractor={(it)=>it.code}
+              ItemSeparatorComponent={()=><View style={{ height:8 }} />}
+              renderItem={({ item }) => (
+                <Pressable style={s.item} onPress={()=>{ setCc(item); setPickerOpen(false); }}>
+                  <Text style={{ fontSize:18 }}>{item.flag}</Text>
+                  <View style={{ flex:1 }}>
+                    <Text style={{ fontWeight:'800' }}>{item.name}</Text>
+                    <Text style={{ opacity:0.6, fontWeight:'700' }}>{item.code}</Text>
+                  </View>
+                </Pressable>
+              )}
+            />
+          </View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
 
-const styles = StyleSheet.create({
+const s = StyleSheet.create({
   header:{ height:56, paddingHorizontal:16, flexDirection:'row', alignItems:'center', justifyContent:'space-between' },
   h:{ fontWeight:'900', fontSize:18 },
   subLink:{ fontWeight:'800', opacity:0.7 },
   body:{ padding:16, gap:14 },
   sub:{ opacity:0.65, fontWeight:'700' },
   row:{ flexDirection:'row', gap:10 },
-  ccBtn:{ width:86, backgroundColor:'#F3F4F6', borderRadius:12, alignItems:'center', justifyContent:'center', paddingVertical:12 },
+  ccBtn:{ width:120, backgroundColor:'#F3F4F6', borderRadius:12, alignItems:'center', justifyContent:'center', paddingVertical:12, flexDirection:'row', gap:6 },
   input:{ flex:1, backgroundColor:'#F3F4F6', borderRadius:12, paddingHorizontal:12, paddingVertical:12, fontWeight:'800' },
-  ccRow:{ gap:8, paddingVertical:6 },
-  ccChip:{ paddingVertical:8, paddingHorizontal:12, borderRadius:999, backgroundColor:'#F3F4F6' },
-  ccChipActive:{ backgroundColor:'#111827' },
-  ccChipTxt:{ fontWeight:'900', color:'#111827' },
-  ccChipTxtActive:{ color:'#fff' },
 
   nextBtn:{ marginTop:6, backgroundColor:PALETTE.primary, borderRadius:14, paddingVertical:14, alignItems:'center', shadowColor:'#000', shadowOpacity:0.12, shadowRadius:8, elevation:2 },
   nextTxt:{ color:'#fff', fontWeight:'900', fontSize:16 },
-  err:{ color:'#dc2626', fontWeight:'800' }
+  err:{ color:'#dc2626', fontWeight:'800' },
+
+  backdrop:{ flex:1, backgroundColor:'rgba(0,0,0,0.45)', padding:16, justifyContent:'center' },
+  picker:{ backgroundColor:'#fff', borderRadius:16, padding:16, maxHeight:'70%', gap:12 },
+  item:{ flexDirection:'row', alignItems:'center', gap:12, paddingVertical:6 },
 });

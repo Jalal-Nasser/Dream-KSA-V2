@@ -6,7 +6,8 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { getSupabase } from '../lib/supabase';
 import { PALETTE } from '../lib/theme';
 
-const BG_URI = 'https://images.unsplash.com/photo-1526045612212-70caf35c14df?q=80&w=1200&auto=format&fit=crop'; // soft couple bg placeholder
+// couples background (soft blur) – replace with your local asset if you prefer
+const BG_URI = 'https://images.unsplash.com/photo-1519098901900-5f2f24c3f61b?q=80&w=1200&auto=format&fit=crop';
 
 export default function Login() {
   const supabase = getSupabase();
@@ -31,21 +32,18 @@ export default function Login() {
       <ImageBackground
         source={{ uri: BG_URI }}
         style={StyleSheet.absoluteFill}
-        imageStyle={{ transform:[{ scale:1.1 }], opacity:0.95 }}
+        imageStyle={{ opacity:0.96 }}
         resizeMode="cover"
       >
-        {/* subtle dark veil so text is readable */}
         <View style={[StyleSheet.absoluteFill, { backgroundColor:'rgba(0,0,0,0.25)'}]} />
       </ImageBackground>
 
-      {/* top help link */}
       <View style={styles.topRow}>
         <Pressable onPress={() => router.push('/login/help')}>
           <Text style={styles.help}>Can't login?</Text>
         </Pressable>
       </View>
 
-      {/* bottom action area */}
       <View style={styles.bottomWrap}>
         {Platform.OS === 'ios' && (
           <Pressable style={[styles.bigBtn, styles.apple]} onPress={() => signInOAuth('apple')}>
@@ -53,7 +51,6 @@ export default function Login() {
             <Text style={styles.bigTxt}>Apple ID</Text>
           </Pressable>
         )}
-
         <Pressable style={[styles.bigBtn, styles.google]} onPress={() => signInOAuth('google')}>
           <Ionicons name="logo-google" size={20} color="#111827" />
           <Text style={[styles.bigTxt, { color:'#111827' }]}>Google</Text>
@@ -69,18 +66,18 @@ export default function Login() {
         </View>
 
         <Pressable onPress={() => router.push('/legal/terms')}>
-          <Text style={styles.legalText}>
+          <Text style={styles.legal}>
             By continuing you agree to DreamKSA's <Text style={styles.link}>Terms of Service</Text> and <Text style={styles.link}>Privacy</Text>
           </Text>
         </Pressable>
       </View>
 
-      {/* Tips modal */}
+      {/* Tips → Confirm → Phone */}
       <Modal visible={showTips} transparent animationType="fade" onRequestClose={()=>setShowTips(false)}>
         <View style={styles.backdrop}>
           <View style={styles.sheet}>
-            <Text style={styles.tipsTitle}>Tips</Text>
-            <Text style={styles.tipsBody}>By continuing, you agree to DreamKSA Terms of Service and Privacy Policy.</Text>
+            <Text style={styles.sheetTitle}>Tips</Text>
+            <Text style={styles.sheetBody}>By continuing, you agree to DreamKSA Terms of Service and Privacy Policy.</Text>
             <View style={{ flexDirection:'row', gap:12 }}>
               <Pressable onPress={()=>setShowTips(false)} style={[styles.sheetBtn,{ backgroundColor:'#e5e7eb'}]}>
                 <Text style={[styles.sheetBtnTxt,{ color:'#111827'}]}>Cancel</Text>
@@ -98,7 +95,7 @@ export default function Login() {
 
 const styles = StyleSheet.create({
   topRow:{ position:'absolute', right:16, top:14 },
-  help:{ color:'#fff', fontWeight:'800', opacity:0.95, textShadowColor:'rgba(0,0,0,0.4)', textShadowRadius:8 },
+  help:{ color:'#fff', fontWeight:'800', opacity:0.95, textShadowColor:'rgba(0,0,0,0.45)', textShadowRadius:10 },
   bottomWrap:{ position:'absolute', left:16, right:16, bottom:24, alignItems:'center' },
   bigBtn:{ height:54, borderRadius:16, width:'100%', marginBottom:12, alignItems:'center', justifyContent:'center', flexDirection:'row', gap:10, shadowColor:'#000', shadowOpacity:0.3, shadowRadius:10, elevation:4 },
   bigTxt:{ color:'#fff', fontWeight:'900', fontSize:16 },
@@ -106,14 +103,12 @@ const styles = StyleSheet.create({
   google:{ backgroundColor:'#fff' },
   iconRow:{ flexDirection:'row', justifyContent:'center', gap:24, marginTop:6, marginBottom:10 },
   roundBtn:{ width:56, height:56, borderRadius:28, backgroundColor:'#fff', alignItems:'center', justifyContent:'center', shadowColor:'#000', shadowOpacity:0.2, shadowRadius:8, elevation:3 },
-
-  legalText:{ color:'#fff', opacity:0.95, textAlign:'center', fontWeight:'700', textShadowColor:'rgba(0,0,0,0.45)', textShadowRadius:10 },
+  legal:{ color:'#fff', opacity:0.95, textAlign:'center', fontWeight:'700', textShadowColor:'rgba(0,0,0,0.45)', textShadowRadius:10 },
   link:{ textDecorationLine:'underline' },
-
   backdrop:{ flex:1, backgroundColor:'rgba(0,0,0,0.5)', alignItems:'center', justifyContent:'center' },
   sheet:{ width:'86%', backgroundColor:'#fff', borderRadius:16, padding:16, alignItems:'center', gap:10 },
-  tipsTitle:{ fontWeight:'900', fontSize:18 },
-  tipsBody:{ textAlign:'center', opacity:0.7, marginBottom:6, fontWeight:'700' },
+  sheetTitle:{ fontWeight:'900', fontSize:18 },
+  sheetBody:{ textAlign:'center', opacity:0.7, marginBottom:6, fontWeight:'700' },
   sheetBtn:{ backgroundColor: PALETTE.primary, borderRadius:12, paddingVertical:10, paddingHorizontal:18, alignItems:'center', justifyContent:'center' },
   sheetBtnTxt:{ color:'#fff', fontWeight:'900' },
 });
