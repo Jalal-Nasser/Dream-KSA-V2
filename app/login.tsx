@@ -30,37 +30,24 @@ export default function Login() {
 
     console.log('[oauth] start', provider, 'returnUrl:', authRedirectUri);
 
-    // 1) Ask Supabase for a URL (no auto-redirect)
-    const resp = await supabase.auth.signInWithOAuth({
+    // Ask Supabase for URL (no auto redirect)
+    const res = await supabase.auth.signInWithOAuth({
       provider,
-      options: {
-        redirectTo: authRedirectUri,
-        skipBrowserRedirect: true,
-        scopes: provider === 'google' ? 'email profile' : undefined,
-      },
+      options: { redirectTo: authRedirectUri, skipBrowserRedirect: true, scopes: provider === 'google' ? 'email profile' : undefined },
     });
 
-    // 2) Prefer the returned URL ONLY if it already contains redirect_to=…
-    let authUrl = resp?.data?.url || '';
-    const hasRedirect = authUrl.includes('redirect_to=');
-
-    // 3) If missing (or empty), build a manual authorize URL that ALWAYS includes redirect_to
-    if (!authUrl || !hasRedirect) {
-      const base = `${SUPABASE_URL}/auth/v1/authorize`;
-      const qs = new URLSearchParams({
-        provider,
-        redirect_to: authRedirectUri,
-        ...(provider === 'google' ? { scopes: 'email profile' } : {}),
-      }).toString();
-      authUrl = `${base}?${qs}`;
-      console.warn('[oauth] using manual authorize url:', authUrl.slice(0, 180), '…');
+    // Use returned URL only if it already has redirect_to=…
+    let authUrl = res?.data?.url || '';
+    if (!authUrl || !authUrl.includes('redirect_to=')) {
+      const qs = new URLSearchParams({ provider, redirect_to: authRedirectUri, ...(provider === 'google' ? { scopes: 'email profile' } : {}) }).toString();
+      authUrl = `${SUPABASE_URL}/auth/v1/authorize?${qs}`;
+      console.warn('[oauth] manual authorize url:', authUrl.slice(0, 180), '…');
     } else {
       console.log('[oauth] provider url:', authUrl.slice(0, 180), '…');
     }
 
-    // 4) Open & exchange (tries multiple strategies)
     const how = await openAndExchange(authUrl);
-    console.log('[oauth] flow completed via:', how, ' (if "await:listener", root listener will exchange on resume)');
+    console.log('[oauth] flow completed via:', how);
   };
 
   return (
