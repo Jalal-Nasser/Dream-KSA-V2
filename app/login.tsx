@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, Image, ImageBackground, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
+import { supabase } from '../lib/supabase';
 
 // local assets
 const BG_LOCAL = require('../assets/images/login-bg.jpg');
@@ -12,6 +13,40 @@ const GOOGLE_ICON = require('../assets/icons/google.png');
 export default function Login() {
   const router = useRouter();
   const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (mounted && data.session) {
+        router.replace('/(tabs)/rooms');
+      }
+    })();
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      if (session) router.replace('/(tabs)/rooms');
+    });
+    return () => { sub.subscription.unsubscribe(); mounted = false; };
+  }, [router]);
+
+  const handleGoogle = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: 'dream-ksa://auth-callback' }
+    });
+    if (error) console.log('[auth/google]', error);
+  };
+
+  const handleEmailPassword = async () => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error?.message?.includes('Invalid login')) {
+      const { error: signUpErr } = await supabase.auth.signUp({ email, password });
+      if (signUpErr) return console.log('[signup]', signUpErr);
+    } else if (error) {
+      console.log('[login/password]', error);
+    }
+  };
   return (
     <ImageBackground source={BG_LOCAL} style={styles.bg} resizeMode="cover">
       <LinearGradient
@@ -37,7 +72,7 @@ export default function Login() {
           <Text style={styles.cardTitle}>انضم إلى مجتمع Dream KSA</Text>
           <Text style={styles.cardSub}>اختر طريقة تسجيل الدخول المفضلة</Text>
 
-          <TouchableOpacity activeOpacity={0.9} style={styles.btnWhite} onPress={() => { console.log('[login] Google pressed -> /(tabs)'); router.replace('/(tabs)'); }}>
+          <TouchableOpacity activeOpacity={0.9} style={styles.btnWhite} onPress={handleGoogle}>
             <Image source={GOOGLE_ICON} style={styles.googleIcon} />
             <Text style={styles.btnWhiteText}>متابعة بـ Google</Text>
           </TouchableOpacity>
@@ -47,28 +82,38 @@ export default function Login() {
             <Text style={styles.btnFBText}>متابعة بـ Facebook</Text>
           </TouchableOpacity>
 
-          {/* divider and mobile login box */}
+          {/* divider and email/password box */}
           <View style={styles.dividerRow}>
             <View style={styles.divider} />
-            <Text style={styles.dividerText}>أو استخدام رقم الهاتف</Text>
+            <Text style={styles.dividerText}>أو باستخدام البريد/كلمة المرور</Text>
             <View style={styles.divider} />
           </View>
 
           <View style={styles.phoneRow}>
-            <View style={styles.flagBox}>
-              <Text style={{ fontSize: 18 }}>🇸🇦</Text>
-              <Text style={{ fontSize: 15, marginLeft: 6, color: '#111827', fontWeight: '700' }}>+966</Text>
-            </View>
             <TextInput
               style={styles.phoneInput}
-              placeholder="5xxxxxxxx"
+              placeholder="you@example.com"
               placeholderTextColor="#9CA3AF"
-              keyboardType="phone-pad"
-              value={phone}
-              onChangeText={setPhone}
-              maxLength={9}
+              keyboardType="email-address"
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
             />
           </View>
+          <View style={[styles.phoneRow, { marginTop: 8 }]}>
+            <TextInput
+              style={styles.phoneInput}
+              placeholder="••••••••"
+              placeholderTextColor="#9CA3AF"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+            />
+          </View>
+          <TouchableOpacity activeOpacity={0.9} style={[styles.btnFB, { marginTop: 10, backgroundColor: '#111827' }]} onPress={handleEmailPassword}>
+            <View style={styles.iconLeft}><Ionicons name="mail" size={18} color="#fff" /></View>
+            <Text style={styles.btnFBText}>تسجيل الدخول</Text>
+          </TouchableOpacity>
         </View>
       </View>
 

@@ -39,6 +39,8 @@ const config: ExpoConfig = {
   },
   extra: {
     // keep your env pass-throughs if used elsewhere
+    EXPO_PUBLIC_SUPABASE_URL: 'https://YOUR-PROJECT.supabase.co',
+    EXPO_PUBLIC_SUPABASE_ANON_KEY: 'YOUR-ANON-KEY',
     eas: {
       projectId: "replace-with-your-eas-project-id"
     }

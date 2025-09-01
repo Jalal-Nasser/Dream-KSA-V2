@@ -1,377 +1,93 @@
 import * as React from 'react';
-import {
-  View, Text, StyleSheet, FlatList, Image, Pressable, TextInput,
-  ImageBackground, Dimensions, ScrollView
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, StyleSheet, FlatList, Pressable, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { PALETTE } from '../../lib/theme';
+import { supabase } from '../../lib/supabase';
 
-type Room = {
-  id: string;
-  title: string;
-  cover?: string;
-  avatar: string;
-  listeners: number;
-  country?: string;
-};
-
-const W = Dimensions.get('window').width;
-
-const BASE_ROOMS: Room[] = new Array(12).fill(0).map((_, i) => ({
-  id: `r${i + 1}`,
-  title: `غرفة زرتها ${i + 1}`,
-  avatar: `https://i.pravatar.cc/120?img=${(i % 60) + 1}`,
-  cover: `https://picsum.photos/seed/rc${i}/1200/600`,
-  listeners: 60 + i * 9,
-  country: ['SA', 'LB', 'KW', 'SY'][i % 4],
-}));
-
-const FEATURED: Room[] = [
-  { id:'f1', title:'إذاعة Binmo الرسمي', avatar:'https://i.pravatar.cc/120?img=15', cover:'https://picsum.photos/seed/f1/800/600', listeners:480, country:'SA' },
-  { id:'f2', title:'نقطة و سطر جديد...', avatar:'https://i.pravatar.cc/120?img=22', cover:'https://picsum.photos/seed/f2/800/600', listeners:65, country:'SA' },
-];
-
-const HOSTS = new Array(10).fill(0).map((_,i)=>({ id:`h${i}`, name:`مضيف ${i+1}`, avatar:`https://i.pravatar.cc/100?img=${(i%60)+1}` }));
+type Room = { id: string; title: string; created_at: string };
 
 export default function Rooms() {
   const router = useRouter();
-  const [mode, setMode] = React.useState<'list' | 'grid'>('grid');
-  const [tab, setTab]   = React.useState<'my' | 'trend' | 'celeb'>('my');
-  const [query, setQuery] = React.useState('');
+  const [rooms, setRooms] = React.useState<Room[]>([]);
+  const [title, setTitle] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
 
-  // Shared header for all tabs (gradient + tabs + search + toggle)
-  const Header = React.useCallback(() => (
-    <>
-      <LinearGradient colors={[PALETTE.soft1, PALETTE.soft2]} start={{x:0,y:0}} end={{x:1,y:0}} style={styles.headerGrad}>
-        <View style={styles.headerRow}>
-          {/* Left side: bigger home icon + search icon bubble */}
-          <View style={styles.leftIcons}>
-            <View style={styles.homeBubble}>
-              <MaterialCommunityIcons name="home-variant" size={22} color={PALETTE.primaryDark} />
-            </View>
-            <View style={styles.iconBtn}><Ionicons name="search" size={18} color={PALETTE.textDark} /></View>
-          </View>
+  const fetchRooms = React.useCallback(async () => {
+    const { data, error } = await supabase
+      .from('rooms')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(50);
+    if (!error && data) setRooms(data as Room[]);
+  }, []);
 
-          {/* Tabs — RTL order and alignment */}
-          <View style={styles.segments}>
-            {[
-              { key: 'my',    label: 'الخاص بي' },
-              { key: 'trend', label: 'ترند' },
-              { key: 'celeb', label: 'المشاهير' },
-            ].map(t => {
-              const active = tab === (t.key as any);
-              return (
-                <Pressable key={t.key} onPress={() => setTab(t.key as any)} style={styles.segItem}>
-                  <Text style={[styles.segTxt, active && styles.segTxtActive]}>{t.label}</Text>
-                  <View style={[styles.segUnderline, active && styles.segUnderlineActive]} />
-                </Pressable>
-              );
-            })}
-          </View>
-        </View>
-      </LinearGradient>
+  React.useEffect(() => {
+    fetchRooms();
+    const channel = supabase
+      .channel('rooms_changes')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'rooms' }, (payload) => {
+        setRooms((prev) => [payload.new as any, ...prev]);
+      })
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchRooms]);
 
-      {/* Search row + view toggle (outside any ScrollView) */}
-      <View style={styles.searchWrap}>
-        <Ionicons name="search" size={16} color={PALETTE.textDim} />
+  const createRoom = async () => {
+    if (!title.trim()) return;
+    setLoading(true);
+    const user = (await supabase.auth.getUser()).data.user;
+    const { data, error } = await supabase
+      .from('rooms')
+      .insert({ title: title.trim(), created_by: user?.id })
+      .select()
+      .single();
+    setLoading(false);
+    if (error) return console.log('[createRoom]', error);
+    setTitle('');
+    router.push(`/room/${data!.id}`);
+  };
+
+  return (
+    <View style={{ flex: 1, backgroundColor: PALETTE.soft1, padding: 12 }}>
+      <View style={styles.creator}>
         <TextInput
-          style={styles.searchInput}
-          placeholder="ابحث عن غرفة"
-          placeholderTextColor={PALETTE.textDim}
-          value={query}
-          onChangeText={setQuery}
+          style={styles.input}
+          placeholder="أدخل اسم الغرفة"
+          placeholderTextColor="#9CA3AF"
+          value={title}
+          onChangeText={setTitle}
           textAlign="right"
         />
-        <View style={styles.toggleWrap}>
-          <Pressable onPress={() => setMode('list')} style={[styles.toggleBtn, mode === 'list' && styles.toggleActive]}>
-            <MaterialCommunityIcons name="view-list" size={16} />
-            <Text style={[styles.toggleTxt, mode === 'list' && styles.toggleTxtActive]}>قائمة</Text>
-          </Pressable>
-          <Pressable onPress={() => setMode('grid')} style={[styles.toggleBtn, mode === 'grid' && styles.toggleActive]}>
-            <MaterialCommunityIcons name="view-grid" size={16} />
-            <Text style={[styles.toggleTxt, mode === 'grid' && styles.toggleTxtActive]}>شبكة</Text>
-          </Pressable>
-        </View>
-      </View>
-    </>
-  ), [mode, tab, query]);
-
-  // Switch per tab: each returns ONE FlatList (no outer ScrollView)
-  if (tab === 'my') {
-    const myRoom: Room = {
-      id:'maryam-room',
-      title:'غرفتي - مريم',
-      avatar:'https://i.pravatar.cc/120?img=5',
-      cover:'https://picsum.photos/seed/maryam/1200/600',
-      listeners: 132,
-      country:'SA',
-    };
-    const data = BASE_ROOMS.filter(r => r.title.includes(query));
-    const listHeader = (
-      <>
-        <Header />
-        {/* Maryam room card */}
-        <Pressable onPress={() => router.push({ pathname: '/room/[id]', params: { id: myRoom.id } })} style={{ paddingHorizontal: 12, paddingTop: 12 }}>
-          <View style={styles.myCard}>
-            <Image source={{ uri: myRoom.cover! }} style={styles.myCover} />
-            <Image source={{ uri: myRoom.avatar }} style={styles.myAvatar} />
-            <Text style={styles.myTitle} numberOfLines={1}>{myRoom.title}</Text>
-            <View style={styles.myMetaRow}>
-              <View style={styles.metaPill}><Text style={styles.metaPillTxt}>{myRoom.country}</Text></View>
-              <View style={{flexDirection:'row-reverse', alignItems:'center', gap:4}}>
-                <Ionicons name="radio" size={12} color={PALETTE.okGreen}/>
-                <Text style={styles.metaCount}>{myRoom.listeners}</Text>
-              </View>
-            </View>
-          </View>
+        <Pressable disabled={loading} onPress={createRoom} style={styles.makeBtn}>
+          <MaterialCommunityIcons name="plus" size={18} color="#fff" />
+          <Text style={{ color: '#fff', fontWeight: '800' }}>{loading ? '...' : 'إنشاء'}</Text>
         </Pressable>
-        <Text style={styles.sectionTitle}>الزيارات الأخيرة</Text>
-      </>
-    );
-
-    return mode === 'list' ? (
-      <SafeAreaView style={{ flex: 1, backgroundColor: PALETTE.soft1 }}>
-        <FlatList
-          key={'my-list'}
-          data={data}
-          keyExtractor={(r) => r.id}
-          ListHeaderComponent={listHeader}
-          contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 28 }}
-          ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-          renderItem={({ item }) => <ListCard room={item} />}
-        />
-      </SafeAreaView>
-    ) : (
-      <SafeAreaView style={{ flex: 1, backgroundColor: PALETTE.soft1 }}>
-        <FlatList
-          key={'my-grid'}
-          data={data}
-          keyExtractor={(r) => r.id}
-          numColumns={2}
-          ListHeaderComponent={listHeader}
-          contentContainerStyle={{ paddingHorizontal: 10, paddingBottom: 28 }}
-          columnWrapperStyle={{ gap: 10 }}
-          ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-          renderItem={({ item }) => <GridCard room={item} />}
-        />
-      </SafeAreaView>
-    );
-  }
-
-  if (tab === 'trend') {
-    const data = BASE_ROOMS.map((r, i) => ({ ...r, title: i%2? 'وكالة أرز لبنان':'بوليفارد سيتي الرياض'}))
-                           .filter(r => r.title.includes(query));
-    const listHeader = (<Header />);
-
-    return mode === 'list' ? (
-      <SafeAreaView style={{ flex: 1, backgroundColor: PALETTE.soft1 }}>
-        <FlatList
-          key={'trend-list'}
-          data={data}
-          keyExtractor={(r)=>r.id}
-          ListHeaderComponent={listHeader}
-          contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 28 }}
-          ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-          renderItem={({ item }) => <ListCard room={item} />}
-        />
-      </SafeAreaView>
-    ) : (
-      <SafeAreaView style={{ flex: 1, backgroundColor: PALETTE.soft1 }}>
-        <FlatList
-          key={'trend-grid'}
-          data={data}
-          keyExtractor={(r)=>r.id}
-          numColumns={2}
-          ListHeaderComponent={listHeader}
-          contentContainerStyle={{ paddingBottom:28, paddingHorizontal:10 }}
-          columnWrapperStyle={{gap:10}}
-          ItemSeparatorComponent={() => <View style={{height:10}}/>}
-          renderItem={({item})=> <GridCard room={item}/> }
-        />
-      </SafeAreaView>
-    );
-  }
-
-  // celeb tab
-  const listHeader = (
-    <>
-      <Header />
-      {/* Featured programs row (horizontal is OK inside header) */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.hlist}>
-        {FEATURED.map((f)=>(
-          <View key={f.id} style={styles.featureCard}>
-            <Image source={{ uri: f.cover! }} style={styles.featureImg}/>
-            <Text style={styles.featureTitle} numberOfLines={1}>{f.title}</Text>
-            <View style={styles.featureMeta}>
-              <View style={{flexDirection:'row-reverse', alignItems:'center', gap:4}}>
-                <Ionicons name="radio" size={12} color={PALETTE.okGreen}/>
-                <Text style={styles.metaCount}>{f.listeners}</Text>
-              </View>
-              <View style={styles.metaPill}><Text style={styles.metaPillTxt}>{f.country}</Text></View>
-            </View>
-          </View>
-        ))}
-      </ScrollView>
-
-      {/* المضيفين المقترحين — RTL row */}
-      <Text style={styles.subHeader}>المضيفين المقترحين</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={[styles.hlist,{paddingVertical:6, flexDirection:'row-reverse'}]}>
-        {HOSTS.map(h=>(
-          <View key={h.id} style={{ alignItems:'center', width:64 }}>
-            <View style={styles.storyRing}>
-              <Image source={{ uri: h.avatar }} style={styles.storyAvatar}/>
-            </View>
-            <Text numberOfLines={1} style={styles.storyName}>{h.name}</Text>
-          </View>
-        ))}
-      </ScrollView>
-    </>
-  );
-  const data = BASE_ROOMS.filter(r => r.title.includes(query));
-
-  return mode === 'list' ? (
-    <SafeAreaView style={{ flex: 1, backgroundColor: PALETTE.soft1 }}>
-      <FlatList
-        key={'celeb-list'}
-        data={data}
-        keyExtractor={(r)=>r.id}
-        ListHeaderComponent={listHeader}
-        contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 28 }}
-        ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-        renderItem={({ item }) => <ListCard room={item} />}
-        />
-      </SafeAreaView>
-  ) : (
-    <SafeAreaView style={{ flex: 1, backgroundColor: PALETTE.soft1 }}>
-      <FlatList
-        key={'celeb-grid'}
-        data={data}
-        keyExtractor={(r)=>r.id}
-        numColumns={2}
-        ListHeaderComponent={listHeader}
-        contentContainerStyle={{ paddingHorizontal:10, paddingBottom:28 }}
-        columnWrapperStyle={{gap:10}}
-        ItemSeparatorComponent={() => <View style={{height:10}}/>}
-        renderItem={({item})=> <GridCard room={item}/> }
-      />
-    </SafeAreaView>
-  );
-}
-
-/* Shared cards */
-function ListCard({ room }: { room: Room }) {
-  return (
-    <Pressable onPress={() => router.push({ pathname: '/room/[id]', params: { id: room.id } })}>
-      <View style={styles.cardList}>
-        <ImageBackground source={{ uri: room.cover! }} style={styles.cover} imageStyle={{ borderTopLeftRadius: 16, borderTopRightRadius: 16 }}>
-          <View style={styles.badgeLive}>
-            <Ionicons name="radio" size={12} color="#fff" />
-            <Text style={styles.badgeTxt}>{room.listeners} مستمع</Text>
-          </View>
-        </ImageBackground>
-        <View style={styles.cardBody}>
-          <Text style={styles.roomTitle} numberOfLines={1}>{room.title}</Text>
-          <View style={{ flexDirection: 'row-reverse', alignItems: 'center', gap: 6 }}>
-            <View style={styles.metaPill}><Text style={styles.metaPillTxt}>{room.country ?? 'SA'}</Text></View>
-          </View>
-        </View>
-        <View style={styles.cardFooter}>
-          <Pressable style={styles.joinBtn} onPress={() => {}}>
-            <MaterialCommunityIcons name="microphone" size={16} color="#fff" />
-            <Text style={styles.joinTxt}>انضم</Text>
-          </Pressable>
-        </View>
       </View>
-    </Pressable>
+
+      <FlatList
+        data={rooms}
+        keyExtractor={(r) => r.id}
+        ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+        renderItem={({ item }) => (
+          <Pressable onPress={() => router.push(`/room/${item.id}`)} style={styles.roomRow}>
+            <MaterialCommunityIcons name="account-voice" size={20} color={PALETTE.primaryDark} />
+            <Text style={styles.roomTitle} numberOfLines={1}>{item.title}</Text>
+            <Ionicons name="chevron-back" size={18} color="#B4B8BF" />
+          </Pressable>
+        )}
+      />
+    </View>
   );
 }
 
-function GridCard({ room }: { room: Room }) {
-  return (
-    <Pressable onPress={() => router.push({ pathname: '/room/[id]', params: { id: room.id } })}>
-      <LinearGradient colors={[PALETTE.soft1, PALETTE.soft2]} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.skinCard}>
-        <Image source={{ uri: room.avatar }} style={styles.skinAvatar}/>
-        <Text style={styles.skinTitle} numberOfLines={1}>{room.title}</Text>
-        <View style={styles.skinMetaRow}>
-          <View style={styles.metaPill}><Text style={styles.metaPillTxt}>{room.country ?? 'SA'}</Text></View>
-          <View style={{flexDirection:'row-reverse', alignItems:'center', gap:4}}>
-            <Ionicons name="radio" size={12} color={PALETTE.okGreen}/>
-            <Text style={styles.metaCount}>{room.listeners}</Text>
-          </View>
-        </View>
-      </LinearGradient>
-    </Pressable>
-  );
-}
-
-/* Styles */
 const styles = StyleSheet.create({
-  headerGrad: { paddingTop: 10, paddingBottom: 12, paddingHorizontal: 12 },
-  headerRow: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between' },
-
-  leftIcons: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  homeBubble: { backgroundColor: PALETTE.soft2, borderRadius: 12, padding: 8, borderWidth: 1, borderColor: PALETTE.cherry150 },
-  iconBtn: { backgroundColor: PALETTE.soft1, borderRadius: 10, padding: 6 },
-
-  // RTL tabs: push to right edge
-  segments: { flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'flex-end', gap: 24, flex: 1, marginRight: 8 },
-  segItem: { alignItems: 'center' },
-  segTxt: { fontWeight: '700', color: PALETTE.textDim, fontSize: 18 },
-  segTxtActive: { color: PALETTE.primaryDark, fontWeight: '900' },
-  segUnderline: { height: 3, width: 30, backgroundColor: 'transparent', marginTop: 6, borderRadius: 2 },
-  segUnderlineActive: { backgroundColor: PALETTE.primaryDark },
-
-  searchWrap: { paddingHorizontal: 12, paddingTop: 8, paddingBottom: 8, flexDirection:'row-reverse', alignItems:'center', gap: 8 },
-  searchInput: { flex: 1, fontSize: 14, paddingVertical: 0, textAlign: 'right' },
-
-  toggleWrap: { flexDirection:'row', gap: 6, backgroundColor: PALETTE.soft1, padding: 4, borderRadius: 999 },
-  toggleBtn: { flexDirection:'row', gap: 6, alignItems:'center', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999 },
-  toggleActive: { backgroundColor: '#FFFFFF', shadowColor:'#000', shadowOpacity:0.06, shadowRadius:6, elevation:1 },
-  toggleTxt: { fontWeight: '700', color: PALETTE.textDim },
-  toggleTxtActive: { color: PALETTE.textDark },
-
-  // Maryam card
-  myCard: { backgroundColor:'#FFFFFF', borderRadius:16, overflow:'hidden', paddingBottom:10 },
-  myCover: { width:'100%', height:120 },
-  myAvatar: { width:48, height:48, borderRadius:12, position:'absolute', top: 90, right: 12, borderWidth:2, borderColor:'#fff' },
-  myTitle: { textAlign:'right', fontWeight:'800', marginTop: 18, marginHorizontal:12 },
-  myMetaRow: { flexDirection:'row-reverse', alignItems:'center', justifyContent:'space-between', marginTop:6, marginHorizontal:12 },
-  sectionTitle: { fontWeight:'900', color:PALETTE.primaryDark, textAlign:'right', marginHorizontal:12, marginTop:16, marginBottom:8 },
-
-  // Shared pills/counters
-  metaPill: { backgroundColor: PALETTE.soft2, paddingHorizontal:8, paddingVertical:3, borderRadius:999 },
-  metaPillTxt: { color: PALETTE.primaryDark, fontWeight:'700', fontSize:12 },
-  metaCount: { fontWeight:'700' },
-
-  // List card
-  cardList: { backgroundColor:'#FFFFFF', borderRadius:16, overflow:'hidden' },
-  cover: { width:'100%', height:120 },
-  badgeLive: { position:'absolute', top:8, right:8, backgroundColor:'rgba(0,0,0,0.6)', flexDirection:'row-reverse', alignItems:'center', gap:4, paddingHorizontal:8, paddingVertical:4, borderRadius:12 },
-  badgeTxt: { color:'#fff', fontSize:11 },
-  cardBody: { paddingHorizontal:12, paddingTop:8, paddingBottom:6, flexDirection:'row-reverse', alignItems:'center', justifyContent:'space-between' },
-  roomTitle: { fontWeight:'800', flex:1, textAlign:'right', marginLeft:8 },
-  cardFooter: { paddingHorizontal:12, paddingBottom:12, flexDirection:'row-reverse', justifyContent:'space-between', alignItems:'center' },
-  joinBtn: { backgroundColor: PALETTE.primary, borderRadius:10, paddingHorizontal:14, paddingVertical:8, flexDirection:'row-reverse', gap:6, alignItems:'center' },
-  joinTxt: { color:'#fff', fontWeight:'700' },
-
-  // Grid card
-  skinCard: { width:(W-30)/2, borderRadius:16, padding:12, minHeight:160, alignItems:'center', justifyContent:'center', overflow:'hidden' },
-  skinAvatar: { width:64, height:64, borderRadius:32, backgroundColor:'#fff', marginBottom:8 },
-  skinTitle: { fontWeight:'800', textAlign:'center', maxWidth:(W-30)/2 - 24 },
-  skinMetaRow: { position:'absolute', bottom:10, right:12, left:12, flexDirection:'row', justifyContent:'space-between', alignItems:'center' },
-
-  // Featured & hosts header blocks
-  hlist: { paddingHorizontal: 12, gap: 10, paddingTop: 8 },
-  featureCard: { width: W*0.6, backgroundColor:'#fff', borderRadius:16, overflow:'hidden', paddingBottom:8 },
-  featureImg: { width:'100%', height:120 },
-  featureTitle: { textAlign:'right', fontWeight:'800', marginTop:8, marginHorizontal:10 },
-  featureMeta: { flexDirection:'row-reverse', justifyContent:'space-between', alignItems:'center', marginTop:6, marginHorizontal:10 },
-
-  storyRing: { padding:2, borderRadius:999, backgroundColor: PALETTE.soft2 },
-  storyAvatar: { width:48, height:48, borderRadius:24, backgroundColor:'#fff' },
-  storyName: { fontSize:11, marginTop:4, maxWidth:60, textAlign:'center' },
+  creator: { flexDirection: 'row-reverse', gap: 8, marginBottom: 12 },
+  input: { flex: 1, backgroundColor: '#fff', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, fontWeight: '700' },
+  makeBtn: { backgroundColor: PALETTE.primary, borderRadius: 12, paddingHorizontal: 14, justifyContent: 'center', alignItems: 'center', flexDirection: 'row-reverse', gap: 6 },
+  roomRow: { backgroundColor: '#fff', borderRadius: 16, padding: 12, flexDirection: 'row', alignItems: 'center', gap: 10 },
+  roomTitle: { flex: 1, textAlign: 'right', fontWeight: '800' },
 });
