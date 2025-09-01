@@ -39,10 +39,10 @@ const config: ExpoConfig = {
   },
   extra: {
     // keep your env pass-throughs if used elsewhere
-    EXPO_PUBLIC_SUPABASE_URL: 'https://YOUR-PROJECT.supabase.co',
-    EXPO_PUBLIC_SUPABASE_ANON_KEY: 'YOUR-ANON-KEY',
+    EXPO_PUBLIC_SUPABASE_URL: 'https://kgcpeoidouajwytndtqi.supabase.co',
+    EXPO_PUBLIC_SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtnY3Blb2lkb3Vhand5dG5kdHFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI5NTc2MzgsImV4cCI6MjA2ODUzMzYzOH0.eV1GRnbrDIQ4xzZ6EsdNOzgGdxUoSFtOXJWoV71wxW4',
     eas: {
-      projectId: "replace-with-your-eas-project-id"
+      projectId: "kgcpeoidouajwytndtqi"
     }
   },
   experiments: {
