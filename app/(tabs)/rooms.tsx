@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { PALETTE } from '../../lib/theme';
-import { supabase } from '../../lib/supabase';
+import { getSupabase } from '../../lib/supabase';
 
 type Room = { id: string; title: string; created_at: string };
 
@@ -13,6 +13,7 @@ export default function Rooms() {
   const [rooms, setRooms] = React.useState<Room[]>([]);
   const [title, setTitle] = React.useState('');
   const [loading, setLoading] = React.useState(false);
+  const supabase = getSupabase();
 
   const fetchRooms = React.useCallback(async () => {
     const { data, error } = await supabase

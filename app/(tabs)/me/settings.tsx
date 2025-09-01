@@ -4,6 +4,8 @@ import CherryHeader from '../../components/CherryHeader';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { PALETTE } from '../../../lib/theme';
+import { getSupabase } from '../../../lib/supabase';
+import { useRouter } from 'expo-router';
 
 type RowProps = {
   label: string;
@@ -36,6 +38,14 @@ function SettingRow({ label, icon, onPress, showAlert, subLeft, last }: RowProps
 }
 
 export default function SettingsScreen() {
+  const router = useRouter();
+  const supabase = getSupabase();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.replace('/login');
+  };
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: PALETTE.soft1 }}>
       <CherryHeader title="إعدادات" />
@@ -59,7 +69,7 @@ export default function SettingsScreen() {
         </View>
 
         {/* Logout */}
-        <Pressable style={styles.logoutBtn} onPress={() => {}}>
+        <Pressable style={styles.logoutBtn} onPress={handleLogout}>
           <Text style={styles.logoutTxt}>خروج</Text>
         </Pressable>
       </ScrollView>

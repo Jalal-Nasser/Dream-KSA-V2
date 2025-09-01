@@ -3,7 +3,7 @@ import { View, Text, Image, ImageBackground, StyleSheet, TouchableOpacity, TextI
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { supabase } from '../lib/supabase';
+import { getSupabase } from '../lib/supabase';
 
 // local assets
 const BG_LOCAL = require('../assets/images/login-bg.jpg');
@@ -15,6 +15,7 @@ export default function Login() {
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const supabase = getSupabase();
 
   useEffect(() => {
     let mounted = true;

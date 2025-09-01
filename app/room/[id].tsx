@@ -2,7 +2,7 @@ import * as React from 'react';
 import { View, Text, StyleSheet, FlatList, TextInput, Pressable } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { supabase } from '../../lib/supabase';
+import { getSupabase } from '../../lib/supabase';
 import { PALETTE } from '../../lib/theme';
 
 type Msg = { id: string; from: string; text: string; at: number };
@@ -11,7 +11,8 @@ const uid = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice
 export default function RoomChat() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const chanRef = React.useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const chanRef = React.useRef<ReturnType<typeof getSupabase>['channel'] | null>(null);
+  const supabase = getSupabase();
 
   const [messages, setMessages] = React.useState<Msg[]>([]);
   const [text, setText] = React.useState('');
