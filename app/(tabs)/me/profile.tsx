@@ -53,7 +53,7 @@ export default function ProfileScreen() {
       if (perm.status !== 'granted') return;
 
       const res = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: [ImagePicker.MediaType.images],
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
         quality: 1,
         allowsMultipleSelection: false,
       });
