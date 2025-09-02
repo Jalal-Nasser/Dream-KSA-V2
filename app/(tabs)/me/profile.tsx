@@ -2,11 +2,12 @@ import * as React from 'react';
 import { View, Text, TextInput, I18nManager, Pressable, Image, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import * as ImageManipulator from 'expo-image-manipulator';
+
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { MaterialCommunityIcons as MCI } from '@expo/vector-icons';
 
 import { fetchMyProfile, upsertMyProfile, publicAvatarUrl, uploadAvatar, type Profile } from '@/lib/profile';
+import { prepareAvatarUri } from '@/lib/image';
 import { getSupabase } from '@/lib/supabase';
 
 I18nManager.allowRTL(true);
@@ -52,15 +53,11 @@ export default function ProfileScreen() {
     if (res.canceled || !res.assets?.length) return;
 
     const img = res.assets[0];
-    // ensure square + reasonable size
-    const manip = await ImageManipulator.manipulateAsync(
-      img.uri,
-      [{ resize: { width: 512, height: 512 } }],
-      { compress: 0.9, format: ImageManipulator.SaveFormat.JPEG }
-    );
+    // prepare image with fallback if manipulator unavailable
+    const preparedUri = await prepareAvatarUri(img.uri);
 
     try {
-      const publicUrl = await uploadAvatar(manip.uri);
+      const publicUrl = await uploadAvatar(preparedUri);
       setAvatar(publicUrl); // instant UI reflect
       // Optional: reload profile from server in case other fields changed
       // const fresh = await fetchMyProfile(); if (fresh.profile) setP(fresh.profile);

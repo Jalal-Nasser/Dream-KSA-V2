@@ -1,4 +1,5 @@
 import { getSupabase } from './supabase';
+import { prepareAvatarUri } from './image';
 
 export type Profile = {
   id: string;
@@ -47,9 +48,10 @@ async function getCurrentUserId(): Promise<string | null> {
 export async function uploadAvatar(uri: string): Promise<string> {
   const uid = await getCurrentUserId();
   if (!uid) throw new Error('No user');
-  const ext = (uri.split('?')[0].split('.').pop() || 'jpg').toLowerCase();
+  const prepared = await prepareAvatarUri(uri);
+  const ext = (prepared.split('?')[0].split('.').pop() || 'jpg').toLowerCase();
   const path = `${uid}/${Date.now()}.${ext}`;
-  const blob = await (await fetch(uri)).blob();
+  const blob = await (await fetch(prepared)).blob();
   const supabase = getSupabase();
   const { error } = await supabase.storage.from('avatars').upload(path, blob, {
     upsert: true,
