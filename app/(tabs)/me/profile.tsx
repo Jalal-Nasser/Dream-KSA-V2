@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { I18nManager, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { getSupabase } from '@/lib/supabase';
 import { resolveAvatarUrl } from '@/lib/storage';
 import { pickAvatar } from '@/lib/profileImageUtils';
@@ -11,6 +11,7 @@ const BORDER = '#F2CAD6';
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const { selectedCountry } = useLocalSearchParams<{ selectedCountry?: string }>();
   const supabase = getSupabase();
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
@@ -54,6 +55,13 @@ export default function ProfileScreen() {
       mounted = false;
     };
   }, [supabase]);
+
+  // When we come back from the country picker, update the field
+  useEffect(() => {
+    if (typeof selectedCountry === 'string' && selectedCountry.length > 0) {
+      setCountry(selectedCountry);
+    }
+  }, [selectedCountry]);
 
   const avatarUrl = useMemo(
     () => resolveAvatarUrl(supabase as any, avatarPath ?? undefined),
@@ -183,17 +191,17 @@ export default function ProfileScreen() {
           />
         </View>
 
-        {/* Country */}
+        {/* Country (navigates to picker) */}
         <View style={styles.field}>
           <Text style={styles.label}>البلد / المنطقة</Text>
-          <TextInput
-            style={styles.input}
-            value={country}
-            onChangeText={setCountry}
-            placeholder="اختر الدولة"
-            placeholderTextColor="#987"
-            textAlign="right"
-          />
+          <Pressable
+            onPress={() => router.push({ pathname: '/select-country', params: { current: country || '' } })}
+            style={[styles.input, { justifyContent: 'center' }]}
+          >
+            <Text style={{ textAlign: 'right', color: country ? '#3b1b26' : '#987' }}>
+              {country || 'اختر الدولة'}
+            </Text>
+          </Pressable>
         </View>
 
         {/* Title */}
