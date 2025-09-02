@@ -21,9 +21,14 @@ module.exports = {
   slug: 'dream-ksa',
   owner: 'jnasser',
   scheme: 'dream-ksa',
+  icon: './assets/images/icon.png',
 
   android: {
     package: 'app.dreamksa',
+    adaptiveIcon: {
+      foregroundImage: './assets/images/adaptive-icon.png',
+      backgroundColor: '#FFF0F3',
+    },
     // Accept ANY path for the custom scheme to avoid matching issues
     intentFilters: [
       {
@@ -35,6 +40,7 @@ module.exports = {
   },
   ios: {
     bundleIdentifier: 'app.dreamksa',
+    icon: './assets/images/icon.png',
   },
 
   orientation: 'portrait',
