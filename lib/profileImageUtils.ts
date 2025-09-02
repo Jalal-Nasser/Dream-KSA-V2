@@ -10,16 +10,27 @@ export async function pickAndUploadAvatar(userId: string) {
   const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (!perm.granted) throw new Error('Permission to access photos is required.');
 
-  // Launch library (SDK 51)
+  // Launch library (SDK 49–51+ safe):
+  // Some SDKs export MediaType.Images, some don't – fall back to the string API.
+  const MEDIA_IMAGES: any =
+    // SDK 51+
+    (ImagePicker as any).MediaType?.Images ??
+    // Older SDK
+    (ImagePicker as any).MediaTypeOptions?.Images ??
+    // Always works (string literal API)
+    'images';
+
   const result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: ImagePicker.MediaType.Images,
+    mediaTypes: MEDIA_IMAGES,
     allowsEditing: true,
     aspect: [1, 1],
     quality: 0.8,
   });
   console.log('[pickAvatar] raw result →', result);
 
-  const canceled = (result as any).canceled ?? (result as any).cancelled ?? false;
+  // Normalize SDK result shape
+  const canceled =
+    (result as any).canceled ?? (result as any).cancelled ?? false;
   if (canceled) return { cancelled: true as const };
 
   // Normalize asset
