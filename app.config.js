@@ -24,11 +24,12 @@ module.exports = {
 
   android: {
     package: 'app.dreamksa',
+    // Accept ANY path for the custom scheme to avoid matching issues
     intentFilters: [
       {
         action: 'VIEW',
         category: ['BROWSABLE', 'DEFAULT'],
-        data: [{ scheme: 'dream-ksa', host: '', pathPrefix: '/auth-callback' }],
+        data: [{ scheme: 'dream-ksa' }],
       },
     ],
   },
