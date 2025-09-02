@@ -61,6 +61,14 @@ export default function Login() {
 
     const how = await openAndExchange(authUrl);
     console.log('[oauth] flow via:', how);
+    try {
+      const { data } = await supabase.auth.getUser();
+      if (data?.user) {
+        router.replace('/(tabs)/rooms');
+      }
+    } catch (e) {
+      // no-op; the auth listener will still route when it fires
+    }
   };
 
   return (

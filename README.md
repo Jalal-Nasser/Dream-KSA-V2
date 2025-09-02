@@ -307,6 +307,12 @@ Enable debug logging in Edge Functions:
 console.error('Function error:', error);
 ```
 
+## Dev tips
+If you see **Cannot connect to Metro**, run:
+
+- `adb reverse tcp:8081 tcp:8081` (Android emulator)
+- Then restart with `npx expo start -c`
+
 ## 📚 API Reference
 
 ### Edge Functions
