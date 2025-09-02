@@ -92,7 +92,7 @@ export default function ProfileScreen() {
         const fresh = await loadMyProfile();
         if (fresh) setP(fresh);
       }
-      router.back();
+      router.replace({ pathname: '/(tabs)/me', params: { refresh: String(Date.now()) } });
     } catch (e) {
       console.warn('[profile save]', (e as any)?.message);
     } finally {

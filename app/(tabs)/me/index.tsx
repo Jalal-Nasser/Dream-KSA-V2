@@ -3,12 +3,48 @@ import { View, Text, StyleSheet, ScrollView, Image, Pressable, Alert } from 'rea
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { PALETTE } from '../../../lib/theme';
+import { getSupabase } from '../../../lib/supabase';
+import { resolveDisplayName } from '../../../lib/display';
 
 export default function MeScreen() {
   const router = useRouter();
+  const { refresh } = useLocalSearchParams();
+  const [profile, setProfile] = React.useState<any>(null);
+  const [user, setUser] = React.useState<any>(null);
+  const [loading, setLoading] = React.useState(true);
+  
   const onMenu = (name: string) => Alert.alert('', `(${name}) قادم لاحقًا`);
+  
+  const fetch = React.useCallback(async () => {
+    try {
+      const supabase = getSupabase();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.replace('/login');
+        return;
+      }
+      
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      
+      setUser(user);
+      setProfile(profile);
+    } catch (error) {
+      console.warn('[me] fetch error:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [router]);
+  
+  React.useEffect(() => { fetch(); }, [fetch]);
+  useFocusEffect(React.useCallback(() => { fetch(); }, [fetch, refresh]));
+  
+  const displayName = resolveDisplayName(profile, user);
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: PALETTE.soft1 }}>
       <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
@@ -21,7 +57,7 @@ export default function MeScreen() {
             <View style={styles.nameBlock}>
               <View style={styles.nameRow}>
                 <MaterialCommunityIcons name="gender-female" size={16} color={PALETTE.primary} />
-                <Text style={styles.name}>مريم</Text>
+                <Text style={styles.name}>{displayName}</Text>
               </View>
               <View style={styles.idRow}>
                 <MaterialCommunityIcons name="clipboard-text-outline" size={14} color={PALETTE.textDim} />
