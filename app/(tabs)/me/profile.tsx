@@ -6,7 +6,7 @@ import * as ImageManipulator from 'expo-image-manipulator';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { MaterialCommunityIcons as MCI } from '@expo/vector-icons';
 
-import { fetchMyProfile, upsertMyProfile, publicAvatarUrl, type Profile } from '@/lib/profile';
+import { fetchMyProfile, upsertMyProfile, publicAvatarUrl, uploadAvatar, type Profile } from '@/lib/profile';
 import { getSupabase } from '@/lib/supabase';
 
 I18nManager.allowRTL(true);
@@ -60,23 +60,10 @@ export default function ProfileScreen() {
     );
 
     try {
-      const supabase = getSupabase();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const path = `${user.id}/avatar.jpg`;
-      const file = {
-        uri: manip.uri,
-        name: 'avatar.jpg',
-        type: 'image/jpeg',
-      } as any;
-
-      const { error } = await supabase.storage.from('avatars').upload(path, file, { upsert: true, contentType: 'image/jpeg' });
-      if (error) throw error;
-
-      setP(s => ({ ...s, avatar_url: path }));
-      const pub = publicAvatarUrl(path);
-      setAvatar(pub);
+      const publicUrl = await uploadAvatar(manip.uri);
+      setAvatar(publicUrl); // instant UI reflect
+      // Optional: reload profile from server in case other fields changed
+      // const fresh = await fetchMyProfile(); if (fresh.profile) setP(fresh.profile);
     } catch (e) {
       console.warn('[avatar upload]', (e as any)?.message);
     }

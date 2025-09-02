@@ -37,3 +37,32 @@ export function publicAvatarUrl(path: string | null) {
   const { data } = supabase.storage.from('avatars').getPublicUrl(path);
   return data.publicUrl;
 }
+
+async function getCurrentUserId(): Promise<string | null> {
+  const supabase = getSupabase();
+  const { data: { user } } = await supabase.auth.getUser();
+  return user?.id || null;
+}
+
+export async function uploadAvatar(uri: string): Promise<string> {
+  const uid = await getCurrentUserId();
+  if (!uid) throw new Error('No user');
+  const ext = (uri.split('?')[0].split('.').pop() || 'jpg').toLowerCase();
+  const path = `${uid}/${Date.now()}.${ext}`;
+  const blob = await (await fetch(uri)).blob();
+  const supabase = getSupabase();
+  const { error } = await supabase.storage.from('avatars').upload(path, blob, {
+    upsert: true,
+    contentType: blob.type || 'image/jpeg',
+  });
+  if (error) throw error;
+  const { data } = supabase.storage.from('avatars').getPublicUrl(path);
+  const publicUrl = data.publicUrl;
+  // Persist to profiles via RPC (created earlier in SQL)
+  const { error: rpcErr } = await supabase.rpc('set_avatar_url', { _path: path });
+  if (rpcErr) {
+    // Fallback: try direct upsert if RPC failed (won't crash UI)
+    try { await upsertMyProfile({ avatar_url: path }); } catch {}
+  }
+  return publicUrl;
+}

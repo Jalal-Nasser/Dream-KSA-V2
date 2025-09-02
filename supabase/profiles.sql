@@ -80,3 +80,16 @@ do $$ begin
       );
   end if;
 end $$;
+
+-- RPC function to set avatar URL
+create or replace function public.set_avatar_url(_path text)
+returns void
+language plpgsql
+security definer
+as $$
+begin
+  update public.profiles 
+  set avatar_url = _path, updated_at = now()
+  where id = auth.uid();
+end;
+$$;
