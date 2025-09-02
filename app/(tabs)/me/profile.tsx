@@ -12,6 +12,9 @@ import { getSupabase } from '@/lib/supabase';
 import { uploadAvatar as uploadToStorage, resolveAvatarUrl, ALLOWED_TYPES, MAX_BYTES } from '@/lib/storage';
 import { pickAndUploadAvatar, alertUploadError } from '@/lib/profileImageUtils';
 
+// Helpers
+type Str = string;
+
 I18nManager.allowRTL(true);
 
 const cherry = '#800F2F';
@@ -50,11 +53,11 @@ export default function ProfileScreen() {
 
   const onPickAvatar = React.useCallback(async () => {
     try {
-      const userId = p.id;
-      const res = await pickAndUploadAvatar(userId);
-      if ((res as any).cancelled) return;
-      // util already saved to DB; just update UI
-      setAvatar(res.publicUrl);
+      if (!p.id) return;
+      const res = await pickAndUploadAvatar(p.id);
+      // Narrow union result properly before reading publicUrl
+      if ('cancelled' in res) return;
+      setAvatar(res.publicUrl); // util already wrote DB
       setP(s => ({ ...s, avatar_url: res.publicUrl }));
     } catch (e) {
       alertUploadError(e);
@@ -64,7 +67,9 @@ export default function ProfileScreen() {
   const save = React.useCallback(async () => {
     setSaving(true);
     try {
+      // DB expects nulls for empty optional fields and non-null for display_name
       const payload = {
+        display_name: p.username || p.display_name || 'مستخدم',
         username: p.username ?? null,
         gender: (p.gender as any) ?? null,
         birthday: p.birthday ?? null,
@@ -72,7 +77,7 @@ export default function ProfileScreen() {
         title: p.title ?? null,
         signature: p.signature ?? null,
         avatar_url: p.avatar_url ?? null,
-      };
+      } as const;
       console.log('[profile save] payload →', payload);
       const saved = await upsertMyProfile(payload);
       // Update UI with what the server actually stored
@@ -211,6 +216,20 @@ function Birthday({ value, onChange }: { value: string | null; onChange: (iso:st
           }}
         />
       )}
+    </View>
+  );
+}
+
+// If your FieldRow-like components are declared in this file without props types,
+// add minimal typing to silence "implicitly any" errors.
+type FieldRowProps = { label: string; value: string; onChange: (v: string) => void };
+export function FieldRow({ label, value, onChange }: FieldRowProps) {
+  // …your existing UI; make sure to call onChange with a string
+  return (
+    <View style={{ paddingHorizontal: 16, paddingVertical: 8 }}>
+      <Text style={{ marginBottom: 6 }}>{label}</Text>
+      {/* Example TextInput – replace with your component */}
+      {/* <TextInput value={value} onChangeText={(t) => onChange(t)} /> */}
     </View>
   );
 }
