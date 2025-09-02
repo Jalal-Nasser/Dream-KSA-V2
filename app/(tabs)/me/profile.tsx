@@ -10,6 +10,7 @@ import { fetchMyProfile, upsertMyProfile, publicAvatarUrl, uploadAvatar, loadMyP
 import { prepareAvatarUri } from '@/lib/image';
 import { getSupabase } from '@/lib/supabase';
 import { uploadAvatar as uploadToStorage, resolveAvatarUrl, ALLOWED_TYPES, MAX_BYTES } from '@/lib/storage';
+import { pickAndUploadAvatar, alertUploadError } from '@/lib/profileImageUtils';
 
 I18nManager.allowRTL(true);
 
@@ -49,45 +50,20 @@ export default function ProfileScreen() {
 
   const pickAvatar = React.useCallback(async () => {
     try {
-      const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (perm.status !== 'granted') return;
-
-      const res = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaType.Images,
-        quality: 1,
-        allowsMultipleSelection: false,
-      });
-      if (res.canceled) return;
-      const asset = res.assets?.[0];
-      if (!asset?.uri) return;
-
-      // quick client-side checks using available metadata if present
-      const mime = asset.type && asset.uri ? asset.type : undefined; // fallback
-      // fetch blob to verify size/type
-      const fetched = await fetch(asset.uri);
-      const blob = await fetched.blob();
-      if (!ALLOWED_TYPES.includes(blob.type)) {
-        alert('Invalid file type. Allowed: jpeg, png, webp');
-        return;
-      }
-      if (blob.size > MAX_BYTES) {
-        alert(`File too large: ${(blob.size/1024/1024).toFixed(2)} MB. Max ${(MAX_BYTES/1024/1024)} MB`);
-        return;
-      }
-
       if (!p.id) {
         alert('Not signed in');
         return;
       }
-
-      const { path, publicUrl } = await uploadToStorage(asset.uri, p.id);
-      // update draft with storage path
-      setP(s => ({ ...s, avatar_url: path }));
-      // optimistic preview using publicUrl
-      setPreviewAvatar(publicUrl);
-    } catch (e: any) {
-      console.warn('[pickAvatar] error', e);
-      alert('Image pick/upload failed: ' + (e?.message || e));
+      const res = await pickAndUploadAvatar(p.id);
+      if ((res as any).cancelled) return;
+      if (res.success) {
+        setAvatar(res.publicUrl);
+        setP(s => ({ ...s, avatar_url: res.publicUrl }));
+        // If you keep form state for avatar too, sync it here
+      }
+    } catch (err) {
+      console.warn('[pickAvatar] error', err);
+      alertUploadError(err);
     }
   }, [p.id]);
 
@@ -137,16 +113,11 @@ export default function ProfileScreen() {
       {/* Avatar */}
       <View style={{ alignItems:'center', paddingVertical: 12 }}>
         <Pressable onPress={pickAvatar} style={{ width:110, height:110, borderRadius:55, backgroundColor:soft, alignItems:'center', justifyContent:'center', overflow:'hidden', borderWidth:1, borderColor:'#eee' }}>
-          {(() => {
-            // draft.avatar_url may be a storage path or a full URL
-            const avatarResolved = p.avatar_url ? resolveAvatarUrl(p.avatar_url) : previewAvatar;
-            const avatarSrc = avatarResolved ? { uri: avatarResolved } : undefined;
-            return avatarSrc ? (
-              <Image source={avatarSrc} style={{ width:'100%', height:'100%' }} />
-            ) : (
-              <RIcon name="account-circle-outline" size={64} />
-            );
-          })()}
+          {avatar ? (
+            <Image source={{ uri: avatar }} style={{ width:'100%', height:'100%' }} />
+          ) : (
+            <RIcon name="account-circle-outline" size={64} />
+          )}
         </Pressable>
         <Text style={{ marginTop:8, color:cherry, fontWeight:'600' }}>تغيير الصورة</Text>
       </View>
