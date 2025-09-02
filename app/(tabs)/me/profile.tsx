@@ -20,7 +20,7 @@ I18nManager.allowRTL(true);
 const cherry = '#800F2F';
 const soft = '#FFF0F3';
 
-function RIcon({ name, size=20, color=cherry }) {
+function RIcon({ name, size=20, color=cherry }: { name: string; size?: number; color?: string }) {
   return <MCI name={name as any} size={size} color={color} style={{ marginLeft: 8, marginRight: 0 }} />;
 }
 
@@ -124,7 +124,7 @@ export default function ProfileScreen() {
       {/* Fields */}
       <View style={{ paddingHorizontal: 14, gap: 8 }}>
         <Row label="اسم" icon="account-outline">
-          <Input value={p.username ?? ''} onChangeText={(t)=>setP(s=>({...s, username:t}))} placeholder="اسمك" />
+          <Input value={p.username ?? ''} onChangeText={(t: string)=>setP(s=>({...s, username:t}))} placeholder="اسمك" />
         </Row>
 
         <Row label="جنس" icon="gender-male-female">
@@ -132,19 +132,19 @@ export default function ProfileScreen() {
         </Row>
 
         <Row label="عيد الميلاد" icon="calendar-month-outline">
-          <Birthday value={p.birthday} onChange={(iso)=>setP(s=>({...s, birthday: iso }))} />
+          <Birthday value={p.birthday ?? null} onChange={(iso)=>setP(s=>({...s, birthday: iso }))} />
         </Row>
 
         <Row label="البلد / المنطقة" icon="earth">
-          <Input value={p.country ?? ''} onChangeText={(t)=>setP(s=>({...s, country:t}))} placeholder="Saudi Arabia" />
+          <Input value={p.country ?? ''} onChangeText={(t: string)=>setP(s=>({...s, country:t}))} placeholder="Saudi Arabia" />
         </Row>
 
         <Row label="لقب" icon="badge-account-outline">
-          <Input value={p.title ?? ''} onChangeText={(t)=>setP(s=>({...s, title:t}))} placeholder="لقبك" />
+          <Input value={p.title ?? ''} onChangeText={(t: string)=>setP(s=>({...s, title:t}))} placeholder="لقبك" />
         </Row>
 
         <Row label="توقيع" icon="card-text-outline">
-          <Input value={p.signature ?? ''} onChangeText={(t)=>setP(s=>({...s, signature:t}))} placeholder="اكتب عبارة قصيرة..." multiline />
+          <Input value={p.signature ?? ''} onChangeText={(t: string)=>setP(s=>({...s, signature:t}))} placeholder="اكتب عبارة قصيرة..." multiline />
         </Row>
       </View>
 
