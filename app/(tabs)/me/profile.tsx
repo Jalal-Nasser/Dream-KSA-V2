@@ -48,22 +48,16 @@ export default function ProfileScreen() {
     })();
   }, []);
 
-  const pickAvatar = React.useCallback(async () => {
+  const onPickAvatar = React.useCallback(async () => {
     try {
-      if (!p.id) {
-        alert('Not signed in');
-        return;
-      }
-      const res = await pickAndUploadAvatar(p.id);
+      const userId = p.id;
+      const res = await pickAndUploadAvatar(userId);
       if ((res as any).cancelled) return;
-      if (res.success) {
-        setAvatar(res.publicUrl);
-        setP(s => ({ ...s, avatar_url: res.publicUrl }));
-        // If you keep form state for avatar too, sync it here
-      }
-    } catch (err) {
-      console.warn('[pickAvatar] error', err);
-      alertUploadError(err);
+      // util already saved to DB; just update UI
+      setAvatar(res.publicUrl);
+      setP(s => ({ ...s, avatar_url: res.publicUrl }));
+    } catch (e) {
+      alertUploadError(e);
     }
   }, [p.id]);
 
@@ -112,7 +106,7 @@ export default function ProfileScreen() {
 
       {/* Avatar */}
       <View style={{ alignItems:'center', paddingVertical: 12 }}>
-        <Pressable onPress={pickAvatar} style={{ width:110, height:110, borderRadius:55, backgroundColor:soft, alignItems:'center', justifyContent:'center', overflow:'hidden', borderWidth:1, borderColor:'#eee' }}>
+        <Pressable onPress={onPickAvatar} accessibilityLabel="Change Avatar" style={{ width:110, height:110, borderRadius:55, backgroundColor:soft, alignItems:'center', justifyContent:'center', overflow:'hidden', borderWidth:1, borderColor:'#eee' }}>
           {avatar ? (
             <Image source={{ uri: avatar }} style={{ width:'100%', height:'100%' }} />
           ) : (
