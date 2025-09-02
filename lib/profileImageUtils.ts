@@ -2,19 +2,23 @@ import * as ImagePicker from 'expo-image-picker';
 import { Alert, Platform } from 'react-native';
 
 /**
- * Ask media-library permission (Android 13+ and iOS).
+ * Ask for media library permission (Android 13+/iOS).
  */
 async function ensureMediaPermission(): Promise<boolean> {
-  const existing = await ImagePicker.getMediaLibraryPermissionsAsync();
-  if (existing.granted) return true;
-  const req = await ImagePicker.requestMediaLibraryPermissionsAsync();
-  return req.granted;
+  try {
+    const existing = await ImagePicker.getMediaLibraryPermissionsAsync();
+    if (existing.granted) return true;
+    const req = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    return req.granted === true;
+  } catch (e) {
+    console.warn('[avatar] permission error', e);
+    return false;
+  }
 }
 
 /**
- * Pick a square avatar from gallery using the new API.
- * - Fixes deprecation warning (MediaTypeOptions → MediaType).
- * - Requests permission before opening the picker.
+ * Open gallery to pick a square avatar.
+ * Uses the new `ImagePicker.MediaType` API (SDK 51+).
  */
 export async function pickAvatar() {
   const allowed = await ensureMediaPermission();
@@ -28,16 +32,22 @@ export async function pickAvatar() {
     );
     return { canceled: true } as const;
   }
-
-  const result = await ImagePicker.launchImageLibraryAsync({
-    // ✅ Expo SDK 51+: use the enum (not MediaTypeOptions)
-    mediaTypes: ImagePicker.MediaType.Images,
-    allowsEditing: true,
-    aspect: [1, 1],
-    quality: 0.9,
-    base64: false,
-    exif: false,
-  });
-  return result;
+  try {
+    const res = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaType.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.9,
+      base64: false,
+      exif: false,
+      // presentationStyle helps some Android skins show the picker fullscreen
+      presentationStyle: 'fullScreen',
+    });
+    return res;
+  } catch (e) {
+    console.warn('[avatar] picker error', e);
+    Alert.alert('حدث خطأ', 'تعذر فتح معرض الصور. حاول مرة أخرى.');
+    return { canceled: true } as const;
+  }
 }
 

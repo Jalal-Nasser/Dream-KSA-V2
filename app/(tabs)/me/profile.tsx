@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { I18nManager, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { I18nManager, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View, Alert } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { getSupabase } from '@/lib/supabase';
 import { resolveAvatarUrl } from '@/lib/storage';
@@ -73,20 +73,26 @@ export default function ProfileScreen() {
     if (result?.canceled) return;
     const asset = result.assets?.[0];
     if (!asset) return;
-    // Upload to Supabase Storage
-    const ext = (asset.fileName?.split('.').pop() ?? 'jpg').toLowerCase();
-    const path = `u/${user?.id}/${Date.now()}.${ext}`;
-    const file = {
-      uri: asset.uri,
-      name: `avatar.${ext}`,
-      type: asset.mimeType ?? 'image/jpeg',
-    } as any;
-    const { error: upErr } = await supabase.storage.from('avatars').upload(path, file, {
-      upsert: true,
-    });
-    if (!upErr) {
+    // Upload to Supabase Storage as BLOB (Expo-friendly)
+    try {
+      const ext = (asset.fileName?.split('.').pop() ?? 'jpg').toLowerCase();
+      const path = `u/${user?.id}/${Date.now()}.${ext}`;
+      const resp = await fetch(asset.uri);
+      const blob = await resp.blob();
+      const { error: upErr } = await supabase
+        .storage
+        .from('avatars')
+        .upload(path, blob, { upsert: true, contentType: asset.mimeType ?? 'image/jpeg' });
+      if (upErr) {
+        console.warn('[avatar] upload error', upErr);
+        Alert.alert('فشل الرفع', 'تعذر رفع الصورة. حاول مرة أخرى.');
+        return;
+      }
       setAvatarPath(path);
       avatarDirtyRef.current = true;
+    } catch (e) {
+      console.warn('[avatar] blob/upload exception', e);
+      Alert.alert('فشل الرفع', 'حدث خطأ أثناء رفع الصورة.');
     }
   };
 
