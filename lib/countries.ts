@@ -1,5 +1,4 @@
-// Full world list with Arabic names, generated locally with Intl.DisplayNames.
-// Requires Hermes/Intl (supported by modern Expo SDKs).
+// Full world list with Arabic names, with fallback for Hermes compatibility
 export type Country = { code: string; nameAr: string };
 
 // ISO 3166-1 alpha-2 codes (249)
@@ -22,10 +21,35 @@ const ISO2: string[] = [
   'VE','VN','VG','VI','WF','EH','YE','ZM','ZW'
 ];
 
-const display = new Intl.DisplayNames(['ar'], { type: 'region' });
+// Safe fallback for Intl.DisplayNames (Hermes compatibility)
+function getCountryName(code: string): string {
+  try {
+    if (typeof Intl !== 'undefined' && Intl.DisplayNames) {
+      const display = new Intl.DisplayNames(['ar'], { type: 'region' });
+      return display.of(code) || code;
+    }
+  } catch (e) {
+    console.warn('[countries] Intl.DisplayNames failed:', e);
+  }
+  
+  // Fallback to English names for common countries
+  const fallbacks: Record<string, string> = {
+    'SA': 'السعودية', 'AE': 'الإمارات', 'EG': 'مصر', 'JO': 'الأردن', 'KW': 'الكويت',
+    'QA': 'قطر', 'BH': 'البحرين', 'OM': 'عُمان', 'IQ': 'العراق', 'SY': 'سوريا',
+    'LB': 'لبنان', 'PS': 'فلسطين', 'YE': 'اليمن', 'MA': 'المغرب', 'DZ': 'الجزائر',
+    'TN': 'تونس', 'LY': 'ليبيا', 'SD': 'السودان', 'SO': 'الصومال', 'DJ': 'جيبوتي',
+    'US': 'الولايات المتحدة', 'GB': 'المملكة المتحدة', 'FR': 'فرنسا', 'DE': 'ألمانيا',
+    'IT': 'إيطاليا', 'ES': 'إسبانيا', 'RU': 'روسيا', 'CN': 'الصين', 'JP': 'اليابان',
+    'IN': 'الهند', 'BR': 'البرازيل', 'CA': 'كندا', 'AU': 'أستراليا', 'TR': 'تركيا',
+    'IR': 'إيران', 'PK': 'باكستان', 'BD': 'بنغلاديش', 'ID': 'إندونيسيا', 'MY': 'ماليزيا',
+    'TH': 'تايلاند', 'VN': 'فيتنام', 'PH': 'الفلبين', 'KR': 'كوريا الجنوبية', 'SG': 'سنغافورة'
+  };
+  
+  return fallbacks[code] || code;
+}
 
 export const COUNTRIES: Country[] = ISO2
-  .map(code => ({ code, nameAr: display.of(code) || code }))
+  .map(code => ({ code, nameAr: getCountryName(code) }))
   .sort((a, b) => a.nameAr.localeCompare(b.nameAr, 'ar'));
 
 export const countryNameAr = (code?: string | null) => {

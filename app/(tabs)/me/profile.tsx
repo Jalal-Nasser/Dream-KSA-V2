@@ -225,16 +225,4 @@ function Birthday({ value, onChange }: { value: string | null; onChange: (iso:st
   );
 }
 
-// If your FieldRow-like components are declared in this file without props types,
-// add minimal typing to silence "implicitly any" errors.
-type FieldRowProps = { label: string; value: string; onChange: (v: string) => void };
-export function FieldRow({ label, value, onChange }: FieldRowProps) {
-  // …your existing UI; make sure to call onChange with a string
-  return (
-    <View style={{ paddingHorizontal: 16, paddingVertical: 8 }}>
-      <Text style={{ marginBottom: 6 }}>{label}</Text>
-      {/* Example TextInput – replace with your component */}
-      {/* <TextInput value={value} onChangeText={(t) => onChange(t)} /> */}
-    </View>
-  );
-}
+
