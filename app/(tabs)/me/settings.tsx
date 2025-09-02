@@ -62,7 +62,7 @@ export default function SettingsScreen() {
           <SettingRow label="خدمة العملاء" icon="headset" onPress={() => {}} />
           <SettingRow label="معلومات عنا" icon="information-outline" onPress={() => {}} />
           <SettingRow label="اتصل بنا" icon="phone-outline" onPress={() => {}} />
-          <SettingRow label="سياسة خاصة" icon="file-document-lock-outline" onPress={() => {}} />
+          <SettingRow label="سياسة خاصة" icon="file-lock-outline" onPress={() => {}} />
           <SettingRow label="سياسة الاسترجاع" icon="cash-refund" onPress={() => {}} />
           <SettingRow label="شروط الخدمة" icon="hand-heart-outline" onPress={() => {}} />
           <SettingRow label="رقم النسخة" icon="information-outline" subLeft="V 2.37.2(984)" last />

@@ -29,15 +29,18 @@ export default function Login() {
     if (provider === 'apple' && Platform.OS !== 'ios') return;
 
     console.log('[oauth] start', provider, 'returnUrl(native):', redirectNative);
+    // Add Google-specific query params to force chooser & offline refresh
+    const qp =
+      provider === 'google'
+        ? { prompt: 'select_account', access_type: 'offline' }
+        : undefined;
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
         redirectTo: redirectNative,        // ← dream-ksa://auth-callback
         skipBrowserRedirect: true,
         scopes: provider === 'google' ? 'email profile' : undefined,
-        queryParams: provider === 'google' ? {
-          'web-client-id': '85207766867-6rgu5nl7rfd3bshqun4k042o0blgbsff.apps.googleusercontent.com'
-        } : undefined,
+        queryParams: qp,
       },
     });
     if (error) { console.warn('[oauth] signInWithOAuth error:', error.message); return; }
@@ -49,7 +52,8 @@ export default function Login() {
         redirect_to: redirectNative,
         ...(provider === 'google' ? { 
           scopes: 'email profile',
-          'web-client-id': '85207766867-6rgu5nl7rfd3bshqun4k042o0blgbsff.apps.googleusercontent.com'
+          prompt: 'select_account',
+          access_type: 'offline'
         } : {})
       };
       const qs = new URLSearchParams(params).toString();
