@@ -6,6 +6,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { PALETTE } from '../../../lib/theme';
 import { getSupabase } from '../../../lib/supabase';
 import { useRouter } from 'expo-router';
+import { getVersionLabel } from '../../../lib/version';
 
 type RowProps = {
   label: string;
@@ -40,6 +41,7 @@ function SettingRow({ label, icon, onPress, showAlert, subLeft, last }: RowProps
 export default function SettingsScreen() {
   const router = useRouter();
   const supabase = getSupabase();
+  const version = React.useMemo(() => getVersionLabel(), []);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -65,7 +67,7 @@ export default function SettingsScreen() {
           <SettingRow label="سياسة خاصة" icon="file-lock-outline" onPress={() => {}} />
           <SettingRow label="سياسة الاسترجاع" icon="cash-refund" onPress={() => {}} />
           <SettingRow label="شروط الخدمة" icon="hand-heart-outline" onPress={() => {}} />
-          <SettingRow label="رقم النسخة" icon="information-outline" subLeft="V 2.37.2(984)" last />
+          <SettingRow label="رقم النسخة" icon="tag-outline" subLeft={version} last />
         </View>
 
         {/* Logout */}
