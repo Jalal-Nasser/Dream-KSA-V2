@@ -4,8 +4,8 @@ import * as WebBrowser from 'expo-web-browser';
 
 WebBrowser.maybeCompleteAuthSession();
 
-// TEMP: pin the Expo proxy (works in Expo Go). Replace "anonymous" with your Expo username later if desired.
-export const authRedirectUri = 'https://auth.expo.io/@anonymous/dream-ksa';
+// TEMP: pin the Expo proxy (works in Expo Go). Using correct Expo username from dashboard.
+export const authRedirectUri = 'https://auth.expo.io/@jnasser/dream-ksa';
 
 // Variants to list in dashboards (scheme for dev/production builds)
 export const routerTriple = Linking.createURL('/auth-callback', { scheme: 'dream-ksa' }); // e.g. dream-ksa:///auth-callback
