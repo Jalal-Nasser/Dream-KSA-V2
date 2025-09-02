@@ -7,6 +7,7 @@ import { useRouter, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { PALETTE } from '../../../lib/theme';
 import { getSupabase } from '../../../lib/supabase';
 import { resolveDisplayName } from '../../../lib/display';
+import { resolveAvatarUrl } from '../../../lib/storage';
 
 export default function MeScreen() {
   const router = useRouter();
@@ -45,6 +46,8 @@ export default function MeScreen() {
   useFocusEffect(React.useCallback(() => { fetch(); }, [fetch, refresh]));
   
   const displayName = resolveDisplayName(profile, user);
+  const _avatarUrl = resolveAvatarUrl(profile?.avatar_url);
+  const avatarSrc = _avatarUrl ? { uri: _avatarUrl } : undefined;
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: PALETTE.soft1 }}>
       <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
@@ -64,7 +67,13 @@ export default function MeScreen() {
                 <Text style={styles.idTxt}>ID: 23733397</Text>
               </View>
             </View>
-            <Image source={{ uri: 'https://i.pravatar.cc/120?img=5' }} style={styles.avatar} />
+            {avatarSrc ? (
+              <Image source={avatarSrc} style={styles.avatar} />
+            ) : (
+              <View style={[styles.avatar, { backgroundColor: PALETTE.soft1, alignItems: 'center', justifyContent: 'center' }]}>
+                <MaterialCommunityIcons name="account-circle" size={30} color={PALETTE.textDim} />
+              </View>
+            )}
           </View>
 
           <View style={styles.statsRow}>

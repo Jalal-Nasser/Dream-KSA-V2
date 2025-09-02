@@ -9,6 +9,7 @@ import { MaterialCommunityIcons as MCI } from '@expo/vector-icons';
 import { fetchMyProfile, upsertMyProfile, publicAvatarUrl, uploadAvatar, loadMyProfile, type Profile } from '@/lib/profile';
 import { prepareAvatarUri } from '@/lib/image';
 import { getSupabase } from '@/lib/supabase';
+import { uploadAvatar as uploadToStorage, resolveAvatarUrl } from '@/lib/storage';
 
 I18nManager.allowRTL(true);
 
@@ -49,22 +50,27 @@ export default function ProfileScreen() {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (perm.status !== 'granted') return;
 
-    const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaType.Images, quality: 0.9, allowsEditing: true, aspect: [1,1] });
-    if (res.canceled || !res.assets?.length) return;
-
-    const img = res.assets[0];
-    // prepare image with fallback if manipulator unavailable
-    const preparedUri = await prepareAvatarUri(img.uri);
-
+    const res = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: [ImagePicker.MediaType.images],
+      quality: 1,
+      allowsMultipleSelection: false,
+    });
+    if (res.canceled) return;
+    
     try {
-      const publicUrl = await uploadAvatar(preparedUri);
-      setAvatar(publicUrl); // instant UI reflect
-      // Optional: reload profile from server in case other fields changed
-      // const fresh = await fetchMyProfile(); if (fresh.profile) setP(fresh.profile);
-    } catch (e) {
-      console.warn('[avatar upload]', (e as any)?.message);
+      const uri = res.assets?.[0]?.uri;
+      if (!uri || !p.id) return;
+      // Upload to storage
+      const { path } = await uploadToStorage(uri, p.id);
+      // Store the STORAGE PATH in DB (safer than storing a public URL)
+      setP(s => ({ ...s, avatar_url: path }));
+      // Update avatar display immediately
+      const publicUrl = resolveAvatarUrl(path);
+      setAvatar(publicUrl || null);
+    } catch (e: any) {
+      console.warn('[avatar upload] failed', e?.message || e);
     }
-  }, []);
+  }, [p.id]);
 
   const save = React.useCallback(async () => {
     setSaving(true);
