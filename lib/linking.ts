@@ -1,20 +1,16 @@
-import * as Linking from 'expo-linking';
 import * as AuthSession from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
-import Constants from 'expo-constants';
 
-WebBrowser.maybeCompleteAuthSession();
+WebBrowser.maybeCompleteAuthSession(); // safe on native
 
-export const authRedirectUri =
-  Constants.appOwnership === 'expo'
-    ? AuthSession.makeRedirectUri({ useProxy: true }) // HTTPS proxy for Expo Go
-    : Linking.createURL('/auth-callback', { scheme: 'dream-ksa' }); // scheme for dev/prod builds
+// Expo Go must use the HTTPS proxy that you added in Supabase Redirect URLs.
+export const authRedirectUri = AuthSession.makeRedirectUri({ useProxy: true });
 
 export function looksLikeAuthReturn(url: string) {
   if (!url) return false;
   return url.includes('access_token') || url.includes('refresh_token') || url.includes('code=');
 }
 
-export function logRedirects(tag='[oauth]') {
+export function logRedirects(tag = '[oauth]') {
   console.log(tag, 'USING redirect:', authRedirectUri);
 }

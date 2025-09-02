@@ -29,15 +29,17 @@ export default function Login() {
     if (provider === 'apple' && Platform.OS !== 'ios') return;
 
     console.log('[oauth] start', provider, 'returnUrl:', authRedirectUri);
-
-    // Ask Supabase for URL (no auto redirect)
-    const res = await supabase.auth.signInWithOAuth({
+    const { data, error } = await supabase.auth.signInWithOAuth({
       provider,
-      options: { redirectTo: authRedirectUri, skipBrowserRedirect: true, scopes: provider === 'google' ? 'email profile' : undefined },
+      options: {
+        redirectTo: authRedirectUri,       // ← HTTPS proxy
+        skipBrowserRedirect: true,
+        scopes: provider === 'google' ? 'email profile' : undefined,
+      },
     });
+    if (error) { console.warn('[oauth] signInWithOAuth error:', error.message); return; }
 
-    // Use returned URL only if it already has redirect_to=…
-    let authUrl = res?.data?.url || '';
+    let authUrl = data?.url || '';
     if (!authUrl || !authUrl.includes('redirect_to=')) {
       const qs = new URLSearchParams({ provider, redirect_to: authRedirectUri, ...(provider === 'google' ? { scopes: 'email profile' } : {}) }).toString();
       authUrl = `${SUPABASE_URL}/auth/v1/authorize?${qs}`;
@@ -47,7 +49,7 @@ export default function Login() {
     }
 
     const how = await openAndExchange(authUrl);
-    console.log('[oauth] flow completed via:', how);
+    console.log('[oauth] flow via:', how);
   };
 
   return (

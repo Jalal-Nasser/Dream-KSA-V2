@@ -3,7 +3,6 @@ import { getSupabase } from '../supabase';
 
 export async function completeSessionFromRedirect(url?: string) {
   if (!url) return { error: new Error('No redirect URL') };
-  console.log('[auth] Processing redirect URL:', url.slice(0, 80));
   const { params, errorCode } = QueryParams.getQueryParams(url);
   if (errorCode) return { error: new Error(String(errorCode)) };
 
@@ -19,7 +18,7 @@ export async function completeSessionFromRedirect(url?: string) {
 
   const code = typeof params?.code === 'string' ? params.code : '';
   if (code) {
-    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession({ code });
     if (error) return { error };
     return { data };
   }
