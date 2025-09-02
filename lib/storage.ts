@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/supabase';
 
 // Allowed types and max size
 export const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -9,7 +9,14 @@ export const MAX_BYTES = 5 * 1024 * 1024; // 5 MB
  * Validates MIME type and size before uploading.
  */
 export async function uploadAvatar(localUri: string, userId: string) {
+  const supabase = getSupabase();
+  console.log('[uploadAvatar] Supabase client:', supabase);
+  console.log('[uploadAvatar] Supabase storage:', supabase?.storage);
+  
   if (!localUri) throw new Error('No local URI');
+  if (!supabase) throw new Error('Supabase client not initialized');
+  if (!supabase.storage) throw new Error('Supabase storage not available');
+  
   // fetch to get blob + content type + size
   const resp = await fetch(localUri);
   const blob = await resp.blob();
@@ -48,8 +55,16 @@ export async function uploadAvatar(localUri: string, userId: string) {
 
 /** Resolve a renderable image URL from profiles.avatar_url (path or full URL). */
 export function resolveAvatarUrl(avatar_url?: string | null) {
+  const supabase = getSupabase();
+  console.log('[resolveAvatarUrl] Supabase client:', supabase);
+  console.log('[resolveAvatarUrl] Supabase storage:', supabase?.storage);
+  
   if (!avatar_url) return undefined;
   if (/^https?:\/\//i.test(avatar_url)) return avatar_url;
+  if (!supabase?.storage) {
+    console.warn('[resolveAvatarUrl] Supabase storage not available');
+    return undefined;
+  }
   const { data } = supabase.storage.from('avatars').getPublicUrl(avatar_url);
   return data?.publicUrl;
 }
