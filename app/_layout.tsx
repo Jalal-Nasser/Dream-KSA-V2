@@ -1,8 +1,8 @@
 import { Slot } from 'expo-router';
 import * as React from 'react';
 import * as Linking from 'expo-linking';
-import { completeSessionFromRedirect } from '../lib/auth/sessionFromUrl';
 import { looksLikeAuthReturn } from '../lib/linking';
+import { completeSessionFromRedirect } from '../lib/auth/sessionFromUrl';
 
 export default function RootLayout() {
   React.useEffect(() => {
