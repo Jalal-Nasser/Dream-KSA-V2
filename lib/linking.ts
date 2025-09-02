@@ -9,3 +9,7 @@ export function looksLikeAuthReturn(url: string) {
   if (!url) return false;
   return url.includes('access_token') || url.includes('refresh_token') || url.includes('code=');
 }
+
+export function logRedirects(tag = '[oauth]') {
+  console.log(tag, 'USING native redirect:', redirectNative);
+}
