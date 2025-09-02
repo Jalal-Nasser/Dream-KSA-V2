@@ -313,6 +313,18 @@ If you see **Cannot connect to Metro**, run:
 - `adb reverse tcp:8081 tcp:8081` (Android emulator)
 - Then restart with `npx expo start -c`
 
+## Metro tips
+If you ever see **Cannot connect to Metro** in dev:
+
+```bash
+adb reverse tcp:8081 tcp:8081
+```
+
+Then restart:
+```bash
+npx expo start -c
+```
+
 ## 📚 API Reference
 
 ### Edge Functions

@@ -10,6 +10,7 @@
     "prebuild": "expo prebuild",
     "web": "expo start --web",
     "lint": "expo lint",
+    "android:reverse": "adb reverse tcp:8081 tcp:8081",
     "supabase:link": "supabase link --project-ref <REPLACE_WITH_YOUR_PROJECT_REF>",
     "functions:deploy": "supabase functions deploy hms-token"
   },
