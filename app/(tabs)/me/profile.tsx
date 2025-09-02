@@ -6,7 +6,7 @@ import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { MaterialCommunityIcons as MCI } from '@expo/vector-icons';
 
-import { fetchMyProfile, upsertMyProfile, publicAvatarUrl, uploadAvatar, type Profile } from '@/lib/profile';
+import { fetchMyProfile, upsertMyProfile, publicAvatarUrl, uploadAvatar, loadMyProfile, type Profile } from '@/lib/profile';
 import { prepareAvatarUri } from '@/lib/image';
 import { getSupabase } from '@/lib/supabase';
 
@@ -79,7 +79,19 @@ export default function ProfileScreen() {
         avatar_url: p.avatar_url ?? null,
       };
       console.log('[profile save] payload →', payload);
-      await upsertMyProfile(payload);
+      const saved = await upsertMyProfile(payload);
+      // Update UI with what the server actually stored
+      if (saved) {
+        setP(saved);
+        // Update avatar display if avatar_url changed
+        if (saved.avatar_url) {
+          const pub = publicAvatarUrl(saved.avatar_url);
+          setAvatar(pub);
+        }
+      } else {
+        const fresh = await loadMyProfile();
+        if (fresh) setP(fresh);
+      }
       router.back();
     } catch (e) {
       console.warn('[profile save]', (e as any)?.message);

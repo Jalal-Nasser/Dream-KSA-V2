@@ -54,6 +54,19 @@ export async function upsertMyProfile(patch: Partial<Profile>) {
   return data as Profile;
 }
 
+export async function loadMyProfile() {
+  const supabase = getSupabase();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, username, gender, birthday, country, title, signature, avatar_url, updated_at')
+    .eq('id', user.id)
+    .single();
+  if (error) return null;
+  return data as Profile | null;
+}
+
 export function publicAvatarUrl(path: string | null) {
   if (!path) return null;
   const supabase = getSupabase();
