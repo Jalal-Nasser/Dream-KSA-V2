@@ -13,7 +13,7 @@ export default function MeScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: PALETTE.soft1 }}>
       <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
         <View style={styles.headerCard}>
-          <Pressable style={styles.editIcon} onPress={() => onMenu('تعديل الملف')}>
+          <Pressable style={styles.editIcon} onPress={() => router.push('/(tabs)/me/profile')}>
             <MaterialCommunityIcons name="pencil" size={18} color={PALETTE.textDim} />
           </Pressable>
 
@@ -67,6 +67,7 @@ export default function MeScreen() {
         </View>
 
         <View style={styles.card}>
+          <MenuItem icon="account-edit-outline" label="معلومات شخصية" onPress={() => router.push('/(tabs)/me/profile')} />
           <MenuItem icon="wallet" label="محفظة" onPress={() => router.push('/(tabs)/me/wallet')} />
           <MenuItem icon="storefront-outline" label="متجر" onPress={() => router.push('/(tabs)/me/store')} />
           <MenuItem icon="account-tie" label="وكالة" onPress={() => onMenu('وكالة')} />
