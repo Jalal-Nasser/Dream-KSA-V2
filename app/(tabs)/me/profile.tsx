@@ -11,6 +11,7 @@ import { prepareAvatarUri } from '@/lib/image';
 import { getSupabase } from '@/lib/supabase';
 import { uploadAvatar as uploadToStorage, resolveAvatarUrl, ALLOWED_TYPES, MAX_BYTES } from '@/lib/storage';
 import { pickAndUploadAvatar, alertUploadError } from '@/lib/profileImageUtils';
+import { CountryPicker } from '@/components/CountryPicker';
 
 // Helpers
 type Str = string;
@@ -36,8 +37,8 @@ export default function ProfileScreen() {
     (async () => {
       const { user, profile } = await fetchMyProfile();
       if (!user) { router.replace('/login'); return; }
-      const pic = publicAvatarUrl(profile?.avatar_url ?? null);
-      setAvatar(pic ?? null);
+      // Use the avatar_url directly since it's already a public URL from the new upload system
+      setAvatar(profile?.avatar_url ?? null);
       setP({
         id: user.id,
         username: profile?.username ?? '',
@@ -136,7 +137,11 @@ export default function ProfileScreen() {
         </Row>
 
         <Row label="البلد / المنطقة" icon="earth">
-          <Input value={p.country ?? ''} onChangeText={(t: string)=>setP(s=>({...s, country:t}))} placeholder="Saudi Arabia" />
+          <CountryPicker 
+            value={p.country ?? 'SA'} 
+            onChange={(code: string) => setP(s => ({ ...s, country: code }))} 
+            placeholder="اختر البلد"
+          />
         </Row>
 
         <Row label="لقب" icon="badge-account-outline">

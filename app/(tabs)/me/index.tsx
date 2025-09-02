@@ -59,7 +59,15 @@ export default function MeScreen() {
           <View style={styles.headerTopRow}>
             <View style={styles.nameBlock}>
               <View style={styles.nameRow}>
-                <MaterialCommunityIcons name="gender-female" size={16} color={PALETTE.primary} />
+                <MaterialCommunityIcons 
+                  name={
+                    profile?.gender === 'male' ? 'gender-male' :
+                    profile?.gender === 'female' ? 'gender-female' :
+                    'gender-male-female'
+                  } 
+                  size={16} 
+                  color={PALETTE.primary} 
+                />
                 <Text style={styles.name}>{displayName}</Text>
               </View>
               <View style={styles.idRow}>
