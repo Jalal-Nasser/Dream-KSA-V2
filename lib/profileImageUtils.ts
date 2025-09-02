@@ -34,8 +34,8 @@ export async function pickAvatar() {
   }
   try {
     const res = await ImagePicker.launchImageLibraryAsync({
-      // Use the older API that's compatible with current expo-image-picker version
-      mediaTypes: (ImagePicker as any).MediaTypeOptions?.Images || 'images',
+      // Use simple string for maximum compatibility
+      mediaTypes: 'images',
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.9,

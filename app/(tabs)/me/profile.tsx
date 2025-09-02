@@ -73,25 +73,38 @@ export default function ProfileScreen() {
     if (result?.canceled) return;
     const asset = result.assets?.[0];
     if (!asset) return;
-    // Upload to Supabase Storage as BLOB (Expo-friendly)
+    
+    // Upload to Supabase Storage using FormData (more reliable for Expo)
     try {
       const ext = (asset.fileName?.split('.').pop() ?? 'jpg').toLowerCase();
       const path = `u/${user?.id}/${Date.now()}.${ext}`;
-      const resp = await fetch(asset.uri);
-      const blob = await resp.blob();
+      
+      // Create FormData for upload
+      const formData = new FormData();
+      formData.append('file', {
+        uri: asset.uri,
+        type: asset.mimeType ?? 'image/jpeg',
+        name: `avatar.${ext}`,
+      } as any);
+      
       const { error: upErr } = await supabase
         .storage
         .from('avatars')
-        .upload(path, blob, { upsert: true, contentType: asset.mimeType ?? 'image/jpeg' });
+        .upload(path, formData, { 
+          upsert: true, 
+          contentType: asset.mimeType ?? 'image/jpeg' 
+        });
+        
       if (upErr) {
         console.warn('[avatar] upload error', upErr);
         Alert.alert('فشل الرفع', 'تعذر رفع الصورة. حاول مرة أخرى.');
         return;
       }
+      
       setAvatarPath(path);
       avatarDirtyRef.current = true;
     } catch (e) {
-      console.warn('[avatar] blob/upload exception', e);
+      console.warn('[avatar] upload exception', e);
       Alert.alert('فشل الرفع', 'حدث خطأ أثناء رفع الصورة.');
     }
   };
