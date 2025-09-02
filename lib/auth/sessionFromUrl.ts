@@ -12,7 +12,7 @@ export async function completeSessionFromParams(params: Record<string, any> | nu
     return { data, error };
   }
   if (code) {
-    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession({ code });
     return { data, error };
   }
   return { error: new Error('No tokens or code in params') };
