@@ -1,95 +1,93 @@
 import * as ImagePicker from 'expo-image-picker';
+import { decode } from 'base64-arraybuffer';
 import { Alert } from 'react-native';
-import { getSupabase } from './supabase';
+import { getSupabase } from './supabase'; // uses your lazy client
 
-// Pick an image, upload to 'avatars' bucket, update profiles.avatar_url, return public URL.
-export async function pickAndUploadAvatar(userId: string) {
-  if (!userId) throw new Error('Missing user id');
+// Cross-SDK images constant (SDK 49–51+)
+const MEDIA_IMAGES: any =
+  // SDK 51+
+  (ImagePicker as any).MediaType?.Images ??
+  // Older
+  (ImagePicker as any).MediaTypeOptions?.Images ??
+  // Fallback literal API
+  'images';
 
-  // Ask permission
-  const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-  if (!perm.granted) throw new Error('Permission to access photos is required.');
+type Ok = { success: true; path: string; publicUrl: string };
+type Cancelled = { cancelled: true };
+export type PickUploadResult = Ok | Cancelled;
 
-  // Launch library (SDK 49–51+ safe):
-  // Some SDKs export MediaType.Images, some don't – fall back to the string API.
-  const MEDIA_IMAGES: any =
-    // SDK 51+
-    (ImagePicker as any).MediaType?.Images ??
-    // Older SDK
-    (ImagePicker as any).MediaTypeOptions?.Images ??
-    // Always works (string literal API)
-    'images';
+export async function pickAndUploadAvatar(userId: string | undefined | null): Promise<PickUploadResult> {
+  try {
+    if (!userId) throw new Error('Missing user id');
 
-  const result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: MEDIA_IMAGES,
-    allowsEditing: true,
-    aspect: [1, 1],
-    quality: 0.8,
-  });
-  console.log('[pickAvatar] raw result →', result);
+    // Permissions
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) throw new Error('Permission to access photos is required');
 
-  // Normalize SDK result shape
-  const canceled =
-    (result as any).canceled ?? (result as any).cancelled ?? false;
-  if (canceled) return { cancelled: true as const };
-
-  // Normalize asset
-  let asset: any = null;
-  if (Array.isArray((result as any).assets) && (result as any).assets.length) {
-    asset = (result as any).assets[0];
-  } else if ((result as any).uri) {
-    asset = { uri: (result as any).uri, mimeType: (result as any).type ?? 'image/jpeg' };
-  } else {
-    throw new Error('No image selected');
-  }
-
-  const uri: string = asset.uri;
-  if (!uri) throw new Error('Selected image URI missing');
-
-  // Check file size if available
-  if (asset.fileSize && asset.fileSize > 5 * 1024 * 1024) { // 5 MB
-    throw new Error('Please pick an image ≤ 5 MB');
-  }
-
-  // Infer extension
-  const ext = (uri.split('.').pop() || 'jpg').split('?')[0];
-  const path = `avatars/${userId}-${Date.now()}.${ext}`;
-
-  // Convert to Blob
-  const resp = await fetch(uri);
-  const blob = await resp.blob();
-
-  // Get Supabase client
-  const supabase = getSupabase();
-
-  // Upload with upsert
-  const { error: uploadErr } = await supabase
-    .storage
-    .from('avatars')
-    .upload(path, blob, {
-      cacheControl: '3600',
-      upsert: true,
-      contentType: asset.mimeType ?? `image/${ext}`,
+    // Pick image (return base64 for RN-safe upload)
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: MEDIA_IMAGES,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+      base64: true,
     });
-  if (uploadErr) {
-    console.error('[upload] supabase error', uploadErr);
-    throw uploadErr;
+    console.log('[pickAvatar] raw result →', result);
+
+    const canceled = (result as any).canceled ?? (result as any).cancelled ?? false;
+    if (canceled) return { cancelled: true };
+
+    const asset: any =
+      Array.isArray((result as any).assets) && (result as any).assets.length
+        ? (result as any).assets[0]
+        : result;
+
+    const base64: string | undefined = asset.base64;
+    if (!base64) throw new Error('No base64 data from picker');
+
+    // 2 MB limit (client-side)
+    const approxBytes = Math.ceil(base64.length * 3 / 4);
+    if (approxBytes > 2 * 1024 * 1024) throw new Error('Image too large (max 2MB)');
+
+    const mime = (asset.mimeType || asset.type || 'image/jpeg') as string;
+    const ext = mime.includes('png') ? 'png' : 'jpg';
+    const objectPath = `profiles/${userId}/avatar.${ext}`; // inside bucket "avatars"
+
+    const supabase = getSupabase();
+    const bytes = decode(base64); // ArrayBuffer
+
+    // Upload (upsert)
+    const { error: uploadErr } = await supabase
+      .storage
+      .from('avatars')
+      .upload(objectPath, bytes, {
+        contentType: mime,
+        cacheControl: '3600',
+        upsert: true,
+      });
+    if (uploadErr) {
+      console.warn('[upload] supabase error', uploadErr);
+      throw uploadErr;
+    }
+
+    // Public URL (bucket should be public for MVP)
+    const { data: pub } = supabase.storage.from('avatars').getPublicUrl(objectPath);
+    const publicUrl = pub?.publicUrl;
+    if (!publicUrl) throw new Error('Public URL not returned');
+
+    // Persist to profiles.avatar_url
+    const { error: profErr } = await supabase
+      .from('profiles')
+      .update({ avatar_url: publicUrl })
+      .eq('id', userId);
+    if (profErr) throw profErr;
+
+    return { success: true, path: objectPath, publicUrl };
+  } catch (err: any) {
+    console.warn('[pickAvatar] error', err);
+    Alert.alert('Avatar upload failed', err?.message || String(err));
+    throw err;
   }
-
-  // Get public URL
-  const { data: pub, error: pubErr } = supabase.storage.from('avatars').getPublicUrl(path);
-  if (pubErr) throw pubErr;
-  const publicUrl = pub?.publicUrl;
-  if (!publicUrl) throw new Error('Public URL not returned');
-
-  // Update profile row
-  const { error: profErr } = await supabase
-    .from('profiles')
-    .update({ avatar_url: publicUrl })
-    .eq('id', userId);
-  if (profErr) throw profErr;
-
-  return { success: true as const, publicUrl, path };
 }
 
 export function alertUploadError(err: any) {
