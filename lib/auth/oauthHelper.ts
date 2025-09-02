@@ -1,11 +1,9 @@
 import * as WebBrowser from 'expo-web-browser';
-import { authRedirectUri } from '../linking';
 import { completeSessionFromRedirect } from './sessionFromUrl';
 
-export async function openAndExchange(authUrl: string) {
+export async function openAndExchange(authUrl: string, returnUrl: string) {
   console.log('[oauth] openAuthSessionAsync →', authUrl.slice(0, 140), '…');
-  const res = await WebBrowser.openAuthSessionAsync(authUrl, authRedirectUri);
-  // Safely access the 'url' property only if it exists on the result object
+  const res = await WebBrowser.openAuthSessionAsync(authUrl, returnUrl);
   const url = (res && typeof res === 'object' && 'url' in res && typeof (res as any).url === 'string')
     ? (res as any).url as string
     : undefined;

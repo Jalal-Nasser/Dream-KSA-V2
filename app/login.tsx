@@ -8,7 +8,7 @@ import * as WebBrowser from 'expo-web-browser';
 
 import { getSupabase } from '../lib/supabase';
 import { PALETTE } from '../lib/theme';
-import { authRedirectUri, logRedirects } from '../lib/linking';
+import { getRedirectTo } from '../lib/linking';
 import { SUPABASE_URL } from '../lib/env';
 import { openAndExchange } from '../lib/auth/oauthHelper';
 
@@ -20,7 +20,6 @@ export default function Login() {
   const [showTips, setShowTips] = React.useState(false);
 
   React.useEffect(() => { 
-    logRedirects('[oauth]'); 
     const sub = supabase.auth.onAuthStateChange((_e,s)=>{ if(s?.user) router.replace('/(tabs)/rooms');}); 
     return ()=>sub.data.subscription.unsubscribe(); 
   }, []);
@@ -28,11 +27,12 @@ export default function Login() {
   const signInOAuth = async (provider: 'google' | 'facebook' | 'apple') => {
     if (provider === 'apple' && Platform.OS !== 'ios') return;
 
-    console.log('[oauth] start', provider, 'returnUrl:', authRedirectUri);
+    const redirectTo = getRedirectTo();
+    console.log('[oauth] start', provider, 'returnUrl:', redirectTo);
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: authRedirectUri,       // ← HTTPS proxy
+        redirectTo,       // ← HTTPS proxy
         skipBrowserRedirect: true,
         scopes: provider === 'google' ? 'email profile' : undefined,
         queryParams: provider === 'google' ? {
@@ -46,7 +46,7 @@ export default function Login() {
     if (!authUrl || !authUrl.includes('redirect_to=')) {
       const params: Record<string, string> = { 
         provider, 
-        redirect_to: authRedirectUri,
+        redirect_to: redirectTo,
         ...(provider === 'google' ? { 
           scopes: 'email profile',
           'web-client-id': '85207766867-6rgu5nl7rfd3bshqun4k042o0blgbsff.apps.googleusercontent.com'
@@ -59,7 +59,7 @@ export default function Login() {
       console.log('[oauth] provider url:', authUrl.slice(0, 180), '…');
     }
 
-    const how = await openAndExchange(authUrl);
+    const how = await openAndExchange(authUrl, redirectTo);
     console.log('[oauth] flow via:', how);
   };
 
