@@ -2,6 +2,7 @@ import { getSupabase } from './supabase';
 import { prepareAvatarUri } from './image';
 
 type ProfilePatch = Partial<{
+  display_name: string;
   username: string;
   gender: 'male' | 'female' | 'other';
   birthday: string; // ISO yyyy-mm-dd
@@ -13,6 +14,7 @@ type ProfilePatch = Partial<{
 
 export type Profile = {
   id: string;
+  display_name: string | null;
   username: string | null;
   gender: 'male' | 'female' | 'other' | null;
   birthday: string | null; // ISO date
@@ -35,11 +37,14 @@ export async function fetchMyProfile() {
 function pickProfilePatch(patch: any): ProfilePatch {
   // Accept only DB columns to avoid schema-cache errors
   const allowed = [
-    'username','gender','birthday','country','title','signature','avatar_url'
+    'display_name','username','gender','birthday','country','title','signature','avatar_url'
   ] as const;
   const out: any = {};
   for (const k of allowed) {
-    if (patch[k] !== undefined) out[k] = patch[k];
+    if (patch[k] !== undefined) {
+      const v = typeof patch[k] === 'string' ? patch[k].trim() : patch[k];
+      out[k] = v;
+    }
   }
   // Normalize country (e.g., "sa" -> "SA")
   if (out.country && typeof out.country === 'string') {
@@ -52,7 +57,26 @@ export async function upsertMyProfile(patch: Partial<Profile>) {
   const supabase = getSupabase();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Not authenticated');
+  const { data: userData } = await supabase.auth.getUser();
+  const authUser = userData?.user;
   const clean = pickProfilePatch(patch);
+
+  // Ensure display_name is always present and non-empty
+  const emailPrefix =
+    (authUser?.email ? String(authUser.email).split('@')[0] : '') || '';
+  const metaName =
+    (authUser?.user_metadata?.full_name ||
+      authUser?.user_metadata?.name ||
+      authUser?.user_metadata?.given_name ||
+      '') as string;
+  const dn =
+    (clean.display_name || '').trim() ||
+    (clean.username || '').trim() ||
+    metaName.trim() ||
+    emailPrefix.trim() ||
+    'مستخدم';
+  clean.display_name = dn;
+
   const row = { id: user.id, ...clean, updated_at: new Date().toISOString() };
   const { data, error } = await supabase.from('profiles').upsert(row, { onConflict: 'id' }).select().single();
   if (error) throw error;
@@ -65,7 +89,7 @@ export async function loadMyProfile() {
   if (!user) return null;
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, username, gender, birthday, country, title, signature, avatar_url, updated_at')
+    .select('id, display_name, username, gender, birthday, country, title, signature, avatar_url, updated_at')
     .eq('id', user.id)
     .single();
   if (error) return null;
