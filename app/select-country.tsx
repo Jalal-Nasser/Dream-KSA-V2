@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, TextInput, View, I18nManager } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, TextInput, View, I18nManager, ScrollView } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { MaterialCommunityIcons as MCI } from '@expo/vector-icons';
 import { COUNTRIES, type Country } from '@/lib/countries';
@@ -7,9 +7,24 @@ import { COUNTRIES, type Country } from '@/lib/countries';
 const ACCENT = '#800F2F';
 const CARD = '#FBE7EF';
 const BORDER = '#F2CAD6';
+const HOT_COLOR = '#FF6B35';
 
-// Popular countries for quick access
-const FAVORITES = ['SA', 'AE', 'EG', 'JO', 'KW', 'QA', 'BH', 'OM', 'IQ', 'US', 'GB', 'FR', 'DE'];
+// Popular countries for quick access with HOT labels
+const HOT_COUNTRIES = ['SA', 'AE', 'EG', 'JO', 'KW', 'QA', 'BH', 'OM', 'IQ', 'US', 'GB', 'FR', 'DE'];
+
+// Country flags mapping (simplified - you can expand this)
+const COUNTRY_FLAGS: Record<string, string> = {
+  'SA': '🇸🇦', 'AE': '🇦🇪', 'EG': '🇪🇬', 'JO': '🇯🇴', 'KW': '🇰🇼', 'QA': '🇶🇦',
+  'BH': '🇧🇭', 'OM': '🇴🇲', 'IQ': '🇮🇶', 'US': '🇺🇸', 'GB': '🇬🇧', 'FR': '🇫🇷',
+  'DE': '🇩🇪', 'TR': '🇹🇷', 'MA': '🇲🇦', 'DZ': '🇩🇿', 'TN': '🇹🇳', 'LY': '🇱🇾',
+  'SD': '🇸🇩', 'SO': '🇸🇴', 'DJ': '🇩🇯', 'CN': '🇨🇳', 'JP': '🇯🇵', 'IN': '🇮🇳',
+  'BR': '🇧🇷', 'CA': '🇨🇦', 'AU': '🇦🇺', 'IT': '🇮🇹', 'ES': '🇪🇸', 'RU': '🇷🇺',
+  'IR': '🇮🇷', 'PK': '🇵🇰', 'BD': '🇧🇩', 'ID': '🇮🇩', 'MY': '🇲🇾', 'TH': '🇹🇭',
+  'VN': '🇻🇳', 'PH': '🇵🇭', 'KR': '🇰🇷', 'SG': '🇸🇬'
+};
+
+// Alphabetical sections
+const ALPHABET = ['#', 'A', 'B', 'C', 'E', 'F', 'G', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'Y'];
 
 export default function SelectCountryScreen() {
   const router = useRouter();
@@ -25,56 +40,63 @@ export default function SelectCountryScreen() {
     );
   }, [search]);
 
-  const favoriteCountries = useMemo(() => {
-    return FAVORITES.map(code => COUNTRIES.find(c => c.code === code)).filter(Boolean) as Country[];
-  }, []);
-
   const onSelectCountry = (countryCode: string) => {
     router.back();
-    // Use a small delay to ensure the navigation completes before updating
     setTimeout(() => {
       router.setParams({ selectedCountry: countryCode });
     }, 100);
   };
 
-  const renderCountryItem = ({ item }: { item: Country }) => (
-    <Pressable
-      onPress={() => onSelectCountry(item.code)}
-      style={[
-        styles.countryItem,
-        item.code === current && styles.countryItemSelected
-      ]}
-    >
-      <View style={styles.countryContent}>
-        <Text style={[
-          styles.countryName,
-          item.code === current && styles.countryNameSelected
-        ]}>
-          {item.nameAr}
-        </Text>
-        <Text style={styles.countryCode}>{item.code}</Text>
-      </View>
-      {item.code === current && (
-        <MCI name="check" size={20} color={ACCENT} />
-      )}
-    </Pressable>
-  );
+  const renderCountryItem = ({ item }: { item: Country }) => {
+    const isHot = HOT_COUNTRIES.includes(item.code);
+    const isSelected = item.code === current;
+    const flag = COUNTRY_FLAGS[item.code] || '🏳️';
 
-  const renderFavoriteItem = ({ item }: { item: Country }) => (
-    <Pressable
-      onPress={() => onSelectCountry(item.code)}
-      style={[
-        styles.favoriteItem,
-        item.code === current && styles.favoriteItemSelected
-      ]}
-    >
-      <Text style={[
-        styles.favoriteName,
-        item.code === current && styles.favoriteNameSelected
-      ]}>
-        {item.nameAr}
-      </Text>
-    </Pressable>
+    return (
+      <Pressable
+        onPress={() => onSelectCountry(item.code)}
+        style={[
+          styles.countryItem,
+          isSelected && styles.countryItemSelected
+        ]}
+      >
+        <View style={styles.countryContent}>
+          <View style={styles.countryInfo}>
+            <Text style={styles.countryFlag}>{flag}</Text>
+            <Text style={[
+              styles.countryName,
+              isSelected && styles.countryNameSelected
+            ]}>
+              {item.nameAr}
+            </Text>
+          </View>
+          {isHot && (
+            <View style={styles.hotLabel}>
+              <Text style={styles.hotText}>HOT</Text>
+            </View>
+          )}
+        </View>
+        {isSelected && (
+          <MCI name="check" size={20} color={ACCENT} />
+        )}
+      </Pressable>
+    );
+  };
+
+  const renderAlphabetIndex = () => (
+    <View style={styles.alphabetIndex}>
+      {ALPHABET.map(letter => (
+        <Pressable
+          key={letter}
+          style={styles.alphabetItem}
+          onPress={() => {
+            // Scroll to section logic could be added here
+          }}
+        >
+          <Text style={styles.alphabetText}>{letter}</Text>
+        </Pressable>
+      ))}
+    </View>
   );
 
   return (
@@ -84,7 +106,7 @@ export default function SelectCountryScreen() {
         <Pressable onPress={() => router.back()} style={styles.backButton}>
           <MCI name="arrow-right" size={24} color={ACCENT} />
         </Pressable>
-        <Text style={styles.headerTitle}>اختر البلد</Text>
+        <Text style={styles.headerTitle}>البلد / المنطقة</Text>
         <View style={styles.headerSpacer} />
       </View>
 
@@ -101,33 +123,17 @@ export default function SelectCountryScreen() {
         />
       </View>
 
-      {/* Favorites (only show when not searching) */}
-      {!search && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>الدول المفضلة</Text>
-          <FlatList
-            data={favoriteCountries}
-            keyExtractor={(item) => item.code}
-            renderItem={renderFavoriteItem}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.favoritesList}
-          />
-        </View>
-      )}
-
-      {/* Countries List */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>
-          {search ? `نتائج البحث (${filteredCountries.length})` : 'جميع الدول'}
-        </Text>
+      {/* Countries List with Alphabet Index */}
+      <View style={styles.listContainer}>
         <FlatList
           data={filteredCountries}
           keyExtractor={(item) => item.code}
           renderItem={renderCountryItem}
           style={styles.countriesList}
           showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.countriesListContent}
         />
+        {renderAlphabetIndex()}
       </View>
     </View>
   );
@@ -182,44 +188,15 @@ const styles = StyleSheet.create({
     color: '#3b1b26',
     paddingVertical: 4,
   },
-  section: {
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: ACCENT,
-    marginHorizontal: 16,
-    marginBottom: 8,
-    textAlign: 'right',
-  },
-  favoritesList: {
-    paddingHorizontal: 16,
-    gap: 8,
-  },
-  favoriteItem: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: CARD,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: BORDER,
-  },
-  favoriteItemSelected: {
-    backgroundColor: ACCENT,
-    borderColor: ACCENT,
-  },
-  favoriteName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: ACCENT,
-    textAlign: 'center',
-  },
-  favoriteNameSelected: {
-    color: '#FFF',
+  listContainer: {
+    flex: 1,
+    flexDirection: 'row',
   },
   countriesList: {
     flex: 1,
+  },
+  countriesListContent: {
+    paddingRight: 8,
   },
   countryItem: {
     flexDirection: 'row-reverse',
@@ -237,6 +214,16 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row-reverse',
     alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  countryInfo: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    flex: 1,
+  },
+  countryFlag: {
+    fontSize: 20,
+    marginLeft: 12,
   },
   countryName: {
     flex: 1,
@@ -248,13 +235,32 @@ const styles = StyleSheet.create({
     color: ACCENT,
     fontWeight: '600',
   },
-  countryCode: {
-    fontSize: 12,
-    color: '#999',
-    marginLeft: 8,
-    backgroundColor: '#F5F5F5',
-    paddingHorizontal: 6,
+  hotLabel: {
+    backgroundColor: HOT_COLOR,
+    paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: 4,
+    borderRadius: 10,
+    marginLeft: 8,
+  },
+  hotText: {
+    color: '#FFF',
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  alphabetIndex: {
+    width: 30,
+    backgroundColor: '#F8F8F8',
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
+  alphabetItem: {
+    paddingVertical: 2,
+    paddingHorizontal: 4,
+    marginVertical: 1,
+  },
+  alphabetText: {
+    fontSize: 12,
+    color: '#666',
+    fontWeight: '600',
   },
 });
