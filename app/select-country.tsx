@@ -28,7 +28,7 @@ const ALPHABET = ['#', 'A', 'B', 'C', 'E', 'F', 'G', 'I', 'J', 'K', 'L', 'M', 'N
 
 export default function SelectCountryScreen() {
   const router = useRouter();
-  const { current } = useLocalSearchParams<{ current?: string }>();
+  const { current, returnTo } = useLocalSearchParams<{ current?: string; returnTo?: string }>();
   const [search, setSearch] = useState('');
 
   const filteredCountries = useMemo(() => {
@@ -41,10 +41,18 @@ export default function SelectCountryScreen() {
   }, [search]);
 
   const onSelectCountry = (countryCode: string) => {
-    router.back();
-    setTimeout(() => {
-      router.setParams({ selectedCountry: countryCode });
-    }, 100);
+    // Navigate back to the specific screen with the selected country
+    if (returnTo) {
+      router.push({ 
+        pathname: returnTo as any, 
+        params: { selectedCountry: countryCode } 
+      });
+    } else {
+      router.back();
+      setTimeout(() => {
+        router.setParams({ selectedCountry: countryCode });
+      }, 300);
+    }
   };
 
   const renderCountryItem = ({ item }: { item: Country }) => {

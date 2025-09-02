@@ -214,7 +214,13 @@ export default function ProfileScreen() {
         <View style={styles.field}>
           <Text style={styles.label}>البلد / المنطقة</Text>
           <Pressable
-            onPress={() => router.push({ pathname: '/select-country', params: { current: country || '' } })}
+            onPress={() => router.push({ 
+              pathname: '/select-country', 
+              params: { 
+                current: country || '',
+                returnTo: '/(tabs)/me/profile'
+              } 
+            })}
             style={[styles.input, { justifyContent: 'center' }]}
           >
             <Text style={{ textAlign: 'right', color: country ? '#3b1b26' : '#987' }}>
