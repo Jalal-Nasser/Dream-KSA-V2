@@ -29,7 +29,7 @@ export async function completeSessionFromRedirect(url?: string) {
   const code = typeof params?.code === 'string' ? params.code : '';
   if (code) {
     console.log('[auth] Found code, exchanging for session');
-    const { data, error } = await supabase.auth.exchangeCodeForSession({ code });
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     return { data, error };
   }
 
