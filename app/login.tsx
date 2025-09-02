@@ -35,13 +35,24 @@ export default function Login() {
         redirectTo: authRedirectUri,       // ← HTTPS proxy
         skipBrowserRedirect: true,
         scopes: provider === 'google' ? 'email profile' : undefined,
+        queryParams: provider === 'google' ? {
+          'web-client-id': '85207766867-6rgu5nl7rfd3bshqun4k042o0blgbsff.apps.googleusercontent.com'
+        } : undefined,
       },
     });
     if (error) { console.warn('[oauth] signInWithOAuth error:', error.message); return; }
 
     let authUrl = data?.url || '';
     if (!authUrl || !authUrl.includes('redirect_to=')) {
-      const qs = new URLSearchParams({ provider, redirect_to: authRedirectUri, ...(provider === 'google' ? { scopes: 'email profile' } : {}) }).toString();
+      const params: Record<string, string> = { 
+        provider, 
+        redirect_to: authRedirectUri,
+        ...(provider === 'google' ? { 
+          scopes: 'email profile',
+          'web-client-id': '85207766867-6rgu5nl7rfd3bshqun4k042o0blgbsff.apps.googleusercontent.com'
+        } : {})
+      };
+      const qs = new URLSearchParams(params).toString();
       authUrl = `${SUPABASE_URL}/auth/v1/authorize?${qs}`;
       console.warn('[oauth] manual authorize url:', authUrl.slice(0, 180), '…');
     } else {
