@@ -1,23 +1,18 @@
 import * as AuthSession from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
-import { parseCode, authRedirectUri } from '../linking';
-import { getSupabase } from '../supabase';
+import { authRedirectUri } from '../linking';
+import { completeSessionFromRedirect } from './sessionFromUrl';
 
 export async function openAndExchange(authUrl: string) {
-  const supabase = getSupabase();
-
-  // 1) Prefer openAuthSessionAsync
+  // 1) Prefer openAuthSessionAsync (Android-friendly)
   console.log('[oauth] try openAuthSessionAsync →', authUrl.slice(0,120), '…');
   try {
     const r1 = await WebBrowser.openAuthSessionAsync(authUrl, authRedirectUri);
     console.log('[oauth] openAuthSessionAsync result:', r1?.type, r1?.url?.slice(0,120) || '<no-url>');
-    const code1 = parseCode(r1?.url);
-    if (code1) {
-      const { error } = await supabase.auth.exchangeCodeForSession({ code: code1 });
-      if (!error) return 'ok:openAuthSessionAsync';
-      console.warn('[oauth] exchange error (openAuthSessionAsync):', error.message);
-    }
+    const done1 = await completeSessionFromRedirect(r1?.url);
+    if (!done1.error) return 'ok:openAuthSessionAsync';
+    console.warn('[oauth] session error (openAuthSessionAsync):', done1.error.message);
   } catch (e) {
     console.warn('[oauth] openAuthSessionAsync failed:', e);
   }
@@ -27,12 +22,9 @@ export async function openAndExchange(authUrl: string) {
     console.log('[oauth] try AuthSession.startAsync');
     const r2 = (await AuthSession.startAsync({ authUrl, returnUrl: authRedirectUri })) as any;
     console.log('[oauth] startAsync result:', r2?.type, r2?.url?.slice(0,120) || '<no-url>');
-    const code2 = parseCode(r2?.url);
-    if (code2) {
-      const { error } = await supabase.auth.exchangeCodeForSession({ code: code2 });
-      if (!error) return 'ok:startAsync';
-      console.warn('[oauth] exchange error (startAsync):', error.message);
-    }
+    const done2 = await completeSessionFromRedirect(r2?.url);
+    if (!done2.error) return 'ok:startAsync';
+    console.warn('[oauth] session error (startAsync):', done2.error.message);
   } catch (e) {
     console.warn('[oauth] startAsync failed:', e);
   }

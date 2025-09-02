@@ -1,27 +1,21 @@
 import { Slot } from 'expo-router';
 import * as React from 'react';
 import * as Linking from 'expo-linking';
-import { getSupabase } from '../lib/supabase';
+import { completeSessionFromRedirect } from '../lib/auth/sessionFromUrl';
 
 export default function RootLayout() {
   React.useEffect(() => {
-    const supabase = getSupabase();
-
     (async () => {
-      const url = await Linking.getInitialURL();
-      if (url) {
-        const { queryParams, path } = Linking.parse(url);
-        if (path?.endsWith('auth-callback') && typeof queryParams?.code === 'string') {
-          await supabase.auth.exchangeCodeForSession({ code: String(queryParams.code) }).catch(e => console.warn('[auth initialURL]', e?.message));
-        }
+      const initial = await Linking.getInitialURL();
+      if (initial) {
+        const { error } = await completeSessionFromRedirect(initial);
+        if (error) console.warn('[auth initialURL]', error.message);
       }
     })();
 
     const sub = Linking.addEventListener('url', async ({ url }) => {
-      const { queryParams, path } = Linking.parse(url);
-              if (path?.endsWith('auth-callback') && typeof queryParams?.code === 'string') {
-          await supabase.auth.exchangeCodeForSession({ code: String(queryParams.code) }).catch(e => console.warn('[auth listener]', e?.message));
-        }
+      const { error } = await completeSessionFromRedirect(url);
+      if (error) console.warn('[auth listener]', error.message);
     });
     return () => sub.remove();
   }, []);
