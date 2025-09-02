@@ -8,7 +8,7 @@ import * as WebBrowser from 'expo-web-browser';
 
 import { getSupabase } from '../lib/supabase';
 import { PALETTE } from '../lib/theme';
-import { authRedirectUri, parseCode, logRedirects, expoProxyUri, routerTriple, schemeSingle } from '../lib/linking';
+import { authRedirectUri, logRedirects } from '../lib/linking';
 import { SUPABASE_URL } from '../lib/env';
 import { openAndExchange } from '../lib/auth/oauthHelper';
 
