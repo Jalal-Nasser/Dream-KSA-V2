@@ -46,7 +46,7 @@ export default function MeScreen() {
   useFocusEffect(React.useCallback(() => { fetch(); }, [fetch, refresh]));
   
   const displayName = resolveDisplayName(profile, user);
-  const _avatar = resolveAvatarUrl(profile?.avatar_url);
+  const _avatar = resolveAvatarUrl(getSupabase(), profile?.avatar_url);
   const avatarSrc = _avatar ? { uri: _avatar } : undefined;
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: PALETTE.soft1 }}>

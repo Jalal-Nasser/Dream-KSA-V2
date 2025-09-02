@@ -1,228 +1,348 @@
-import * as React from 'react';
-import { View, Text, TextInput, I18nManager, Pressable, Image, Platform } from 'react-native';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { I18nManager, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import * as ImagePicker from 'expo-image-picker';
-
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { MaterialCommunityIcons as MCI } from '@expo/vector-icons';
-
-import { fetchMyProfile, upsertMyProfile, publicAvatarUrl, uploadAvatar, loadMyProfile, type Profile } from '@/lib/profile';
-import { prepareAvatarUri } from '@/lib/image';
 import { getSupabase } from '@/lib/supabase';
-import { uploadAvatar as uploadToStorage, resolveAvatarUrl, ALLOWED_TYPES, MAX_BYTES } from '@/lib/storage';
-import { pickAndUploadAvatar, alertUploadError } from '@/lib/profileImageUtils';
-import { CountryPicker } from '@/components/CountryPicker';
+import { resolveAvatarUrl } from '@/lib/storage';
+import { pickAvatar } from '@/lib/profileImageUtils';
 
-// Helpers
-type Str = string;
-
-I18nManager.allowRTL(true);
-
-const cherry = '#800F2F';
-const soft = '#FFF0F3';
-
-function RIcon({ name, size=20, color=cherry }: { name: string; size?: number; color?: string }) {
-  return <MCI name={name as any} size={size} color={color} style={{ marginLeft: 8, marginRight: 0 }} />;
-}
+const ACCENT = '#800F2F';
+const CARD = '#FBE7EF'; // soft cherry blossom surface
+const BORDER = '#F2CAD6';
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const [loading, setLoading] = React.useState(true);
-  const [saving, setSaving] = React.useState(false);
-  const [avatar, setAvatar] = React.useState<string | null>(null);
-  const [previewAvatar, setPreviewAvatar] = React.useState<string | null>(null);
-  const [p, setP] = React.useState<Partial<Profile>>({});
+  const supabase = getSupabase();
+  const [user, setUser] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
+  const [displayName, setDisplayName] = useState('');
+  const [gender, setGender] = useState<'male' | 'female' | 'other' | ''>('');
+  const [birthday, setBirthday] = useState('');
+  const [country, setCountry] = useState('');
+  const [title, setTitle] = useState('');
+  const [signature, setSignature] = useState('');
+  const [avatarPath, setAvatarPath] = useState<string | null>(null);
+  // Track if avatar has changed in this session (prevents wiping on save)
+  const avatarDirtyRef = useRef(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
+    let mounted = true;
     (async () => {
-      const { user, profile } = await fetchMyProfile();
-      if (!user) { router.replace('/login'); return; }
-      // Use the avatar_url directly since it's already a public URL from the new upload system
-      setAvatar(profile?.avatar_url ?? null);
-      setP({
-        id: user.id,
-        username: profile?.username ?? '',
-        gender: (profile?.gender as any) ?? null,
-        birthday: profile?.birthday ?? null,
-        country: profile?.country ?? '',
-        title: profile?.title ?? '',
-        signature: profile?.signature ?? '',
-      });
-      setLoading(false);
-    })();
-  }, []);
-
-  const onPickAvatar = React.useCallback(async () => {
-    try {
-      if (!p.id) return;
-      const res = await pickAndUploadAvatar(p.id);
-      // Narrow union result properly before reading publicUrl
-      if ('cancelled' in res) return;
-      setAvatar(res.publicUrl); // util already wrote DB
-      setP(s => ({ ...s, avatar_url: res.publicUrl }));
-    } catch (e) {
-      alertUploadError(e);
-    }
-  }, [p.id]);
-
-  const save = React.useCallback(async () => {
-    setSaving(true);
-    try {
-      // DB expects nulls for empty optional fields and non-null for display_name
-      const payload = {
-        display_name: p.username || p.display_name || 'مستخدم',
-        username: p.username ?? null,
-        gender: (p.gender as any) ?? null,
-        birthday: p.birthday ?? null,
-        country: p.country ?? null,
-        title: p.title ?? null,
-        signature: p.signature ?? null,
-        avatar_url: p.avatar_url ?? null,
-      } as const;
-      console.log('[profile save] payload →', payload);
-      const saved = await upsertMyProfile(payload);
-      // Update UI with what the server actually stored
-      if (saved) {
-        setP(saved);
-        // Update avatar display if avatar_url changed
-        if (saved.avatar_url) {
-          const pub = publicAvatarUrl(saved.avatar_url);
-          setAvatar(pub);
-        }
-      } else {
-        const fresh = await loadMyProfile();
-        if (fresh) setP(fresh);
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      if (!mounted) return;
+      setUser(currentUser);
+      if (!currentUser) return;
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('display_name, gender, birthday, country, title, signature, avatar_path')
+        .eq('id', currentUser.id)
+        .single();
+      if (!mounted) return;
+      if (!error && data) {
+        setProfile(data);
+        setDisplayName(data.display_name ?? '');
+        setGender((data.gender as any) ?? '');
+        setBirthday(data.birthday ?? '');
+        setCountry(data.country ?? '');
+        setTitle(data.title ?? '');
+        setSignature(data.signature ?? '');
+        setAvatarPath(data.avatar_path ?? null);
+        // Fresh load → not dirty
+        avatarDirtyRef.current = false;
       }
-      router.replace({ pathname: '/(tabs)/me', params: { refresh: String(Date.now()) } });
-    } catch (e) {
-      console.warn('[profile save]', (e as any)?.message);
-    } finally {
-      setSaving(false);
-    }
-  }, [p]);
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [supabase]);
 
-  if (loading) return <View style={{ flex:1, backgroundColor:'#fff' }} />;
+  const avatarUrl = useMemo(
+    () => resolveAvatarUrl(supabase as any, avatarPath ?? undefined),
+    [supabase, avatarPath]
+  );
+
+  const onPickAvatar = async () => {
+    const result = await pickAvatar();
+    if (result?.canceled) return;
+    const asset = result.assets?.[0];
+    if (!asset) return;
+    // Upload to Supabase Storage
+    const ext = (asset.fileName?.split('.').pop() ?? 'jpg').toLowerCase();
+    const path = `u/${user?.id}/${Date.now()}.${ext}`;
+    const file = {
+      uri: asset.uri,
+      name: `avatar.${ext}`,
+      type: asset.mimeType ?? 'image/jpeg',
+    } as any;
+    const { error: upErr } = await supabase.storage.from('avatars').upload(path, file, {
+      upsert: true,
+    });
+    if (!upErr) {
+      setAvatarPath(path);
+      avatarDirtyRef.current = true;
+    }
+  };
+
+  const onSave = async () => {
+    // Minimal update payload — DO NOT nullify avatar_path unless truly changed
+    const payload: any = {
+      display_name: displayName?.trim(),
+      gender: gender || null,
+      birthday: birthday || null,
+      country: country || null,
+      title: title?.trim() || null,
+      signature: signature?.trim() || null,
+    };
+    // Only include avatar_path when the avatar actually changed this session
+    if (avatarDirtyRef.current) {
+      payload.avatar_path = avatarPath;
+    }
+
+    if (__DEV__) console.log('[profile save] payload →', payload);
+    const { error } = await supabase.from('profiles').update(payload).eq('id', user?.id);
+    if (!error) {
+      avatarDirtyRef.current = false; // reset after successful save
+      router.back();
+    }
+  };
 
   return (
-    <View style={{ flex:1, backgroundColor:'#fff' }}>
+    <ScrollView contentContainerStyle={styles.container}>
       {/* Header */}
-      <View style={{ paddingTop: 16, paddingBottom: 8, alignItems: 'center' }}>
-        <Text style={{ fontWeight:'800', fontSize:22, color:'#222' }}>معلومات شخصية</Text>
-      </View>
+      <Text style={styles.h1}>معلومات شخصية</Text>
 
-      {/* Avatar */}
-      <View style={{ alignItems:'center', paddingVertical: 12 }}>
-        <Pressable onPress={onPickAvatar} accessibilityLabel="Change Avatar" style={{ width:110, height:110, borderRadius:55, backgroundColor:soft, alignItems:'center', justifyContent:'center', overflow:'hidden', borderWidth:1, borderColor:'#eee' }}>
-          {avatar ? (
-            <Image source={{ uri: avatar }} style={{ width:'100%', height:'100%' }} />
+      {/* Avatar Card */}
+      <View style={styles.card}>
+        <Pressable onPress={onPickAvatar} style={styles.avatarWrap}>
+          {avatarUrl ? (
+            <Image source={{ uri: avatarUrl }} style={styles.avatar} />
           ) : (
-            <RIcon name="account-circle-outline" size={64} />
+            <View style={styles.avatarPlaceholder}>
+              <Text style={styles.avatarGlyph}>👤</Text>
+            </View>
           )}
         </Pressable>
-        <Text style={{ marginTop:8, color:cherry, fontWeight:'600' }}>تغيير الصورة</Text>
+        <Text style={styles.link}>تغيير الصورة</Text>
       </View>
 
-      {/* Fields */}
-      <View style={{ paddingHorizontal: 14, gap: 8 }}>
-        <Row label="اسم" icon="account-outline">
-          <Input value={p.username ?? ''} onChangeText={(t: string)=>setP(s=>({...s, username:t}))} placeholder="اسمك" />
-        </Row>
-
-        <Row label="جنس" icon="gender-male-female">
-          <Segment value={p.gender ?? null} onChange={(g)=>setP(s=>({...s, gender:g as any}))} />
-        </Row>
-
-        <Row label="عيد الميلاد" icon="calendar-month-outline">
-          <Birthday value={p.birthday ?? null} onChange={(iso)=>setP(s=>({...s, birthday: iso }))} />
-        </Row>
-
-        <Row label="البلد / المنطقة" icon="earth">
-          <CountryPicker 
-            value={p.country ?? 'SA'} 
-            onChange={(code: string) => setP(s => ({ ...s, country: code }))} 
-            placeholder="اختر البلد"
+      {/* Form Card */}
+      <View style={styles.card}>
+        {/* Name */}
+        <View style={styles.field}>
+          <Text style={styles.label}>اسم</Text>
+          <TextInput
+            style={styles.input}
+            value={displayName}
+            onChangeText={setDisplayName}
+            placeholder="اسم العرض"
+            placeholderTextColor="#987"
+            textAlign="right"
           />
-        </Row>
+        </View>
 
-        <Row label="لقب" icon="badge-account-outline">
-          <Input value={p.title ?? ''} onChangeText={(t: string)=>setP(s=>({...s, title:t}))} placeholder="لقبك" />
-        </Row>
+        {/* Gender */}
+        <View style={styles.field}>
+          <Text style={styles.label}>جنس</Text>
+          <View style={styles.segmentRow}>
+            <Pressable
+              onPress={() => setGender('male')}
+              style={[styles.segment, gender === 'male' && styles.segmentActive]}
+            >
+              <Text style={[styles.segmentText, gender === 'male' && styles.segmentTextActive]}>
+                ذكر
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => setGender('female')}
+              style={[styles.segment, gender === 'female' && styles.segmentActive]}
+            >
+              <Text style={[styles.segmentText, gender === 'female' && styles.segmentTextActive]}>
+                أنثى
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => setGender('other')}
+              style={[styles.segment, gender === 'other' && styles.segmentActive]}
+            >
+              <Text style={[styles.segmentText, gender === 'other' && styles.segmentTextActive]}>
+                أخرى
+              </Text>
+            </Pressable>
+          </View>
+        </View>
 
-        <Row label="توقيع" icon="card-text-outline">
-          <Input value={p.signature ?? ''} onChangeText={(t: string)=>setP(s=>({...s, signature:t}))} placeholder="اكتب عبارة قصيرة..." multiline />
-        </Row>
-      </View>
+        {/* Birthday */}
+        <View style={styles.field}>
+          <Text style={styles.label}>عيد الميلاد</Text>
+          <TextInput
+            style={styles.input}
+            value={birthday}
+            onChangeText={setBirthday}
+            placeholder="1995-01-01"
+            placeholderTextColor="#987"
+            textAlign="right"
+          />
+        </View>
 
-      {/* Save */}
-      <View style={{ padding:16 }}>
-        <Pressable onPress={save} disabled={saving} style={{ backgroundColor: cherry, paddingVertical:14, borderRadius:14, alignItems:'center' }}>
-          <Text style={{ color:'#fff', fontWeight:'700', fontSize:16 }}>{saving ? 'جارٍ الحفظ…' : 'حفظ'}</Text>
+        {/* Country */}
+        <View style={styles.field}>
+          <Text style={styles.label}>البلد / المنطقة</Text>
+          <TextInput
+            style={styles.input}
+            value={country}
+            onChangeText={setCountry}
+            placeholder="اختر الدولة"
+            placeholderTextColor="#987"
+            textAlign="right"
+          />
+        </View>
+
+        {/* Title */}
+        <View style={styles.field}>
+          <Text style={styles.label}>لقب</Text>
+          <TextInput
+            style={styles.input}
+            value={title}
+            onChangeText={setTitle}
+            placeholder="Mr"
+            placeholderTextColor="#987"
+            textAlign="right"
+          />
+        </View>
+
+        {/* Signature */}
+        <View style={styles.field}>
+          <Text style={styles.label}>توقيع</Text>
+          <TextInput
+            style={[styles.input, { height: 48 }]}
+            value={signature}
+            onChangeText={setSignature}
+            placeholder="Jalal"
+            placeholderTextColor="#987"
+            textAlign="right"
+          />
+        </View>
+
+        <Pressable onPress={onSave} style={styles.saveBtn}>
+          <Text style={styles.saveText}>حفظ</Text>
         </Pressable>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
-function Row({ label, icon, children }: { label:string; icon:string; children:React.ReactNode }) {
-  return (
-    <View style={{ backgroundColor:'#fff', borderRadius:12, borderWidth:1, borderColor:'#eee', paddingHorizontal:14, paddingVertical:10, flexDirection:'row-reverse', alignItems:'center', justifyContent:'space-between', gap:10 }}>
-      <View style={{ flexDirection:'row-reverse', alignItems:'center' }}>
-        <RIcon name={icon} />
-        <Text style={{ fontWeight:'600', color:'#111' }}>{label}</Text>
-      </View>
-      <View style={{ flex:1, alignItems:'flex-start' }}>{children}</View>
-    </View>
-  );
-}
-
-function Input(props: any) {
-  return (
-    <TextInput
-      {...props}
-      style={[{ width:'100%', textAlign:'right', paddingVertical:6, color:'#111' }, props.multiline && { minHeight:64 }]}
-      placeholderTextColor="#bbb"
-    />
-  );
-}
-
-function Segment({ value, onChange }: { value: any; onChange: (v:string|null)=>void }) {
-  const opt = [
-    { k: 'male', label:'ذكر' },
-    { k: 'female', label:'أنثى' },
-    { k: 'other', label:'أخرى' },
-  ];
-  return (
-    <View style={{ flexDirection:'row-reverse', gap:8 }}>
-      {opt.map(o => (
-        <Pressable key={o.k} onPress={()=>onChange(o.k)} style={{ paddingHorizontal:12, paddingVertical:6, borderRadius:999, borderWidth:1, borderColor:value===o.k?cherry:'#eee', backgroundColor:value===o.k?soft:'#fff' }}>
-          <Text style={{ color:value===o.k?cherry:'#333', fontWeight:'600' }}>{o.label}</Text>
-        </Pressable>
-      ))}
-    </View>
-  );
-}
-
-function Birthday({ value, onChange }: { value: string | null; onChange: (iso:string|null)=>void }) {
-  const [show, setShow] = React.useState(false);
-  const date = value ? new Date(value) : new Date(1995, 0, 1);
-  return (
-    <View style={{ flexDirection:'row-reverse', alignItems:'center', gap:8 }}>
-      <Pressable onPress={()=>setShow(true)} style={{ paddingHorizontal:12, paddingVertical:8, borderRadius:10, borderWidth:1, borderColor:'#eee' }}>
-        <Text style={{ color:'#333' }}>{value ? value : 'اختر التاريخ'}</Text>
-      </Pressable>
-      {show && (
-        <DateTimePicker
-          value={date}
-          mode="date"
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-          onChange={(event, d) => {
-            setShow(false);
-            if (d) onChange(d.toISOString().slice(0,10));
-          }}
-        />
-      )}
-    </View>
-  );
-}
-
-
+const styles = StyleSheet.create({
+  container: {
+    padding: 16,
+    backgroundColor: '#FFF',
+    // RTL-first layout
+    writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
+  },
+  h1: {
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 12,
+    color: ACCENT,
+    textAlign: 'right',
+  },
+  card: {
+    backgroundColor: CARD,
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: BORDER,
+    shadowColor: ACCENT,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  avatarWrap: {
+    alignSelf: 'center',
+    width: 96,
+    height: 96,
+    borderRadius: 999,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: ACCENT,
+    backgroundColor: '#fff',
+  },
+  avatar: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  avatarPlaceholder: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+  },
+  avatarGlyph: {
+    fontSize: 42,
+    color: ACCENT,
+  },
+  link: {
+    color: ACCENT,
+    textAlign: 'center',
+    marginTop: 8,
+    fontWeight: '600',
+  },
+  field: {
+    marginBottom: 12,
+  },
+  label: {
+    color: ACCENT,
+    fontSize: 13,
+    marginBottom: 6,
+    textAlign: 'right',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: BORDER,
+    backgroundColor: '#fff',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 12,
+    fontSize: 14,
+    color: '#3b1b26',
+    textAlign: 'right',
+  },
+  segmentRow: {
+    // RTL: right-to-left order for chips
+    flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
+    justifyContent: 'flex-start',
+    gap: 8,
+  },
+  segment: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: BORDER,
+    borderRadius: 999,
+    backgroundColor: '#fff',
+  },
+  segmentActive: {
+    backgroundColor: ACCENT,
+    borderColor: ACCENT,
+  },
+  segmentText: {
+    color: ACCENT,
+    fontWeight: '600',
+  },
+  segmentTextActive: {
+    color: '#fff',
+  },
+  saveBtn: {
+    marginTop: 8,
+    backgroundColor: ACCENT,
+    paddingVertical: 14,
+    borderRadius: 16,
+  },
+  saveText: {
+    color: '#fff',
+    textAlign: 'center',
+    fontWeight: '700',
+    fontSize: 16,
+  },
+});

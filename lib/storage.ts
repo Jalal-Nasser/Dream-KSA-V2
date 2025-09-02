@@ -1,70 +1,18 @@
-import { getSupabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 
-// Allowed types and max size
-export const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-export const MAX_BYTES = 5 * 1024 * 1024; // 5 MB
+// Simple in-memory memo to avoid recomputing public URLs repeatedly.
+const avatarUrlCache = new Map<string, string>();
 
 /**
- * Upload a local image URI to Supabase storage and return { path, publicUrl }.
- * Validates MIME type and size before uploading.
+ * Resolve a public URL for an avatar path with memoization.
  */
-export async function uploadAvatar(localUri: string, userId: string) {
-  const supabase = getSupabase();
-  console.log('[uploadAvatar] Supabase client:', supabase);
-  console.log('[uploadAvatar] Supabase storage:', supabase?.storage);
-  
-  if (!localUri) throw new Error('No local URI');
-  if (!supabase) throw new Error('Supabase client not initialized');
-  if (!supabase.storage) throw new Error('Supabase storage not available');
-  
-  // fetch to get blob + content type + size
-  const resp = await fetch(localUri);
-  const blob = await resp.blob();
-  const contentType = blob.type || 'image/jpeg';
-
-  if (!ALLOWED_TYPES.includes(contentType)) {
-    throw new Error(`Invalid file type: ${contentType}`);
-  }
-  if (blob.size > MAX_BYTES) {
-    throw new Error(`File too large: ${(blob.size / 1024 / 1024).toFixed(2)} MB (max ${(MAX_BYTES/1024/1024)} MB)`);
-  }
-
-  // Optional: try to compress/resize with expo-image-manipulator if available
-  let uploadBlob = blob;
-  try {
-    // If manipulateAsync is available at runtime, use it (import dynamically)
-    // This keeps the helper resilient if the project doesn't include the manipulator
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { manipulateAsync, SaveFormat } = require('expo-image-manipulator');
-    if (manipulateAsync) {
-      const m = await manipulateAsync(localUri, [{ resize: { width: 1024 } }], { compress: 0.8, format: SaveFormat.JPEG });
-      const r = await fetch(m.uri);
-      uploadBlob = await r.blob();
-    }
-  } catch (e) {
-    // ignore — proceed with original blob
-  }
-
-  const path = `avatars/${userId}/${Date.now()}.jpg`;
-  const { error } = await supabase.storage.from('avatars').upload(path, uploadBlob, { contentType: 'image/jpeg', upsert: true });
-  if (error) throw error;
-
-  const { data } = supabase.storage.from('avatars').getPublicUrl(path);
-  return { path, publicUrl: data.publicUrl };
-}
-
-/** Resolve a renderable image URL from profiles.avatar_url (path or full URL). */
-export function resolveAvatarUrl(avatar_url?: string | null) {
-  const supabase = getSupabase();
-  console.log('[resolveAvatarUrl] Supabase client:', supabase);
-  console.log('[resolveAvatarUrl] Supabase storage:', supabase?.storage);
-  
-  if (!avatar_url) return undefined;
-  if (/^https?:\/\//i.test(avatar_url)) return avatar_url;
-  if (!supabase?.storage) {
-    console.warn('[resolveAvatarUrl] Supabase storage not available');
-    return undefined;
-  }
-  const { data } = supabase.storage.from('avatars').getPublicUrl(avatar_url);
-  return data?.publicUrl;
+export function resolveAvatarUrl(client: ReturnType<typeof createClient>, path?: string | null) {
+  if (!path) return null;
+  const cached = avatarUrlCache.get(path);
+  if (cached) return cached;
+  if (__DEV__) console.log('[resolveAvatarUrl] path:', path);
+  const { data } = client.storage.from('avatars').getPublicUrl(path);
+  const url = data?.publicUrl ?? null;
+  if (url) avatarUrlCache.set(path, url);
+  return url;
 }
