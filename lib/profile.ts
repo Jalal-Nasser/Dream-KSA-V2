@@ -33,12 +33,17 @@ export async function fetchMyProfile() {
 }
 
 function pickProfilePatch(patch: any): ProfilePatch {
+  // Accept only DB columns to avoid schema-cache errors
   const allowed = [
     'username','gender','birthday','country','title','signature','avatar_url'
   ] as const;
   const out: any = {};
   for (const k of allowed) {
     if (patch[k] !== undefined) out[k] = patch[k];
+  }
+  // Normalize country (e.g., "sa" -> "SA")
+  if (out.country && typeof out.country === 'string') {
+    out.country = out.country.toUpperCase();
   }
   return out;
 }
