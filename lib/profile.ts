@@ -1,6 +1,16 @@
 import { getSupabase } from './supabase';
 import { prepareAvatarUri } from './image';
 
+type ProfilePatch = Partial<{
+  username: string;
+  gender: 'male' | 'female' | 'other';
+  birthday: string; // ISO yyyy-mm-dd
+  country: string;
+  title: string;
+  signature: string;
+  avatar_url: string;
+}>;
+
 export type Profile = {
   id: string;
   username: string | null;
@@ -22,11 +32,23 @@ export async function fetchMyProfile() {
   return { user, profile: (data ?? null) as Profile | null };
 }
 
+function pickProfilePatch(patch: any): ProfilePatch {
+  const allowed = [
+    'username','gender','birthday','country','title','signature','avatar_url'
+  ] as const;
+  const out: any = {};
+  for (const k of allowed) {
+    if (patch[k] !== undefined) out[k] = patch[k];
+  }
+  return out;
+}
+
 export async function upsertMyProfile(patch: Partial<Profile>) {
   const supabase = getSupabase();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Not authenticated');
-  const row = { id: user.id, ...patch, updated_at: new Date().toISOString() };
+  const clean = pickProfilePatch(patch);
+  const row = { id: user.id, ...clean, updated_at: new Date().toISOString() };
   const { data, error } = await supabase.from('profiles').upsert(row, { onConflict: 'id' }).select().single();
   if (error) throw error;
   return data as Profile;

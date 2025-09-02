@@ -49,7 +49,7 @@ export default function ProfileScreen() {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (perm.status !== 'granted') return;
 
-    const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.9, allowsEditing: true, aspect: [1,1] });
+    const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaType.Images, quality: 0.9, allowsEditing: true, aspect: [1,1] });
     if (res.canceled || !res.assets?.length) return;
 
     const img = res.assets[0];
@@ -69,7 +69,7 @@ export default function ProfileScreen() {
   const save = React.useCallback(async () => {
     setSaving(true);
     try {
-      await upsertMyProfile({
+      const payload = {
         username: p.username ?? null,
         gender: (p.gender as any) ?? null,
         birthday: p.birthday ?? null,
@@ -77,7 +77,9 @@ export default function ProfileScreen() {
         title: p.title ?? null,
         signature: p.signature ?? null,
         avatar_url: p.avatar_url ?? null,
-      });
+      };
+      console.log('[profile save] payload →', payload);
+      await upsertMyProfile(payload);
       router.back();
     } catch (e) {
       console.warn('[profile save]', (e as any)?.message);
