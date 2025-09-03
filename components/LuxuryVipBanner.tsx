@@ -55,35 +55,27 @@ export default function LuxuryVipBanner({
             </View>
           </View>
           
-          {/* Right section - Banner with text */}
-          <View style={styles.bannerSection}>
-            <LinearGradient
-              colors={['#8B0000', '#A52A2A', '#8B0000']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.bannerBackground}
-            >
-              {/* Decorative pattern overlay */}
-              <View style={styles.patternOverlay} />
-              
-              {/* Text content */}
-              <View style={styles.textContent}>
-                <Text style={styles.subtitle}>{subtitle}</Text>
-              </View>
-              
-              {/* Details button */}
-              <View style={styles.buttonContainer}>
-                <LinearGradient
-                  colors={['#D4AF37', '#B8860B', '#D4AF37']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.button}
-                >
-                  <Text style={styles.buttonText}>{buttonText}</Text>
-                </LinearGradient>
-              </View>
-            </LinearGradient>
-          </View>
+                     {/* Right section - Banner with text */}
+           <View style={styles.bannerSection}>
+             <View style={styles.bannerBackground}>
+               {/* Text content */}
+               <View style={styles.textContent}>
+                 <Text style={styles.subtitle}>{subtitle}</Text>
+               </View>
+               
+               {/* Details button */}
+               <View style={styles.buttonContainer}>
+                 <LinearGradient
+                   colors={['#D4AF37', '#B8860B', '#D4AF37']}
+                   start={{ x: 0, y: 0 }}
+                   end={{ x: 1, y: 1 }}
+                   style={styles.button}
+                 >
+                   <Text style={styles.buttonText}>{buttonText}</Text>
+                 </LinearGradient>
+               </View>
+             </View>
+           </View>
         </View>
       </LinearGradient>
     </Pressable>
@@ -114,7 +106,7 @@ const styles = StyleSheet.create({
   },
   shieldSection: {
     alignItems: 'center',
-    paddingVertical: 16,
+    paddingVertical: 12,
     paddingHorizontal: 20,
     position: 'relative',
   },
@@ -167,30 +159,21 @@ const styles = StyleSheet.create({
   },
   bannerSection: {
     flex: 1,
-    height: 80,
+    height: 60,
   },
   bannerBackground: {
     flex: 1,
     flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    position: 'relative',
-  },
-  patternOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
-    opacity: 0.3,
+    backgroundColor: 'transparent',
   },
   textContent: {
     flex: 1,
     alignItems: I18nManager.isRTL ? 'flex-end' : 'flex-start',
   },
   subtitle: {
-    color: '#F5F5DC',
+    color: '#E5E1C6',
     fontSize: 14,
     fontWeight: '600',
     textAlign: I18nManager.isRTL ? 'right' : 'left',
