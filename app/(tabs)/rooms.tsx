@@ -46,8 +46,24 @@ export default function Rooms() {
   }, [fetchRooms]);
 
   const createRoom = async () => {
-    if (!title.trim()) return;
+    if (!title.trim()) {
+      console.log('[createRoom] No title provided');
+      return;
+    }
+    
+    console.log('[createRoom] Starting room creation with title:', title.trim());
     setLoading(true);
+    
+    // Check if user is authenticated
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      console.log('[createRoom] User not authenticated:', authError);
+      setLoading(false);
+      return;
+    }
+    
+    console.log('[createRoom] User authenticated:', user.id);
+    
     const { data, error } = await supabase
       .from('rooms')
       .insert({ 
@@ -57,11 +73,14 @@ export default function Rooms() {
       })
       .select()
       .single();
+    
     setLoading(false);
     if (error) {
-      console.log('[createRoom] error:', error);
+      console.log('[createRoom] Database error:', error);
       return;
     }
+    
+    console.log('[createRoom] Room created successfully:', data);
     setTitle('');
     router.push(`/room/${data!.id}`);
   };
@@ -80,13 +99,13 @@ export default function Rooms() {
         <Pressable disabled={loading} onPress={createRoom} style={styles.makeBtn}>
           <MaterialCommunityIcons name="plus" size={18} color="#fff" />
           <Text style={{ color: '#fff', fontWeight: '800' }}>{loading ? '...' : 'إنشاء'}</Text>
-          </Pressable>
-        </View>
+        </Pressable>
+      </View>
 
-        <FlatList
+      <FlatList
         data={rooms}
-          keyExtractor={(r) => r.id}
-          ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+        keyExtractor={(r) => r.id}
+        ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
         renderItem={({ item }) => (
           <Pressable onPress={() => router.push(`/room/${item.id}`)} style={styles.roomRow}>
             <MaterialCommunityIcons name="account-voice" size={20} color={PALETTE.primaryDark} />
@@ -95,7 +114,7 @@ export default function Rooms() {
           </Pressable>
         )}
       />
-        </View>
+    </View>
   );
 }
 
