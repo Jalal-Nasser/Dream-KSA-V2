@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, Pressable, Alert, I18nManager } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter, useFocusEffect, useLocalSearchParams } from 'expo-router';
@@ -124,8 +125,22 @@ export default function MeScreen() {
           />
 
           <View style={styles.segmentRow}>
-            <View style={[styles.segment, styles.segmentActive]}><Text style={styles.segmentTxtActive}>الأوسمة</Text></View>
-            <View style={[styles.segment, styles.segmentDim]}><Text style={styles.segmentTxtDim}>مستوى</Text></View>
+            <LinearGradient
+              colors={['#FDE7EA', '#F8D7DA', '#FDE7EA']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={[styles.segment, styles.segmentActive]}
+            >
+              <Text style={styles.segmentTxtActive}>الأوسمة</Text>
+            </LinearGradient>
+            <LinearGradient
+              colors={['#F4E4BC', '#E6D3A3', '#F4E4BC']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={[styles.segment, styles.segmentDim]}
+            >
+              <Text style={styles.segmentTxtDim}>مستوى</Text>
+            </LinearGradient>
           </View>
 
           <View style={styles.badgeArea}>
@@ -290,10 +305,10 @@ const styles = StyleSheet.create({
 
   segmentRow: { flexDirection: 'row-reverse', gap: 10, marginTop: 4 },
   segment: { flex: 1, paddingVertical: 10, borderRadius: 10, alignItems: 'center' },
-  segmentActive: { backgroundColor: '#FDE7EA' },
-  segmentDim: { backgroundColor: PALETTE.soft2 },
-  segmentTxtActive: { color: PALETTE.primary, fontWeight: '700' },
-  segmentTxtDim: { color: PALETTE.primaryDark, opacity: 0.7, fontWeight: '700' },
+  segmentActive: { /* backgroundColor removed - using LinearGradient */ },
+  segmentDim: { /* backgroundColor removed - using LinearGradient */ },
+  segmentTxtActive: { color: '#8B4513', fontWeight: '700' },
+  segmentTxtDim: { color: '#8B4513', fontWeight: '700' },
   badgeArea: { backgroundColor: '#FFFFFF', paddingVertical: 8, gap: 8 },
   badgeEmpty: { alignSelf: 'flex-end', flexDirection: 'row-reverse', gap: 6, backgroundColor: PALETTE.soft2, borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4 },
   badgeEmptyTxt: { color: PALETTE.primary, fontWeight: '700' },
