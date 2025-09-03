@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { I18nManager, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View, Alert, ActivityIndicator } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { getSupabase } from '@/lib/supabase';
 import { useSupabase } from '@/lib/supabaseProvider';
 import { resolveAvatarUrl } from '@/lib/storage';
@@ -13,7 +13,6 @@ const BORDER = '#F2CAD6';
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { selectedCountry } = useLocalSearchParams<{ selectedCountry?: string }>();
   const supabase = getSupabase();
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
@@ -81,12 +80,7 @@ export default function ProfileScreen() {
     };
   }, [supabase]);
 
-  // When we come back from the country picker, update the field
-  useEffect(() => {
-    if (typeof selectedCountry === 'string' && selectedCountry.length > 0) {
-      setCountry(selectedCountry);
-    }
-  }, [selectedCountry]);
+
 
   const avatarUrl = useMemo(
     () => resolveAvatarUrl(supabase as any, avatarPath ?? undefined),
@@ -163,8 +157,13 @@ export default function ProfileScreen() {
     // ⛔️ Do NOT send any avatar column to DB (table doesn’t have one).
 
     if (Object.keys(payload).length === 0) {
+      // No changes → still navigate to Me screen as requested
       setSaving(false);
-      Alert.alert('لا يوجد تغييرات', 'لم تقم بتعديل أي بيانات.');
+      try {
+        router.replace('/(tabs)/me');
+      } catch {
+        router.back();
+      }
       return;
     }
 
@@ -202,7 +201,12 @@ export default function ProfileScreen() {
     };
     avatarDirtyRef.current = false;
     setSaving(false);
-    Alert.alert('تم الحفظ', 'تم حفظ معلوماتك بنجاح.');
+    // Navigate to Me screen after successful save
+    try {
+      router.replace('/(tabs)/me');
+    } catch {
+      router.back();
+    }
   };
 
   return (
@@ -287,13 +291,7 @@ export default function ProfileScreen() {
         <View style={styles.field}>
           <Text style={styles.label}>البلد / المنطقة</Text>
           <Pressable
-            onPress={() => router.push({ 
-              pathname: '/select-country', 
-              params: { 
-                current: country || '',
-                returnTo: '/(tabs)/me/profile'
-              } 
-            })}
+            onPress={() => router.push({ pathname: '/select-country', params: { current: country || '' } })}
             style={[styles.input, { justifyContent: 'center' }]}
           >
             <Text style={{ textAlign: 'right', color: country ? '#3b1b26' : '#987' }}>

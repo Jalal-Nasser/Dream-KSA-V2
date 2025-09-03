@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, TextInput, View, I18nManager, ScrollView } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, TextInput, View, I18nManager, ScrollView, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { getSupabase } from '@/lib/supabase';
 import { MaterialCommunityIcons as MCI } from '@expo/vector-icons';
 import { COUNTRIES, type Country } from '@/lib/countries';
 
@@ -30,6 +31,7 @@ export default function SelectCountryScreen() {
   const router = useRouter();
   const { current, returnTo } = useLocalSearchParams<{ current?: string; returnTo?: string }>();
   const [search, setSearch] = useState('');
+  const supabase = getSupabase();
 
   const filteredCountries = useMemo(() => {
     if (!search.trim()) return COUNTRIES;
@@ -40,18 +42,31 @@ export default function SelectCountryScreen() {
     );
   }, [search]);
 
-  const onSelectCountry = (countryCode: string) => {
-    // Navigate back to the specific screen with the selected country
-    if (returnTo) {
-      router.push({ 
-        pathname: returnTo as any, 
-        params: { selectedCountry: countryCode } 
-      });
-    } else {
-      router.back();
-      setTimeout(() => {
-        router.setParams({ selectedCountry: countryCode });
-      }, 300);
+  const handleSelectCountry = async (item: Country) => {
+    try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user?.id) {
+        Alert.alert('لم يتم تسجيل الدخول', 'رجاءً سجّل الدخول أولاً.');
+        return;
+      }
+      // Persist immediately so Profile loads it reliably
+      const { error } = await supabase
+        .from('profiles')
+        .upsert({ id: user.id, country: item.nameAr }, { onConflict: 'id' });
+      if (error) {
+        Alert.alert('خطأ', 'تعذر حفظ الدولة. حاول مرة أخرى.');
+        return;
+      }
+      // Return to Profile
+      try {
+        router.back();
+      } catch {
+        router.replace('/(tabs)/me/profile');
+      }
+    } catch (e) {
+      console.warn('[country picker] error:', e);
+      Alert.alert('خطأ', 'حدث خطأ غير متوقع.');
     }
   };
 
@@ -62,7 +77,7 @@ export default function SelectCountryScreen() {
 
     return (
       <Pressable
-        onPress={() => onSelectCountry(item.code)}
+        onPress={() => handleSelectCountry(item)}
         style={[
           styles.countryItem,
           isSelected && styles.countryItemSelected
