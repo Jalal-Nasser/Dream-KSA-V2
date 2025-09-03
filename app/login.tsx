@@ -31,7 +31,6 @@ export default function Login() {
   const scaleAnim = React.useRef(new Animated.Value(0.9)).current;
   const rotateAnim = React.useRef(new Animated.Value(0)).current;
   const pulseAnim = React.useRef(new Animated.Value(1)).current;
-  const floatAnim = React.useRef(new Animated.Value(0)).current;
 
   React.useEffect(() => { 
     logRedirects?.('[oauth]');
@@ -92,29 +91,9 @@ export default function Login() {
     );
     pulseAnimation.start();
 
-    // Floating animation for background gradient
-    const floatAnimation = Animated.loop(
-      Animated.sequence([
-        Animated.timing(floatAnim, {
-          toValue: 1,
-          duration: 3000,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-        Animated.timing(floatAnim, {
-          toValue: 0,
-          duration: 3000,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-      ])
-    );
-    floatAnimation.start();
-
     return () => {
       rotateAnimation.stop();
       pulseAnimation.stop();
-      floatAnimation.stop();
     };
   }, []);
 
@@ -251,28 +230,7 @@ export default function Login() {
         imageStyle={{ opacity: 0.96, transform: [{ translateY: -20 }] }}
         resizeMode="cover"
       >
-        <Animated.View
-          style={[
-            StyleSheet.absoluteFill,
-            {
-              transform: [
-                {
-                  translateY: floatAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, -10],
-                  }),
-                },
-              ],
-            },
-          ]}
-        >
-          <LinearGradient
-            colors={['rgba(251, 231, 239, 0.3)', 'rgba(242, 202, 214, 0.4)', 'rgba(248, 215, 218, 0.3)', 'rgba(251, 231, 239, 0.3)']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={StyleSheet.absoluteFill}
-          />
-        </Animated.View>
+
         <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.15)' }]} />
       </ImageBackground>
 
