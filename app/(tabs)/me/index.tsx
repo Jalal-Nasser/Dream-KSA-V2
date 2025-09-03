@@ -8,6 +8,7 @@ import { PALETTE } from '../../../lib/theme';
 import { getSupabase } from '../../../lib/supabase';
 import { resolveDisplayName } from '../../../lib/display';
 import { resolveAvatarUrl } from '../../../lib/storage';
+import LuxuryVipBanner from '../../../components/LuxuryVipBanner';
 
 export default function MeScreen() {
   const router = useRouter();
@@ -108,12 +109,12 @@ export default function MeScreen() {
             </View>
           </View>
 
-          <Pressable onPress={() => onMenu('VIP')} style={styles.vipBanner}>
-            <Text style={styles.vipTitle}>VIP</Text>
-            <Text style={styles.vipSub}>استمتع بامتيازات حصرية</Text>
-            <View style={{ flex: 1 }} />
-            <View style={styles.vipBtn}><Text style={styles.vipBtnTxt}>تفاصيل</Text></View>
-          </Pressable>
+          <LuxuryVipBanner 
+            onPress={() => onMenu('VIP')}
+            title="VIP"
+            subtitle="استمتع بامتيازات حصرية"
+            buttonText="تفاصيل"
+          />
 
           <View style={styles.segmentRow}>
             <View style={[styles.segment, styles.segmentActive]}><Text style={styles.segmentTxtActive}>الأوسمة</Text></View>
@@ -227,11 +228,7 @@ const styles = StyleSheet.create({
   statBox: { alignItems: 'center', minWidth: 80 },
   statNum: { fontSize: 18, fontWeight: '700' },
   statLbl: { color: '#7C8794', marginTop: 2 },
-  vipBanner: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: '#1E1E1E', padding: 14, borderRadius: 12 },
-  vipTitle: { color: '#D4AF37', fontSize: 18, fontWeight: '800', marginLeft: 10 },
-  vipSub: { color: '#E5E1C6', opacity: 0.9 },
-  vipBtn: { backgroundColor: '#D4AF37', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10, marginLeft: 8 },
-  vipBtnTxt: { fontWeight: '700', color: '#1E1E1E' },
+
   segmentRow: { flexDirection: 'row-reverse', gap: 10, marginTop: 4 },
   segment: { flex: 1, paddingVertical: 10, borderRadius: 10, alignItems: 'center' },
   segmentActive: { backgroundColor: '#FDE7EA' },
