@@ -2,8 +2,10 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { I18nManager, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View, Alert, ActivityIndicator } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { getSupabase } from '@/lib/supabase';
+import { useSupabase } from '@/lib/supabaseProvider';
 import { resolveAvatarUrl } from '@/lib/storage';
 import { pickAvatar } from '@/lib/profileImageUtils';
+import { decode } from 'base64-arraybuffer';
 
 const ACCENT = '#800F2F';
 const CARD = '#FBE7EF'; // soft cherry blossom surface
@@ -95,36 +97,31 @@ export default function ProfileScreen() {
     const result = await pickAvatar();
     if (result?.canceled) return;
     const asset = result.assets?.[0];
-    if (!asset) return;
-    // Upload to Supabase Storage as BLOB (Expo-friendly) to a STABLE key per user
+    if (!asset || !asset.base64) {
+      Alert.alert('خطأ', 'تعذر الحصول على بيانات الصورة.');
+      return;
+    }
+    // Upload to Supabase Storage using base64-arraybuffer (most reliable on Expo)
     try {
       const path = `u/${user?.id}/avatar`; // stable key → no DB column needed
-      if (__DEV__) {
-        console.log('[avatar] picked asset', {
-          uri: asset.uri,
-          type: asset.mimeType,
-          fileName: asset.fileName,
-          width: asset.width,
-          height: asset.height,
-        });
-      }
-      // In Expo 51+, fetch(fileUri).blob() is supported and reliable with polyfills loaded.
-      const resp = await fetch(asset.uri);
-      const blob = await resp.blob();
       const contentType = asset.mimeType ?? 'image/jpeg';
+      const arrayBuffer = decode(asset.base64);
+
       const { error: upErr } = await supabase
         .storage
         .from('avatars')
-        .upload(path, blob, { upsert: true, contentType });
+        .upload(path, arrayBuffer, { upsert: true, contentType });
+
       if (upErr) {
         console.warn('[avatar] upload error', upErr);
         Alert.alert('فشل الرفع', 'تعذر رفع الصورة. حاول مرة أخرى.');
         return;
       }
-      setAvatarPath(path);
+      // Manually trigger a re-render by setting a new path object
+      setAvatarPath(`${path}?t=${new Date().getTime()}`);
       avatarDirtyRef.current = true;
     } catch (e) {
-      console.warn('[avatar] blob/upload exception', e);
+      console.warn('[avatar] base64/upload exception', e);
       Alert.alert('فشل الرفع', 'حدث خطأ أثناء رفع الصورة.');
     }
   };

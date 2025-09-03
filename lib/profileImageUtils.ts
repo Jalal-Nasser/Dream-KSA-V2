@@ -39,7 +39,7 @@ export async function pickAvatar() {
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.9,
-      base64: false,
+      base64: true, // <--- CHANGE: Request base64 data
       exif: false,
       // presentationStyle helps some Android skins show the picker fullscreen
       presentationStyle: 'fullScreen',
