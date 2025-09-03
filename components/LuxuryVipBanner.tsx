@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
   },
   shieldSection: {
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: 8,
     paddingHorizontal: 20,
     position: 'relative',
   },
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
   shield: {
     backgroundColor: '#000000',
     borderRadius: 12,
-    paddingVertical: 12,
+    paddingVertical: 8,
     paddingHorizontal: 16,
     alignItems: 'center',
     borderWidth: 2,
@@ -159,13 +159,13 @@ const styles = StyleSheet.create({
   },
   bannerSection: {
     flex: 1,
-    height: 60,
+    height: 50,
   },
   bannerBackground: {
     flex: 1,
     flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
     backgroundColor: 'transparent',
   },
   textContent: {
