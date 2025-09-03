@@ -1,5 +1,5 @@
-import * as React from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, Pressable, Alert } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, Image, Pressable, Alert, I18nManager } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -12,9 +12,9 @@ import { resolveAvatarUrl } from '../../../lib/storage';
 export default function MeScreen() {
   const router = useRouter();
   const { refresh } = useLocalSearchParams();
-  const [profile, setProfile] = React.useState<any>(null);
-  const [user, setUser] = React.useState<any>(null);
-  const [loading, setLoading] = React.useState(true);
+  const [profile, setProfile] = useState<any>(null);
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   
   const onMenu = (name: string) => Alert.alert('', `(${name}) قادم لاحقًا`);
   
@@ -29,7 +29,7 @@ export default function MeScreen() {
       
       const { data: profile } = await supabase
         .from('profiles')
-        .select('*')
+        .select('display_name, gender, birthday, country, title, signature')
         .eq('id', user.id)
         .single();
       
@@ -46,12 +46,28 @@ export default function MeScreen() {
   useFocusEffect(React.useCallback(() => { fetch(); }, [fetch, refresh]));
   
   const displayName = resolveDisplayName(profile, user);
-  const _avatar = resolveAvatarUrl(getSupabase(), profile?.avatar_url);
-  const avatarSrc = _avatar ? { uri: _avatar } : undefined;
+  
+  // Derive avatar from stable storage path (no DB column needed)
+  const avatarUrl = useMemo(
+    () => (user ? resolveAvatarUrl(getSupabase(), `u/${user.id}/avatar`) : null),
+    [user?.id]
+  );
+  const avatarSrc = avatarUrl ? { uri: avatarUrl } : undefined;
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: PALETTE.soft1 }}>
       <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
         <View style={styles.headerCard}>
+          <View style={styles.avatarWrap}>
+            {avatarUrl ? (
+              <Image source={{ uri: avatarUrl }} style={styles.avatar} />
+            ) : (
+              <View style={styles.avatarPh}><Text style={styles.avatarGlyph}>👤</Text></View>
+            )}
+          </View>
+          <Text style={styles.nameText}>{displayName || 'بدون اسم'}</Text>
+        </View>
+
+        <View style={styles.card}>
           <Pressable style={styles.editIcon} onPress={() => router.push('/(tabs)/me/profile')}>
             <MaterialCommunityIcons name="pencil" size={18} color={PALETTE.textDim} />
           </Pressable>
@@ -75,13 +91,6 @@ export default function MeScreen() {
                 <Text style={styles.idTxt}>ID: 23733397</Text>
               </View>
             </View>
-            {avatarSrc ? (
-              <Image source={avatarSrc} style={styles.avatar} />
-            ) : (
-              <View style={[styles.avatar, { backgroundColor: PALETTE.soft1, alignItems: 'center', justifyContent: 'center' }]}>
-                <MaterialCommunityIcons name="account-circle" size={30} color={PALETTE.textDim} />
-              </View>
-            )}
           </View>
 
           <View style={styles.statsRow}>
@@ -179,7 +188,34 @@ function MenuItem({
 }
 
 const styles = StyleSheet.create({
-  headerCard: { backgroundColor: '#FFFFFF', marginTop: 8, marginHorizontal: 12, borderRadius: 16, padding: 14, gap: 12, shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 10, elevation: 2 },
+  container: {
+    flex: 1,
+    padding: 12,
+    backgroundColor: '#fff',
+    writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
+  },
+  headerCard: {
+    backgroundColor: '#FBE7EF',
+    borderColor: '#F2CAD6',
+    borderWidth: 1,
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 12,
+  },
+  avatarWrap: {
+    alignSelf: 'center',
+    width: 72,
+    height: 72,
+    borderRadius: 999,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: '#800F2F',
+    backgroundColor: '#fff',
+  },
+  avatar: { width: '100%', height: '100%' },
+  avatarPh: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff' },
+  avatarGlyph: { fontSize: 34, color: '#800F2F' },
+  nameText: { marginTop: 8, textAlign: 'center', fontWeight: '700', color: '#800F2F' },
   editIcon: { position: 'absolute', top: 10, left: 10, padding: 6, borderRadius: 999 },
   headerTopRow: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between' },
   nameBlock: { flex: 1, alignItems: 'flex-end', paddingRight: 8, gap: 6 },
@@ -187,7 +223,6 @@ const styles = StyleSheet.create({
   name: { fontSize: 18, fontWeight: '700' },
   idRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 6 },
   idTxt: { color: '#8E8E93' },
-  avatar: { width: 60, height: 60, borderRadius: 30, backgroundColor: '#EEE' },
   statsRow: { flexDirection: 'row-reverse', justifyContent: 'space-between', backgroundColor: PALETTE.soft1, borderRadius: 12, paddingVertical: 10, paddingHorizontal: 16 },
   statBox: { alignItems: 'center', minWidth: 80 },
   statNum: { fontSize: 18, fontWeight: '700' },

@@ -5,6 +5,7 @@ import { getSupabase } from '@/lib/supabase';
 import { resolveAvatarUrl } from '@/lib/storage';
 import { pickAvatar } from '@/lib/profileImageUtils';
 import { decode } from 'base64-arraybuffer';
+import DateTimePicker, { AndroidNativeProps, IOSNativeProps } from '@react-native-community/datetimepicker';
 
 const ACCENT = '#800F2F';
 const CARD = '#FBE7EF'; // soft cherry blossom surface
@@ -18,6 +19,8 @@ export default function ProfileScreen() {
   const [displayName, setDisplayName] = useState('');
   const [gender, setGender] = useState<'male' | 'female' | 'other' | ''>('');
   const [birthday, setBirthday] = useState('');
+  const [showBirthdayPicker, setShowBirthdayPicker] = useState(false);
+  const [birthdayDate, setBirthdayDate] = useState<Date | null>(null);
   const [country, setCountry] = useState('');
   const [title, setTitle] = useState('');
   const [signature, setSignature] = useState('');
@@ -53,6 +56,7 @@ export default function ProfileScreen() {
         setDisplayName(data.display_name ?? '');
         setGender((data.gender as any) ?? '');
         setBirthday(data.birthday ?? '');
+        setBirthdayDate(data.birthday ? new Date(data.birthday) : null);
         setCountry(data.country ?? '');
         setTitle(data.title ?? '');
         setSignature(data.signature ?? '');
@@ -117,6 +121,24 @@ export default function ProfileScreen() {
       console.warn('[avatar] base64/upload exception', e);
       Alert.alert('فشل الرفع', 'حدث خطأ أثناء رفع الصورة.');
     }
+  };
+
+  // ----- Birthday helpers -----
+  const formatDate = (d: Date) => {
+    const y = d.getFullYear();
+    const m = `${d.getMonth() + 1}`.padStart(2, '0');
+    const da = `${d.getDate()}`.padStart(2, '0');
+    return `${y}-${m}-${da}`;
+  };
+  const openBirthday = () => setShowBirthdayPicker(true);
+  const onBirthdayChange: AndroidNativeProps['onChange'] & IOSNativeProps['onChange'] = (_e: any, date?: Date) => {
+    if (!date) {
+      setShowBirthdayPicker(false);
+      return;
+    }
+    setBirthdayDate(date);
+    setBirthday(formatDate(date));
+    setShowBirthdayPicker(false);
   };
 
   const onSave = async () => {
@@ -276,14 +298,20 @@ export default function ProfileScreen() {
         {/* Birthday */}
         <View style={styles.field}>
           <Text style={styles.label}>عيد الميلاد</Text>
-          <TextInput
-            style={styles.input}
-            value={birthday}
-            onChangeText={setBirthday}
-            placeholder="1995-01-01"
-            placeholderTextColor="#987"
-            textAlign="right"
-          />
+          <Pressable onPress={openBirthday} style={[styles.input, { justifyContent: 'center' }]}>
+            <Text style={{ textAlign: 'right', color: birthday ? '#3b1b26' : '#987' }}>
+              {birthday || 'اختر التاريخ'}
+            </Text>
+          </Pressable>
+          {showBirthdayPicker && (
+            <DateTimePicker
+              value={birthdayDate ?? new Date(1995, 0, 1)}
+              mode="date"
+              display="default"
+              onChange={onBirthdayChange}
+              maximumDate={new Date()}
+            />
+          )}
         </View>
 
         {/* Country (navigates to picker) */}
@@ -416,9 +444,9 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   segmentRow: {
-    // RTL: right-to-left order for chips
-    flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
-    justifyContent: 'flex-start',
+    // Anchor chips to the RIGHT in RTL, left in LTR (keeps tab order but aligns correctly)
+    flexDirection: 'row',
+    justifyContent: I18nManager.isRTL ? 'flex-end' : 'flex-start',
     gap: 8,
   },
   segment: {
