@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { I18nManager, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View, Alert } from 'react-native';
+import { I18nManager, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View, Alert, ActivityIndicator } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { getSupabase } from '@/lib/supabase';
 import { resolveAvatarUrl } from '@/lib/storage';
@@ -24,6 +24,17 @@ export default function ProfileScreen() {
   const [avatarPath, setAvatarPath] = useState<string | null>(null);
   // Track if avatar has changed in this session (prevents wiping on save)
   const avatarDirtyRef = useRef(false);
+  // Snapshot of the loaded profile to compute diffs (avoid overwriting with nulls)
+  const initialRef = useRef<{
+    display_name?: string | null;
+    gender?: 'male' | 'female' | 'other' | '' | null;
+    birthday?: string | null;
+    country?: string | null;
+    title?: string | null;
+    signature?: string | null;
+    avatar_path?: string | null;
+  }>({});
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -47,8 +58,18 @@ export default function ProfileScreen() {
         setTitle(data.title ?? '');
         setSignature(data.signature ?? '');
         setAvatarPath(data.avatar_path ?? null);
-        // Fresh load → not dirty
-        avatarDirtyRef.current = false;
+         // Fresh load → not dirty
+         avatarDirtyRef.current = false;
+         // Save initial snapshot for diffing
+         initialRef.current = {
+           display_name: data.display_name ?? '',
+           gender: (data.gender as any) ?? '',
+           birthday: data.birthday ?? '',
+           country: data.country ?? '',
+           title: data.title ?? '',
+           signature: data.signature ?? '',
+           avatar_path: data.avatar_path ?? null,
+         };
       }
     })();
     return () => {
@@ -110,26 +131,85 @@ export default function ProfileScreen() {
   };
 
   const onSave = async () => {
-    // Minimal update payload — DO NOT nullify avatar_path unless truly changed
-    const payload: any = {
-      display_name: displayName?.trim(),
-      gender: gender || null,
-      birthday: birthday || null,
-      country: country || null,
-      title: title?.trim() || null,
-      signature: signature?.trim() || null,
-    };
-    // Only include avatar_path when the avatar actually changed this session
-    if (avatarDirtyRef.current) {
+    if (!user?.id) {
+      Alert.alert('لم يتم تسجيل الدخول', 'رجاءً سجّل الدخول أولاً.');
+      return;
+    }
+    setSaving(true);
+    // Prepare draft with trimmed values
+    const draft = {
+      display_name: (displayName ?? '').trim(),
+      gender: (gender ?? '') || null,
+      birthday: (birthday ?? '') || null,
+      country: (country ?? '') || null,
+      title: (title ?? '').trim() || null,
+      signature: (signature ?? '').trim() || null,
+    } as Record<string, string | null>;
+
+    // Build a minimal PATCH: only include keys that truly changed.
+    // Also: do NOT wipe a previously non-empty value to empty/null unless the user explicitly cleared it.
+    const original = initialRef.current;
+    const payload: Record<string, any> = {};
+    (Object.keys(draft) as (keyof typeof draft)[]).forEach((k) => {
+      const nextVal = draft[k];
+      const prevVal = (original as any)[k] ?? '';
+      const normalizedNext = nextVal === '' ? '' : nextVal; // keep '' for comparison
+      const normalizedPrev = prevVal === null ? '' : prevVal;
+      if (normalizedNext !== normalizedPrev) {
+        // If user left field empty but there was a previous value, skip to avoid accidental erase
+        if ((normalizedNext === '' || normalizedNext === null) && normalizedPrev !== '') {
+          return; // skip wiping
+        }
+        // Convert '' to null when storing
+        payload[k as string] = normalizedNext === '' ? null : normalizedNext;
+      }
+    });
+    // Avatar path only if changed this session
+    if (avatarDirtyRef.current && avatarPath) {
       payload.avatar_path = avatarPath;
     }
 
-    if (__DEV__) console.log('[profile save] payload →', payload);
-    const { error } = await supabase.from('profiles').update(payload).eq('id', user?.id);
-    if (!error) {
-      avatarDirtyRef.current = false; // reset after successful save
-      router.back();
+    if (Object.keys(payload).length === 0) {
+      setSaving(false);
+      Alert.alert('لا يوجد تغييرات', 'لم تقم بتعديل أي بيانات.');
+      return;
     }
+
+    if (__DEV__) console.log('[profile save] payload →', payload);
+    const { data, error } = await supabase
+      .from('profiles')
+      .update(payload)
+      .eq('id', user.id)
+      .select('display_name, gender, birthday, country, title, signature, avatar_path')
+      .single();
+
+    if (error) {
+      console.warn('[profile save] error', error);
+      setSaving(false);
+      Alert.alert('فشل الحفظ', error.message || 'تعذر حفظ التغييرات.');
+      return;
+    }
+
+    // Success: update state + initial snapshot; reset dirty avatar flag
+    setDisplayName(data.display_name ?? '');
+    setGender((data.gender as any) ?? '');
+    setBirthday(data.birthday ?? '');
+    setCountry(data.country ?? '');
+    setTitle(data.title ?? '');
+    setSignature(data.signature ?? '');
+    setAvatarPath(data.avatar_path ?? null);
+    initialRef.current = {
+      display_name: data.display_name ?? '',
+      gender: (data.gender as any) ?? '',
+      birthday: data.birthday ?? '',
+      country: data.country ?? '',
+      title: data.title ?? '',
+      signature: data.signature ?? '',
+      avatar_path: data.avatar_path ?? null,
+    };
+    avatarDirtyRef.current = false;
+    setSaving(false);
+    Alert.alert('تم الحفظ', 'تم حفظ معلوماتك بنجاح.');
   };
 
   return (
@@ -255,8 +335,12 @@ export default function ProfileScreen() {
           />
         </View>
 
-        <Pressable onPress={onSave} style={styles.saveBtn}>
-          <Text style={styles.saveText}>حفظ</Text>
+        <Pressable onPress={saving ? undefined : onSave} style={[styles.saveBtn, saving && { opacity: 0.6 }]}>
+          {saving ? (
+            <ActivityIndicator />
+          ) : (
+            <Text style={styles.saveText}>حفظ</Text>
+          )}
         </Pressable>
       </View>
     </ScrollView>
