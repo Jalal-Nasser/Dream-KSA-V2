@@ -326,6 +326,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     textAlign: 'right',              // keep RTL alignment
   },
-  fab: { position: 'absolute', right: 12, bottom: 24, backgroundColor: PALETTE.soft2, borderRadius: 18, flexDirection: 'row-reverse', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: PALETTE.cherry150 },
+  fab: { position: 'absolute', left: 12, bottom: 24, backgroundColor: PALETTE.soft2, borderRadius: 18, flexDirection: 'row-reverse', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: PALETTE.cherry150 },
   fabTxt: { fontWeight: '700', color: PALETTE.primaryDark },
 });
