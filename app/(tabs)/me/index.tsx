@@ -63,6 +63,16 @@ export default function MeScreen() {
           </Pressable>
           
           <View style={styles.headerContent}>
+            <View style={styles.avatarContainer}>
+              {avatarUrl ? (
+                <Image source={{ uri: avatarUrl }} style={styles.headerAvatar} />
+              ) : (
+                <View style={styles.headerAvatarPh}>
+                  <Text style={styles.headerAvatarGlyph}>👤</Text>
+                </View>
+              )}
+            </View>
+            
             <View style={styles.userInfo}>
               <View style={styles.nameRow}>
                 <MaterialCommunityIcons 
@@ -85,16 +95,6 @@ export default function MeScreen() {
                 <MaterialCommunityIcons name="clipboard-text-outline" size={14} color={PALETTE.textDim} />
                 <Text style={styles.idText}>ID: 23733397</Text>
               </View>
-            </View>
-            
-            <View style={styles.avatarContainer}>
-              {avatarUrl ? (
-                <Image source={{ uri: avatarUrl }} style={styles.headerAvatar} />
-              ) : (
-                <View style={styles.headerAvatarPh}>
-                  <Text style={styles.headerAvatarGlyph}>👤</Text>
-                </View>
-              )}
             </View>
           </View>
         </View>
@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
   userInfo: {
     flex: 1,
     alignItems: 'flex-end',
-    paddingRight: 12,
+    paddingLeft: 12,
   },
   nameRow: {
     flexDirection: 'row-reverse',
