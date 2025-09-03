@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text } from 'react-native';
-import { supabase } from '@/supabase';
+import { supabase } from '@/lib/supabase';
 
 export default function UserName({ userId, fallback }: { userId: string; fallback?: string }) {
   const [name, setName] = React.useState<string | null>(fallback || null);

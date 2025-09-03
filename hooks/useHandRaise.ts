@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { supabase } from '@/supabase';
+import { supabase } from '@/lib/supabase';
 
 export function useHandRaise(roomId: string, userId: string) {
   const raise = useCallback(async () => {
