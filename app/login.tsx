@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { View, Text, Pressable, StyleSheet, Platform, Modal, ImageBackground, Image, TextInput, KeyboardAvoidingView, Alert } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
@@ -146,7 +147,13 @@ export default function Login() {
         imageStyle={{ opacity: 0.96, transform: [{ translateY: -20 }] }}
         resizeMode="cover"
       >
-        <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.25)' }]} />
+        <LinearGradient
+          colors={['rgba(251, 231, 239, 0.3)', 'rgba(242, 202, 214, 0.4)', 'rgba(248, 215, 218, 0.3)', 'rgba(251, 231, 239, 0.3)']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.15)' }]} />
       </ImageBackground>
 
       <View style={styles.topRow}>

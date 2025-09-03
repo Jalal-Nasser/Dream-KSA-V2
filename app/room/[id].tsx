@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { View, Text, StyleSheet, FlatList, TextInput, Pressable, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getSupabase } from '../../lib/supabase';
 import { PALETTE } from '../../lib/theme';
@@ -87,7 +88,12 @@ export default function RoomChat() {
   };
 
   return (
-    <View style={{ flex:1, backgroundColor: PALETTE.soft1 }}>
+    <LinearGradient
+      colors={['#FBE7EF', '#F2CAD6', '#F8D7DA', '#FBE7EF']}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={{ flex: 1 }}
+    >
       <View style={styles.header}>
         <Pressable onPress={() => router.back()}><Ionicons name="chevron-forward" size={22} color={PALETTE.primaryDark} /></Pressable>
         <Text style={styles.title}>{room?.name || 'غرفة دردشة'}</Text>
@@ -119,7 +125,7 @@ export default function RoomChat() {
           textAlign="right"
         />
       </View>
-    </View>
+    </LinearGradient>
   );
 }
 

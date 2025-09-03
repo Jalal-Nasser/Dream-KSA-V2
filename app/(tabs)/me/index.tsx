@@ -56,8 +56,14 @@ export default function MeScreen() {
   );
   const avatarSrc = avatarUrl ? { uri: avatarUrl } : undefined;
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: PALETTE.soft1 }}>
-      <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
+    <LinearGradient
+      colors={['#FBE7EF', '#F2CAD6', '#F8D7DA', '#FBE7EF']}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={{ flex: 1 }}
+    >
+      <SafeAreaView style={{ flex: 1 }}>
+        <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
         <View style={styles.headerCard}>
           <Pressable style={styles.editIcon} onPress={() => router.push('/(tabs)/me/profile')}>
             <MaterialCommunityIcons name="pencil" size={18} color={PALETTE.textDim} />
@@ -167,13 +173,14 @@ export default function MeScreen() {
         </View>
 
         <View style={{ height: 32 }} />
-      </ScrollView>
+        </ScrollView>
 
-      <Pressable style={styles.fab} onPress={() => onMenu('اول شحنة')}>
-        <Ionicons name="cash-outline" size={16} color={PALETTE.primaryDark}/>
-        <Text style={styles.fabTxt}>اول شحنة</Text>
-      </Pressable>
-    </SafeAreaView>
+        <Pressable style={styles.fab} onPress={() => onMenu('اول شحنة')}>
+          <Ionicons name="cash-outline" size={16} color={PALETTE.primaryDark}/>
+          <Text style={styles.fabTxt}>اول شحنة</Text>
+        </Pressable>
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 
