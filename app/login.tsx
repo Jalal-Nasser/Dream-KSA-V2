@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, Text, Pressable, StyleSheet, Platform, Modal, ImageBackground, Image, TextInput, KeyboardAvoidingView, Alert } from 'react-native';
+import { View, Text, Pressable, StyleSheet, Platform, Modal, ImageBackground, Image, TextInput, KeyboardAvoidingView, Alert, Animated, Easing } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -25,11 +25,115 @@ export default function Login() {
   const [confirmPassword, setConfirmPassword] = React.useState('');
   const [loading, setLoading] = React.useState(false);
 
+  // Animation values
+  const fadeAnim = React.useRef(new Animated.Value(0)).current;
+  const slideAnim = React.useRef(new Animated.Value(50)).current;
+  const scaleAnim = React.useRef(new Animated.Value(0.9)).current;
+  const rotateAnim = React.useRef(new Animated.Value(0)).current;
+  const pulseAnim = React.useRef(new Animated.Value(1)).current;
+  const floatAnim = React.useRef(new Animated.Value(0)).current;
+
   React.useEffect(() => { 
     logRedirects?.('[oauth]');
     const sub = supabase.auth.onAuthStateChange((_e,s)=>{ if(s?.user) router.replace('/(tabs)/rooms');}); 
     return ()=>sub.data.subscription.unsubscribe(); 
   }, []);
+
+  // Start animations on component mount
+  React.useEffect(() => {
+    // Entrance animations
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 800,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 600,
+        easing: Easing.out(Easing.back(1.2)),
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // Continuous rotation animation for logo
+    const rotateAnimation = Animated.loop(
+      Animated.timing(rotateAnim, {
+        toValue: 1,
+        duration: 20000,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      })
+    );
+    rotateAnimation.start();
+
+    // Pulse animation for login box
+    const pulseAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.02,
+          duration: 2000,
+          easing: Easing.inOut(Easing.sine),
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 2000,
+          easing: Easing.inOut(Easing.sine),
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    pulseAnimation.start();
+
+    // Floating animation for background gradient
+    const floatAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(floatAnim, {
+          toValue: 1,
+          duration: 3000,
+          easing: Easing.inOut(Easing.sine),
+          useNativeDriver: true,
+        }),
+        Animated.timing(floatAnim, {
+          toValue: 0,
+          duration: 3000,
+          easing: Easing.inOut(Easing.sine),
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    floatAnimation.start();
+
+    return () => {
+      rotateAnimation.stop();
+      pulseAnimation.stop();
+      floatAnimation.stop();
+    };
+  }, []);
+
+  // Button press animation
+  const handleButtonPress = (callback: () => void) => {
+    Animated.sequence([
+      Animated.timing(scaleAnim, {
+        toValue: 0.95,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
+    callback();
+  };
 
   const signInOAuth = async (provider: 'google' | 'facebook' | 'apple') => {
     if (provider === 'apple' && Platform.OS !== 'ios') return;
@@ -147,12 +251,28 @@ export default function Login() {
         imageStyle={{ opacity: 0.96, transform: [{ translateY: -20 }] }}
         resizeMode="cover"
       >
-        <LinearGradient
-          colors={['rgba(251, 231, 239, 0.3)', 'rgba(242, 202, 214, 0.4)', 'rgba(248, 215, 218, 0.3)', 'rgba(251, 231, 239, 0.3)']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={StyleSheet.absoluteFill}
-        />
+        <Animated.View
+          style={[
+            StyleSheet.absoluteFill,
+            {
+              transform: [
+                {
+                  translateY: floatAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, -10],
+                  }),
+                },
+              ],
+            },
+          ]}
+        >
+          <LinearGradient
+            colors={['rgba(251, 231, 239, 0.3)', 'rgba(242, 202, 214, 0.4)', 'rgba(248, 215, 218, 0.3)', 'rgba(251, 231, 239, 0.3)']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={StyleSheet.absoluteFill}
+          />
+        </Animated.View>
         <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.15)' }]} />
       </ImageBackground>
 
@@ -163,18 +283,63 @@ export default function Login() {
       </View>
 
       {/* center brand with logo and slug */}
-      <View style={styles.brandSection}>
+      <Animated.View 
+        style={[
+          styles.brandSection,
+          {
+            opacity: fadeAnim,
+            transform: [
+              { translateY: slideAnim },
+              { scale: scaleAnim },
+              { 
+                rotate: rotateAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: ['0deg', '360deg'],
+                })
+              }
+            ]
+          }
+        ]}
+      >
         <ImageBackground
           source={require('../assets/images/logo.png')}
           style={styles.logo}
           resizeMode="contain"
         />
-        <Text style={styles.slug}>الدردشة الصوتية</Text>
-      </View>
+        <Animated.Text 
+          style={[
+            styles.slug,
+            {
+              opacity: fadeAnim,
+              transform: [{ translateY: slideAnim }]
+            }
+          ]}
+        >
+          الدردشة الصوتية
+        </Animated.Text>
+      </Animated.View>
 
       {/* Transparent/White Login Box */}
-      <View style={styles.loginContainer}>
-        <View style={styles.loginBox}>
+      <Animated.View 
+        style={[
+          styles.loginContainer,
+          {
+            opacity: fadeAnim,
+            transform: [
+              { translateY: slideAnim },
+              { scale: pulseAnim }
+            ]
+          }
+        ]}
+      >
+        <Animated.View 
+          style={[
+            styles.loginBox,
+            {
+              transform: [{ scale: pulseAnim }]
+            }
+          ]}
+        >
           {/* Toggle between Sign In / Sign Up */}
           <View style={styles.toggleRow}>
             <Pressable
@@ -251,38 +416,57 @@ export default function Login() {
 
           {/* OAuth Icons Row */}
           <View style={styles.oauthRow}>
-            <Pressable style={styles.oauthBtn} onPress={() => signInOAuth('google')}>
+            <Pressable 
+              style={styles.oauthBtn} 
+              onPress={() => handleButtonPress(() => signInOAuth('google'))}
+            >
               <Image
                 source={require('../assets/images/google.png')}
                 style={styles.oauthIcon}
                 resizeMode="contain"
               />
             </Pressable>
-            <Pressable style={styles.oauthBtn} onPress={() => signInOAuth('facebook')}>
+            <Pressable 
+              style={styles.oauthBtn} 
+              onPress={() => handleButtonPress(() => signInOAuth('facebook'))}
+            >
               <Image
                 source={require('../assets/images/facebook.png')}
                 style={styles.oauthIcon}
                 resizeMode="contain"
               />
             </Pressable>
-            <Pressable style={styles.oauthBtn} onPress={() => setShowTips(true)}>
+            <Pressable 
+              style={styles.oauthBtn} 
+              onPress={() => handleButtonPress(() => setShowTips(true))}
+            >
               <MaterialCommunityIcons name="cellphone" size={24} color={PALETTE.primaryDark} />
             </Pressable>
             {Platform.OS === 'ios' && (
-              <Pressable style={styles.oauthBtn} onPress={() => signInOAuth('apple')}>
+              <Pressable 
+                style={styles.oauthBtn} 
+                onPress={() => handleButtonPress(() => signInOAuth('apple'))}
+              >
                 <Ionicons name="logo-apple" size={24} color="#000" />
               </Pressable>
             )}
           </View>
-        </View>
+        </Animated.View>
 
         {/* Legal Text */}
-        <Pressable onPress={() => router.push('/legal/terms')} style={{ marginTop: 16 }}>
-          <Text style={styles.legal}>
-            By continuing you agree to DreamKSA's <Text style={styles.link}>Terms of Service</Text> and <Text style={styles.link}>Privacy</Text>
-          </Text>
-        </Pressable>
-      </View>
+        <Animated.View
+          style={{
+            opacity: fadeAnim,
+            transform: [{ translateY: slideAnim }]
+          }}
+        >
+          <Pressable onPress={() => router.push('/legal/terms')} style={{ marginTop: 16 }}>
+            <Text style={styles.legal}>
+              By continuing you agree to DreamKSA's <Text style={styles.link}>Terms of Service</Text> and <Text style={styles.link}>Privacy</Text>
+            </Text>
+          </Pressable>
+        </Animated.View>
+      </Animated.View>
 
       {/* Tips → Confirm → Phone */}
       <Modal visible={showTips} transparent animationType="fade" onRequestClose={()=>setShowTips(false)}>
