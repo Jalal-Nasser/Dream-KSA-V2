@@ -1,4 +1,23 @@
-import { supabase } from './supabase';
+import { supabase } from './supabaseClient';
+
+// Reusable record type for flexible update payloads (typed, not implicit any)
+export type AnyPayload = Record<string, unknown>;
+
+// ===== Rooms helpers (create/join/customize) =====
+export type RoomInsert = {
+  title: string;
+  topic?: string | null;
+  is_locked?: boolean | null;
+  language?: string | null;
+  max_participants?: number | null;
+  banner_url?: string | null;
+  description?: string | null;
+};
+
+export type RoomUpdate = Partial<RoomInsert> & {
+  category?: string | null;
+  region?: string | null;
+};
 
 export type MicRequestRow = {
   id: string;
@@ -46,7 +65,7 @@ async function fetchMicRequests(roomId: string) {
     .eq('room_id', roomId)
     .order('created_at', { ascending: true });
   if (error) throw error;
-  return (data || []) as MicRequestRow[];
+  return (data || []) as unknown as MicRequestRow[];
 }
 
 export async function raiseHand(roomId: string) {
@@ -146,5 +165,60 @@ export const createRoom = async (name: string) => {
   if (error) throw error;
   return data;
 };
+
+export async function createRoomTyped(payload: RoomInsert) {
+  // host_id is set via trigger (auth.uid()) from our migration; client only sends room fields
+  const { data, error } = await supabase
+    .from('rooms')
+    .insert(payload)
+    .select('id')
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function updateRoom(roomId: string, payload: RoomUpdate) {
+  const { data, error } = await supabase
+    .from('rooms')
+    .update(payload)
+    .eq('id', roomId)
+    .select('id')
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function joinRoomTyped(roomId: string) {
+  // RLS allows inserting your own membership row
+  const { data, error } = await supabase
+    .from('room_participants')
+    .insert({ room_id: roomId }) // user_id = auth.uid() enforced by policy
+    .select('room_id, user_id')
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function leaveRoom(roomId: string) {
+  const { data, error } = await supabase
+    .from('room_participants')
+    .delete()
+    .eq('room_id', roomId)
+    .select('room_id')
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+// Example: safe generic upsert helper with typed payload
+export async function upsertProfile(payload: AnyPayload) {
+  const { data, error } = await supabase
+    .from('profiles')
+    .upsert(payload, { onConflict: 'id' })
+    .select('id')
+    .single();
+  if (error) throw error;
+  return data;
+}
 
 
