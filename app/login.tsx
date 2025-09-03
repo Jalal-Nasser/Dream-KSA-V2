@@ -143,7 +143,7 @@ export default function Login() {
       <ImageBackground
         source={BG_URI}
         style={StyleSheet.absoluteFill}
-        imageStyle={{ opacity: 0.96 }}
+        imageStyle={{ opacity: 0.96, transform: [{ translateY: -20 }] }}
         resizeMode="cover"
       >
         <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.25)' }]} />
@@ -308,7 +308,7 @@ const styles = StyleSheet.create({
   // New login container styles
   loginContainer: { position: 'absolute', left: 16, right: 16, bottom: 24, alignItems: 'center' },
   loginBox: {
-    backgroundColor: 'rgba(255, 255, 255, 0.60)',
+    backgroundColor: 'rgba(255, 255, 255, 0.50)',
     borderRadius: 20,
     padding: 20,
     width: '100%',
