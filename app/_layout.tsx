@@ -1,3 +1,5 @@
+// Polyfills MUST load before any Supabase or network code runs.
+import '@/app/bootstrap/polyfills';
 import { Slot } from 'expo-router';
 import { LogBox } from 'react-native';
 import * as React from 'react';

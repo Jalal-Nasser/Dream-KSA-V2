@@ -99,24 +99,32 @@ export default function ProfileScreen() {
     // Upload to Supabase Storage as BLOB (Expo-friendly) to a STABLE key per user
     try {
       const path = `u/${user?.id}/avatar`; // stable key → no DB column needed
+      if (__DEV__) {
+        console.log('[avatar] picked asset', {
+          uri: asset.uri,
+          type: asset.mimeType,
+          fileName: asset.fileName,
+          width: asset.width,
+          height: asset.height,
+        });
+      }
+      // In Expo 51+, fetch(fileUri).blob() is supported and reliable with polyfills loaded.
       const resp = await fetch(asset.uri);
       const blob = await resp.blob();
-      
+      const contentType = asset.mimeType ?? 'image/jpeg';
       const { error: upErr } = await supabase
         .storage
         .from('avatars')
-        .upload(path, blob, { upsert: true, contentType: asset.mimeType ?? 'image/jpeg' });
-        
+        .upload(path, blob, { upsert: true, contentType });
       if (upErr) {
         console.warn('[avatar] upload error', upErr);
         Alert.alert('فشل الرفع', 'تعذر رفع الصورة. حاول مرة أخرى.');
         return;
       }
-      
       setAvatarPath(path);
       avatarDirtyRef.current = true;
     } catch (e) {
-      console.warn('[avatar] upload exception', e);
+      console.warn('[avatar] blob/upload exception', e);
       Alert.alert('فشل الرفع', 'حدث خطأ أثناء رفع الصورة.');
     }
   };
