@@ -281,7 +281,7 @@ export default function Login() {
   };
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: '#000' }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <ImageBackground
         source={BG_URI}
         style={StyleSheet.absoluteFill}
