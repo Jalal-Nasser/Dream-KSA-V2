@@ -36,9 +36,13 @@ export default function Login() {
   const flower1Anim = React.useRef(new Animated.Value(0)).current;
   const flower2Anim = React.useRef(new Animated.Value(0)).current;
   const flower3Anim = React.useRef(new Animated.Value(0)).current;
+  const flower4Anim = React.useRef(new Animated.Value(0)).current;
+  const flower5Anim = React.useRef(new Animated.Value(0)).current;
   const balloon1Anim = React.useRef(new Animated.Value(0)).current;
   const balloon2Anim = React.useRef(new Animated.Value(0)).current;
   const balloon3Anim = React.useRef(new Animated.Value(0)).current;
+  const balloon4Anim = React.useRef(new Animated.Value(0)).current;
+  const balloon5Anim = React.useRef(new Animated.Value(0)).current;
 
   React.useEffect(() => { 
     logRedirects?.('[oauth]');
@@ -132,16 +136,24 @@ export default function Login() {
     const flower1Animation = createFloatingAnimation(flower1Anim, 4000, 0);
     const flower2Animation = createFloatingAnimation(flower2Anim, 5000, 1000);
     const flower3Animation = createFloatingAnimation(flower3Anim, 6000, 2000);
+    const flower4Animation = createFloatingAnimation(flower4Anim, 4500, 500);
+    const flower5Animation = createFloatingAnimation(flower5Anim, 5500, 1500);
     const balloon1Animation = createFloatingAnimation(balloon1Anim, 8000, 500);
     const balloon2Animation = createFloatingAnimation(balloon2Anim, 7000, 1500);
     const balloon3Animation = createFloatingAnimation(balloon3Anim, 9000, 2500);
+    const balloon4Animation = createFloatingAnimation(balloon4Anim, 7500, 1000);
+    const balloon5Animation = createFloatingAnimation(balloon5Anim, 8500, 2000);
 
     flower1Animation.start();
     flower2Animation.start();
     flower3Animation.start();
+    flower4Animation.start();
+    flower5Animation.start();
     balloon1Animation.start();
     balloon2Animation.start();
     balloon3Animation.start();
+    balloon4Animation.start();
+    balloon5Animation.start();
 
     return () => {
       logoBounceAnimation.stop();
@@ -149,9 +161,13 @@ export default function Login() {
       flower1Animation.stop();
       flower2Animation.stop();
       flower3Animation.stop();
+      flower4Animation.stop();
+      flower5Animation.stop();
       balloon1Animation.stop();
       balloon2Animation.stop();
       balloon3Animation.stop();
+      balloon4Animation.stop();
+      balloon5Animation.stop();
     };
   }, []);
 
@@ -458,6 +474,124 @@ export default function Login() {
                 translateX: balloon3Anim.interpolate({
                   inputRange: [0, 1],
                   outputRange: [0, 8],
+                }),
+              },
+            ],
+          },
+        ]}
+      >
+        <Text style={styles.balloonEmoji}>🎈</Text>
+      </Animated.View>
+
+      {/* Additional Flowers */}
+      <Animated.View
+        style={[
+          styles.floatingElement,
+          styles.flower4,
+          {
+            opacity: flower4Anim.interpolate({
+              inputRange: [0, 0.5, 1],
+              outputRange: [0.3, 0.8, 0.3],
+            }),
+            transform: [
+              {
+                translateY: flower4Anim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, -35],
+                }),
+              },
+              {
+                rotate: flower4Anim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: ['0deg', '-12deg'],
+                }),
+              },
+            ],
+          },
+        ]}
+      >
+        <Text style={styles.flowerEmoji}>🌻</Text>
+      </Animated.View>
+
+      <Animated.View
+        style={[
+          styles.floatingElement,
+          styles.flower5,
+          {
+            opacity: flower5Anim.interpolate({
+              inputRange: [0, 0.5, 1],
+              outputRange: [0.4, 0.9, 0.4],
+            }),
+            transform: [
+              {
+                translateY: flower5Anim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, -28],
+                }),
+              },
+              {
+                rotate: flower5Anim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: ['0deg', '6deg'],
+                }),
+              },
+            ],
+          },
+        ]}
+      >
+        <Text style={styles.flowerEmoji}>🌷</Text>
+      </Animated.View>
+
+      {/* Additional Balloons */}
+      <Animated.View
+        style={[
+          styles.floatingElement,
+          styles.balloon4,
+          {
+            opacity: balloon4Anim.interpolate({
+              inputRange: [0, 0.5, 1],
+              outputRange: [0.3, 0.8, 0.3],
+            }),
+            transform: [
+              {
+                translateY: balloon4Anim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, -42],
+                }),
+              },
+              {
+                translateX: balloon4Anim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, -12],
+                }),
+              },
+            ],
+          },
+        ]}
+      >
+        <Text style={styles.balloonEmoji}>🎈</Text>
+      </Animated.View>
+
+      <Animated.View
+        style={[
+          styles.floatingElement,
+          styles.balloon5,
+          {
+            opacity: balloon5Anim.interpolate({
+              inputRange: [0, 0.5, 1],
+              outputRange: [0.2, 0.7, 0.2],
+            }),
+            transform: [
+              {
+                translateY: balloon5Anim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, -38],
+                }),
+              },
+              {
+                translateX: balloon5Anim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, 6],
                 }),
               },
             ],
@@ -777,9 +911,13 @@ const styles = StyleSheet.create({
   flower1: { top: '20%', left: '10%' },
   flower2: { top: '60%', right: '15%' },
   flower3: { top: '40%', left: '5%' },
+  flower4: { top: '25%', right: '8%' },
+  flower5: { top: '75%', left: '15%' },
   balloon1: { top: '15%', right: '20%' },
   balloon2: { top: '70%', left: '20%' },
   balloon3: { top: '35%', right: '5%' },
+  balloon4: { top: '50%', left: '8%' },
+  balloon5: { top: '80%', right: '12%' },
   flowerEmoji: { fontSize: 24, textShadowColor: 'rgba(0,0,0,0.3)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 2 },
   balloonEmoji: { fontSize: 28, textShadowColor: 'rgba(0,0,0,0.3)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 2 },
 });
