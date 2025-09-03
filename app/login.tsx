@@ -57,7 +57,7 @@ export default function Login() {
       Animated.timing(scaleAnim, {
         toValue: 1,
         duration: 600,
-        easing: Easing.out(Easing.back(1.2)),
+        easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }),
     ]).start();
@@ -79,13 +79,13 @@ export default function Login() {
         Animated.timing(pulseAnim, {
           toValue: 1.02,
           duration: 2000,
-          easing: Easing.inOut(Easing.sine),
+          easing: Easing.inOut(Easing.ease),
           useNativeDriver: true,
         }),
         Animated.timing(pulseAnim, {
           toValue: 1,
           duration: 2000,
-          easing: Easing.inOut(Easing.sine),
+          easing: Easing.inOut(Easing.ease),
           useNativeDriver: true,
         }),
       ])
@@ -98,13 +98,13 @@ export default function Login() {
         Animated.timing(floatAnim, {
           toValue: 1,
           duration: 3000,
-          easing: Easing.inOut(Easing.sine),
+          easing: Easing.inOut(Easing.ease),
           useNativeDriver: true,
         }),
         Animated.timing(floatAnim, {
           toValue: 0,
           duration: 3000,
-          easing: Easing.inOut(Easing.sine),
+          easing: Easing.inOut(Easing.ease),
           useNativeDriver: true,
         }),
       ])
