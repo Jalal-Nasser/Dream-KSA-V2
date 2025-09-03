@@ -24,6 +24,8 @@ export default function ProfileScreen() {
   const [avatarPath, setAvatarPath] = useState<string | null>(null);
   // Track if avatar has changed in this session (prevents wiping on save)
   const avatarDirtyRef = useRef(false);
+  // Which column does the DB actually have? ('avatar_path' | 'avatar_url' | 'avatar' | null)
+  const avatarColRef = useRef<'avatar_path' | 'avatar_url' | 'avatar' | null>(null);
   // Snapshot of the loaded profile to compute diffs (avoid overwriting with nulls)
   const initialRef = useRef<{
     display_name?: string | null;
@@ -32,7 +34,6 @@ export default function ProfileScreen() {
     country?: string | null;
     title?: string | null;
     signature?: string | null;
-    avatar_path?: string | null;
   }>({});
   const [saving, setSaving] = useState(false);
 
@@ -45,7 +46,8 @@ export default function ProfileScreen() {
       if (!currentUser) return;
       const { data, error } = await supabase
         .from('profiles')
-        .select('display_name, gender, birthday, country, title, signature, avatar_path')
+        // Select multiple possible avatar columns; we’ll detect which exists
+        .select('display_name, gender, birthday, country, title, signature, avatar_path, avatar_url, avatar')
         .eq('id', currentUser.id)
         .single();
       if (!mounted) return;
@@ -57,7 +59,14 @@ export default function ProfileScreen() {
         setCountry(data.country ?? '');
         setTitle(data.title ?? '');
         setSignature(data.signature ?? '');
-        setAvatarPath(data.avatar_path ?? null);
+        // Determine real avatar column & value
+        const col: any =
+          'avatar_path' in data ? 'avatar_path' :
+          ('avatar_url' in data ? 'avatar_url' :
+          ('avatar' in data ? 'avatar' : null));
+        avatarColRef.current = col;
+        const avatarVal = col ? (data as any)[col] ?? null : null;
+        setAvatarPath(avatarVal);
          // Fresh load → not dirty
          avatarDirtyRef.current = false;
          // Save initial snapshot for diffing
@@ -68,7 +77,6 @@ export default function ProfileScreen() {
            country: data.country ?? '',
            title: data.title ?? '',
            signature: data.signature ?? '',
-           avatar_path: data.avatar_path ?? null,
          };
       }
     })();
@@ -164,9 +172,9 @@ export default function ProfileScreen() {
         payload[k as string] = normalizedNext === '' ? null : normalizedNext;
       }
     });
-    // Avatar path only if changed this session
-    if (avatarDirtyRef.current && avatarPath) {
-      payload.avatar_path = avatarPath;
+    // Avatar only if changed this session AND the column exists
+    if (avatarDirtyRef.current && avatarPath && avatarColRef.current) {
+      (payload as any)[avatarColRef.current] = avatarPath;
     }
 
     if (Object.keys(payload).length === 0) {
@@ -180,7 +188,7 @@ export default function ProfileScreen() {
       .from('profiles')
       .update(payload)
       .eq('id', user.id)
-      .select('display_name, gender, birthday, country, title, signature, avatar_path')
+      .select('display_name, gender, birthday, country, title, signature, avatar_path, avatar_url, avatar')
       .single();
 
     if (error) {
@@ -197,7 +205,13 @@ export default function ProfileScreen() {
     setCountry(data.country ?? '');
     setTitle(data.title ?? '');
     setSignature(data.signature ?? '');
-    setAvatarPath(data.avatar_path ?? null);
+    // Refresh avatar with whichever column exists
+    const col: any =
+      'avatar_path' in data ? 'avatar_path' :
+      ('avatar_url' in data ? 'avatar_url' :
+      ('avatar' in data ? 'avatar' : null));
+    avatarColRef.current = col;
+    setAvatarPath(col ? (data as any)[col] ?? null : null);
     initialRef.current = {
       display_name: data.display_name ?? '',
       gender: (data.gender as any) ?? '',
@@ -205,7 +219,6 @@ export default function ProfileScreen() {
       country: data.country ?? '',
       title: data.title ?? '',
       signature: data.signature ?? '',
-      avatar_path: data.avatar_path ?? null,
     };
     avatarDirtyRef.current = false;
     setSaving(false);
