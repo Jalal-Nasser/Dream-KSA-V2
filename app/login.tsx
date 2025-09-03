@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, Text, Pressable, StyleSheet, Platform, Modal, ImageBackground, Image } from 'react-native';
+import { View, Text, Pressable, StyleSheet, Platform, Modal, ImageBackground, Image, TextInput, KeyboardAvoidingView, Alert } from 'react-native';
 import { router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
@@ -18,6 +18,11 @@ const BG_URI = require('../assets/images/login-bg.jpg');
 export default function Login() {
   const supabase = getSupabase();
   const [showTips, setShowTips] = React.useState(false);
+  const [isSignUp, setIsSignUp] = React.useState(false);
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [confirmPassword, setConfirmPassword] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
 
   React.useEffect(() => { 
     logRedirects?.('[oauth]');
@@ -75,15 +80,73 @@ export default function Login() {
     }
   };
 
+  const signInWithEmail = async () => {
+    if (!email.trim() || !password.trim()) {
+      Alert.alert('خطأ', 'يرجى إدخال البريد الإلكتروني وكلمة المرور');
+      return;
+    }
+
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password: password.trim(),
+    });
+    setLoading(false);
+
+    if (error) {
+      Alert.alert('فشل تسجيل الدخول', error.message);
+    } else {
+      router.replace('/(tabs)/rooms');
+    }
+  };
+
+  const signUpWithEmail = async () => {
+    if (!email.trim() || !password.trim() || !confirmPassword.trim()) {
+      Alert.alert('خطأ', 'يرجى ملء جميع الحقول');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert('خطأ', 'كلمات المرور غير متطابقة');
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert('خطأ', 'كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+      return;
+    }
+
+    setLoading(true);
+    const { error } = await supabase.auth.signUp({
+      email: email.trim(),
+      password: password.trim(),
+    });
+    setLoading(false);
+
+    if (error) {
+      Alert.alert('فشل إنشاء الحساب', error.message);
+    } else {
+      Alert.alert('تم إنشاء الحساب', 'تم إرسال رابط التفعيل إلى بريدك الإلكتروني');
+    }
+  };
+
+  const handleAuth = () => {
+    if (isSignUp) {
+      signUpWithEmail();
+    } else {
+      signInWithEmail();
+    }
+  };
+
   return (
-    <View style={{ flex:1 }}>
-                    <ImageBackground
-                source={BG_URI}
-                style={StyleSheet.absoluteFill}
-                imageStyle={{ opacity:0.96 }}
-                resizeMode="cover"
-              >
-        <View style={[StyleSheet.absoluteFill, { backgroundColor:'rgba(0,0,0,0.25)'}]} />
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <ImageBackground
+        source={BG_URI}
+        style={StyleSheet.absoluteFill}
+        imageStyle={{ opacity: 0.96 }}
+        resizeMode="cover"
+      >
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.25)' }]} />
       </ImageBackground>
 
       <View style={styles.topRow}>
@@ -102,36 +165,112 @@ export default function Login() {
         <Text style={styles.slug}>الدردشة الصوتية</Text>
       </View>
 
-      <View style={styles.bottomWrap}>
-        {Platform.OS === 'ios' && (
-          <Pressable style={[styles.bigBtn, styles.apple]} onPress={() => signInOAuth('apple')}>
-            <Ionicons name="logo-apple" size={20} color="#fff" />
-            <Text style={styles.bigTxt}>Apple ID</Text>
-          </Pressable>
-        )}
-        <Pressable style={[styles.bigBtn, styles.google]} onPress={() => signInOAuth('google')}>
-          <Image
-            source={require('../assets/images/google.png')}
-            style={styles.googleIcon}
-            resizeMode="contain"
-          />
-          <Text style={[styles.bigTxt, { color:'#111827' }]}>Google</Text>
-        </Pressable>
+      {/* Transparent/White Login Box */}
+      <View style={styles.loginContainer}>
+        <View style={styles.loginBox}>
+          {/* Toggle between Sign In / Sign Up */}
+          <View style={styles.toggleRow}>
+            <Pressable
+              style={[styles.toggleBtn, !isSignUp && styles.toggleActive]}
+              onPress={() => setIsSignUp(false)}
+            >
+              <Text style={[styles.toggleText, !isSignUp && styles.toggleTextActive]}>
+                تسجيل الدخول
+              </Text>
+            </Pressable>
+            <Pressable
+              style={[styles.toggleBtn, isSignUp && styles.toggleActive]}
+              onPress={() => setIsSignUp(true)}
+            >
+              <Text style={[styles.toggleText, isSignUp && styles.toggleTextActive]}>
+                إنشاء حساب
+              </Text>
+            </Pressable>
+          </View>
 
-        <View style={styles.iconRow}>
-                            <Pressable style={styles.roundBtn} onPress={() => signInOAuth('facebook')}>
-                    <Image
-                      source={require('../assets/images/facebook.png')}
-                      style={styles.facebookIcon}
-                      resizeMode="contain"
-                    />
-                  </Pressable>
-                  <Pressable style={styles.roundBtn} onPress={() => setShowTips(true)}>
-                    <MaterialCommunityIcons name="cellphone" size={28} color={PALETTE.primaryDark} />
-                  </Pressable>
+          {/* Email Input */}
+          <TextInput
+            style={styles.input}
+            placeholder="البريد الإلكتروني"
+            placeholderTextColor="#9CA3AF"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            textAlign="right"
+          />
+
+          {/* Password Input */}
+          <TextInput
+            style={styles.input}
+            placeholder="كلمة المرور"
+            placeholderTextColor="#9CA3AF"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            textAlign="right"
+          />
+
+          {/* Confirm Password (only for sign up) */}
+          {isSignUp && (
+            <TextInput
+              style={styles.input}
+              placeholder="تأكيد كلمة المرور"
+              placeholderTextColor="#9CA3AF"
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              secureTextEntry
+              textAlign="right"
+            />
+          )}
+
+          {/* Auth Button */}
+          <Pressable
+            style={[styles.authBtn, loading && { opacity: 0.6 }]}
+            onPress={handleAuth}
+            disabled={loading}
+          >
+            <Text style={styles.authBtnText}>
+              {loading ? '...' : isSignUp ? 'إنشاء حساب' : 'تسجيل الدخول'}
+            </Text>
+          </Pressable>
+
+          {/* Divider */}
+          <View style={styles.divider}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>أو</Text>
+            <View style={styles.dividerLine} />
+          </View>
+
+          {/* OAuth Icons Row */}
+          <View style={styles.oauthRow}>
+            <Pressable style={styles.oauthBtn} onPress={() => signInOAuth('google')}>
+              <Image
+                source={require('../assets/images/google.png')}
+                style={styles.oauthIcon}
+                resizeMode="contain"
+              />
+            </Pressable>
+            <Pressable style={styles.oauthBtn} onPress={() => signInOAuth('facebook')}>
+              <Image
+                source={require('../assets/images/facebook.png')}
+                style={styles.oauthIcon}
+                resizeMode="contain"
+              />
+            </Pressable>
+            <Pressable style={styles.oauthBtn} onPress={() => setShowTips(true)}>
+              <MaterialCommunityIcons name="cellphone" size={24} color={PALETTE.primaryDark} />
+            </Pressable>
+            {Platform.OS === 'ios' && (
+              <Pressable style={styles.oauthBtn} onPress={() => signInOAuth('apple')}>
+                <Ionicons name="logo-apple" size={24} color="#000" />
+              </Pressable>
+            )}
+          </View>
         </View>
 
-        <Pressable onPress={() => router.push('/legal/terms')}>
+        {/* Legal Text */}
+        <Pressable onPress={() => router.push('/legal/terms')} style={{ marginTop: 16 }}>
           <Text style={styles.legal}>
             By continuing you agree to DreamKSA's <Text style={styles.link}>Terms of Service</Text> and <Text style={styles.link}>Privacy</Text>
           </Text>
@@ -155,31 +294,96 @@ export default function Login() {
           </View>
         </View>
       </Modal>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  topRow:{ position:'absolute', right:16, top:14 },
-  help:{ color:'#fff', fontWeight:'800', opacity:0.95, textShadowColor:'rgba(0,0,0,0.45)', textShadowRadius:10 },
-  brandSection:{ position:'absolute', left:16, right:16, top:80, alignItems:'center' },
-  logo:{ width:120, height:120, marginBottom:16 },
-  slug:{ color:'#fff', fontSize:18, fontWeight:'800', textAlign:'center', opacity:0.95, textShadowColor:'rgba(0,0,0,0.6)', textShadowRadius:8 },
-  bottomWrap:{ position:'absolute', left:16, right:16, bottom:24, alignItems:'center' },
-  bigBtn:{ height:54, borderRadius:16, width:'100%', marginBottom:12, alignItems:'center', justifyContent:'center', flexDirection:'row', gap:10, shadowColor:'#000', shadowOpacity:0.3, shadowRadius:10, elevation:4 },
-  bigTxt:{ color:'#fff', fontWeight:'900', fontSize:16 },
-  apple:{ backgroundColor:'#000' },
-  google:{ backgroundColor:'#fff' },
-  iconRow:{ flexDirection:'row', justifyContent:'center', gap:24, marginTop:6, marginBottom:10 },
-  roundBtn:{ width:48, height:48, borderRadius:24, backgroundColor:'#fff', alignItems:'center', justifyContent:'center', shadowColor:'#000', shadowOpacity:0.2, shadowRadius:8, elevation:3 },
-  facebookIcon:{ width:32, height:32 },
-  googleIcon:{ width:20, height:20 },
-  legal:{ color:'#fff', opacity:0.95, textAlign:'center', fontWeight:'700', textShadowColor:'rgba(0,0,0,0.45)', textShadowRadius:10 },
-  link:{ textDecorationLine:'underline' },
-  backdrop:{ flex:1, backgroundColor:'rgba(0,0,0,0.5)', alignItems:'center', justifyContent:'center' },
-  sheet:{ width:'86%', backgroundColor:'#fff', borderRadius:16, padding:16, alignItems:'center', gap:10 },
-  sheetTitle:{ fontWeight:'900', fontSize:18 },
-  sheetBody:{ textAlign:'center', opacity:0.7, marginBottom:6, fontWeight:'700' },
-  sheetBtn:{ backgroundColor: PALETTE.primary, borderRadius:12, paddingVertical:10, paddingHorizontal:18, alignItems:'center', justifyContent:'center' },
-  sheetBtnTxt:{ color:'#fff', fontWeight:'900' },
+  topRow: { position: 'absolute', right: 16, top: 14 },
+  help: { color: '#fff', fontWeight: '800', opacity: 0.95, textShadowColor: 'rgba(0,0,0,0.45)', textShadowRadius: 10 },
+  brandSection: { position: 'absolute', left: 16, right: 16, top: 60, alignItems: 'center' },
+  logo: { width: 100, height: 100, marginBottom: 12 },
+  slug: { color: '#fff', fontSize: 16, fontWeight: '800', textAlign: 'center', opacity: 0.95, textShadowColor: 'rgba(0,0,0,0.6)', textShadowRadius: 8 },
+  
+  // New login container styles
+  loginContainer: { position: 'absolute', left: 16, right: 16, bottom: 24, alignItems: 'center' },
+  loginBox: {
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 20,
+    padding: 20,
+    width: '100%',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 8,
+  },
+  
+  // Toggle buttons
+  toggleRow: { flexDirection: 'row-reverse', marginBottom: 16, backgroundColor: '#F3F4F6', borderRadius: 12, padding: 2 },
+  toggleBtn: { flex: 1, paddingVertical: 10, borderRadius: 10, alignItems: 'center' },
+  toggleActive: { backgroundColor: '#fff', shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 },
+  toggleText: { fontWeight: '700', color: '#6B7280' },
+  toggleTextActive: { color: PALETTE.primary, fontWeight: '800' },
+  
+  // Input styles
+  input: {
+    backgroundColor: '#F9FAFB',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    marginBottom: 12,
+    fontSize: 16,
+    fontWeight: '600',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  
+  // Auth button
+  authBtn: {
+    backgroundColor: PALETTE.primary,
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginBottom: 16,
+    shadowColor: PALETTE.primary,
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  authBtnText: { color: '#fff', fontWeight: '800', fontSize: 16 },
+  
+  // Divider
+  divider: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: '#E5E7EB' },
+  dividerText: { marginHorizontal: 16, color: '#6B7280', fontWeight: '700' },
+  
+  // OAuth icons
+  oauthRow: { flexDirection: 'row', justifyContent: 'center', gap: 16 },
+  oauthBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  oauthIcon: { width: 24, height: 24 },
+  
+  // Legal text
+  legal: { color: '#fff', opacity: 0.95, textAlign: 'center', fontWeight: '700', textShadowColor: 'rgba(0,0,0,0.45)', textShadowRadius: 10, fontSize: 12 },
+  link: { textDecorationLine: 'underline' },
+  
+  // Modal styles
+  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', alignItems: 'center', justifyContent: 'center' },
+  sheet: { width: '86%', backgroundColor: '#fff', borderRadius: 16, padding: 16, alignItems: 'center', gap: 10 },
+  sheetTitle: { fontWeight: '900', fontSize: 18 },
+  sheetBody: { textAlign: 'center', opacity: 0.7, marginBottom: 6, fontWeight: '700' },
+  sheetBtn: { backgroundColor: PALETTE.primary, borderRadius: 12, paddingVertical: 10, paddingHorizontal: 18, alignItems: 'center', justifyContent: 'center' },
+  sheetBtnTxt: { color: '#fff', fontWeight: '900' },
 });
