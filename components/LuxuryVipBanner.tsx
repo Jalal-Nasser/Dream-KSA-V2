@@ -20,7 +20,7 @@ export default function LuxuryVipBanner({
     <Pressable onPress={onPress} style={styles.container} activeOpacity={0.9}>
       {/* Main banner with gradient background */}
       <LinearGradient
-        colors={['#1a1a1a', '#2d1b1b', '#1a1a1a']}
+        colors={['#2c2c2c', '#1a1a1a', '#2c2c2c']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.banner}
@@ -66,9 +66,9 @@ export default function LuxuryVipBanner({
                {/* Details button */}
                <View style={styles.buttonContainer}>
                  <LinearGradient
-                   colors={['#D4AF37', '#B8860B', '#D4AF37']}
+                   colors={['#F4E4BC', '#D4AF37', '#B8860B']}
                    start={{ x: 0, y: 0 }}
-                   end={{ x: 1, y: 1 }}
+                   end={{ x: 1, y: 0 }}
                    style={styles.button}
                  >
                    <Text style={styles.buttonText}>{buttonText}</Text>
@@ -186,9 +186,9 @@ const styles = StyleSheet.create({
     marginRight: I18nManager.isRTL ? 12 : 0,
   },
   button: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: '#B8860B',
     shadowColor: '#D4AF37',
@@ -196,9 +196,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 4,
     elevation: 4,
+    minWidth: 80,
   },
   buttonText: {
-    color: '#1a1a1a',
+    color: '#8B4513',
     fontSize: 14,
     fontWeight: '800',
     textAlign: 'center',
