@@ -43,6 +43,9 @@ export default function Login() {
   const balloon3Anim = React.useRef(new Animated.Value(0)).current;
   const balloon4Anim = React.useRef(new Animated.Value(0)).current;
   const balloon5Anim = React.useRef(new Animated.Value(0)).current;
+  const bird1Anim = React.useRef(new Animated.Value(0)).current;
+  const bird2Anim = React.useRef(new Animated.Value(0)).current;
+  const bird3Anim = React.useRef(new Animated.Value(0)).current;
 
   React.useEffect(() => { 
     logRedirects?.('[oauth]');
@@ -143,6 +146,30 @@ export default function Login() {
     const balloon3Animation = createFloatingAnimation(balloon3Anim, 9000, 2500);
     const balloon4Animation = createFloatingAnimation(balloon4Anim, 7500, 1000);
     const balloon5Animation = createFloatingAnimation(balloon5Anim, 8500, 2000);
+    
+    // Bird flying animations (horizontal movement)
+    const createBirdAnimation = (animValue: Animated.Value, duration: number, delay: number = 0) => {
+      return Animated.loop(
+        Animated.sequence([
+          Animated.delay(delay),
+          Animated.timing(animValue, {
+            toValue: 1,
+            duration: duration,
+            easing: Easing.linear,
+            useNativeDriver: true,
+          }),
+          Animated.timing(animValue, {
+            toValue: 0,
+            duration: 0,
+            useNativeDriver: true,
+          }),
+        ])
+      );
+    };
+
+    const bird1Animation = createBirdAnimation(bird1Anim, 12000, 0);
+    const bird2Animation = createBirdAnimation(bird2Anim, 15000, 4000);
+    const bird3Animation = createBirdAnimation(bird3Anim, 10000, 8000);
 
     flower1Animation.start();
     flower2Animation.start();
@@ -154,6 +181,9 @@ export default function Login() {
     balloon3Animation.start();
     balloon4Animation.start();
     balloon5Animation.start();
+    bird1Animation.start();
+    bird2Animation.start();
+    bird3Animation.start();
 
     return () => {
       logoBounceAnimation.stop();
@@ -168,6 +198,9 @@ export default function Login() {
       balloon3Animation.stop();
       balloon4Animation.stop();
       balloon5Animation.stop();
+      bird1Animation.stop();
+      bird2Animation.stop();
+      bird3Animation.stop();
     };
   }, []);
 
@@ -601,6 +634,94 @@ export default function Login() {
         <Text style={styles.balloonEmoji}>🎈</Text>
       </Animated.View>
 
+      {/* Flying Birds */}
+      <Animated.View
+        style={[
+          styles.floatingElement,
+          styles.bird1,
+          {
+            opacity: bird1Anim.interpolate({
+              inputRange: [0, 0.1, 0.9, 1],
+              outputRange: [0, 0.8, 0.8, 0],
+            }),
+            transform: [
+              {
+                translateX: bird1Anim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [-50, 400],
+                }),
+              },
+              {
+                translateY: bird1Anim.interpolate({
+                  inputRange: [0, 0.5, 1],
+                  outputRange: [0, -10, 0],
+                }),
+              },
+            ],
+          },
+        ]}
+      >
+        <Text style={styles.birdEmoji}>🐦</Text>
+      </Animated.View>
+
+      <Animated.View
+        style={[
+          styles.floatingElement,
+          styles.bird2,
+          {
+            opacity: bird2Anim.interpolate({
+              inputRange: [0, 0.1, 0.9, 1],
+              outputRange: [0, 0.7, 0.7, 0],
+            }),
+            transform: [
+              {
+                translateX: bird2Anim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [-60, 380],
+                }),
+              },
+              {
+                translateY: bird2Anim.interpolate({
+                  inputRange: [0, 0.3, 0.7, 1],
+                  outputRange: [0, -15, -5, 0],
+                }),
+              },
+            ],
+          },
+        ]}
+      >
+        <Text style={styles.birdEmoji}>🕊️</Text>
+      </Animated.View>
+
+      <Animated.View
+        style={[
+          styles.floatingElement,
+          styles.bird3,
+          {
+            opacity: bird3Anim.interpolate({
+              inputRange: [0, 0.1, 0.9, 1],
+              outputRange: [0, 0.6, 0.6, 0],
+            }),
+            transform: [
+              {
+                translateX: bird3Anim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [-40, 420],
+                }),
+              },
+              {
+                translateY: bird3Anim.interpolate({
+                  inputRange: [0, 0.4, 0.6, 1],
+                  outputRange: [0, -8, -12, 0],
+                }),
+              },
+            ],
+          },
+        ]}
+      >
+        <Text style={styles.birdEmoji}>🐤</Text>
+      </Animated.View>
+
       <View style={styles.topRow}>
         <Pressable onPress={() => router.push('/login/help')}>
           <Text style={styles.help}>Can't login?</Text>
@@ -918,6 +1039,10 @@ const styles = StyleSheet.create({
   balloon3: { top: '35%', right: '5%' },
   balloon4: { top: '50%', left: '8%' },
   balloon5: { top: '80%', right: '12%' },
+  bird1: { top: '30%', left: 0 },
+  bird2: { top: '45%', left: 0 },
+  bird3: { top: '65%', left: 0 },
   flowerEmoji: { fontSize: 24, textShadowColor: 'rgba(0,0,0,0.3)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 2 },
   balloonEmoji: { fontSize: 28, textShadowColor: 'rgba(0,0,0,0.3)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 2 },
+  birdEmoji: { fontSize: 20, textShadowColor: 'rgba(0,0,0,0.4)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 3 },
 });
