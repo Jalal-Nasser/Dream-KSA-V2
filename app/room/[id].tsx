@@ -1,9 +1,10 @@
 import * as React from 'react';
-import { View, Text, StyleSheet, FlatList, TextInput, Pressable } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TextInput, Pressable, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getSupabase } from '../../lib/supabase';
 import { PALETTE } from '../../lib/theme';
+import { useRoom } from '../../hooks/useRoom';
 
 type Msg = { id: string; from: string; text: string; at: number };
 const uid = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`;
@@ -13,10 +14,14 @@ export default function RoomChat() {
   const router = useRouter();
   const supabase = getSupabase();
   const chanRef = React.useRef<ReturnType<typeof supabase.channel> | null>(null);
+  
+  // Use room hook for participant management
+  const { room, participants, joinRoom, leaveRoom } = useRoom(id!);
 
   const [messages, setMessages] = React.useState<Msg[]>([]);
   const [text, setText] = React.useState('');
   const [peers, setPeers] = React.useState<string[]>([]);
+  const [hasJoined, setHasJoined] = React.useState(false);
 
   React.useEffect(() => {
     let mounted = true;
@@ -40,6 +45,16 @@ export default function RoomChat() {
 
     (async () => {
       const user = (await supabase.auth.getUser()).data.user;
+      if (user && !hasJoined) {
+        // Auto-join room when entering
+        const { error } = await joinRoom(user.id);
+        if (!error) {
+          setHasJoined(true);
+        } else {
+          console.warn('Failed to join room:', error);
+        }
+      }
+      
       await channel.subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
           await channel.track({ username: user?.email || user?.id?.slice(0, 6) || 'ضيف' });
@@ -49,10 +64,18 @@ export default function RoomChat() {
 
     return () => {
       mounted = false;
+      // Leave room when component unmounts
+      (async () => {
+        const user = (await supabase.auth.getUser()).data.user;
+        if (user && hasJoined) {
+          await leaveRoom(user.id);
+        }
+      })();
+      
       if (chanRef.current) supabase.removeChannel(chanRef.current);
       chanRef.current = null;
     };
-  }, [id]);
+  }, [id, hasJoined]);
 
   const send = async () => {
     const user = (await supabase.auth.getUser()).data.user;
@@ -67,8 +90,10 @@ export default function RoomChat() {
     <View style={{ flex:1, backgroundColor: PALETTE.soft1 }}>
       <View style={styles.header}>
         <Pressable onPress={() => router.back()}><Ionicons name="chevron-forward" size={22} color={PALETTE.primaryDark} /></Pressable>
-        <Text style={styles.title}>غرفة دردشة</Text>
-        <View style={{ minWidth:22, alignItems:'flex-end' }}><Text style={styles.badge}>{peers.length}</Text></View>
+        <Text style={styles.title}>{room?.name || 'غرفة دردشة'}</Text>
+        <View style={{ minWidth:22, alignItems:'flex-end' }}>
+          <Text style={styles.badge}>{participants.length}</Text>
+        </View>
       </View>
 
       <FlatList

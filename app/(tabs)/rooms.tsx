@@ -18,10 +18,18 @@ export default function Rooms() {
   const fetchRooms = React.useCallback(async () => {
     const { data, error } = await supabase
       .from('rooms')
-      .select('*')
+      .select('id, name, created_at')
       .order('created_at', { ascending: false })
       .limit(50);
-    if (!error && data) setRooms(data as Room[]);
+    if (!error && data) {
+      // Map to expected format
+      const mappedRooms = data.map(room => ({
+        id: room.id,
+        title: room.name,
+        created_at: room.created_at
+      }));
+      setRooms(mappedRooms as Room[]);
+    }
   }, []);
 
   React.useEffect(() => {
@@ -40,19 +48,25 @@ export default function Rooms() {
   const createRoom = async () => {
     if (!title.trim()) return;
     setLoading(true);
-    const user = (await supabase.auth.getUser()).data.user;
     const { data, error } = await supabase
       .from('rooms')
-      .insert({ title: title.trim(), created_by: user?.id })
+      .insert({ 
+        name: title.trim(),
+        description: `غرفة ${title.trim()}` 
+        // owner_id will be auto-set by our trigger
+      })
       .select()
       .single();
     setLoading(false);
-    if (error) return console.log('[createRoom]', error);
+    if (error) {
+      console.log('[createRoom] error:', error);
+      return;
+    }
     setTitle('');
     router.push(`/room/${data!.id}`);
   };
 
-              return (
+  return (
     <View style={{ flex: 1, backgroundColor: PALETTE.soft1, padding: 12 }}>
       <View style={styles.creator}>
         <TextInput
