@@ -29,7 +29,7 @@ export default function Login() {
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
   const slideAnim = React.useRef(new Animated.Value(50)).current;
   const scaleAnim = React.useRef(new Animated.Value(0.9)).current;
-  const rotateAnim = React.useRef(new Animated.Value(0)).current;
+  const logoBounceAnim = React.useRef(new Animated.Value(1)).current;
   const pulseAnim = React.useRef(new Animated.Value(1)).current;
 
   React.useEffect(() => { 
@@ -61,16 +61,25 @@ export default function Login() {
       }),
     ]).start();
 
-    // Continuous rotation animation for logo
-    const rotateAnimation = Animated.loop(
-      Animated.timing(rotateAnim, {
-        toValue: 1,
-        duration: 20000,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      })
+    // Elegant bounce animation for logo
+    const logoBounceAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(logoBounceAnim, {
+          toValue: 1.1,
+          duration: 1500,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(logoBounceAnim, {
+          toValue: 1,
+          duration: 1500,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.delay(2000), // Pause between bounces
+      ])
     );
-    rotateAnimation.start();
+    logoBounceAnimation.start();
 
     // Pulse animation for login box
     const pulseAnimation = Animated.loop(
@@ -92,7 +101,7 @@ export default function Login() {
     pulseAnimation.start();
 
     return () => {
-      rotateAnimation.stop();
+      logoBounceAnimation.stop();
       pulseAnimation.stop();
     };
   }, []);
@@ -248,22 +257,22 @@ export default function Login() {
             opacity: fadeAnim,
             transform: [
               { translateY: slideAnim },
-              { scale: scaleAnim },
-              { 
-                rotate: rotateAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: ['0deg', '360deg'],
-                })
-              }
+              { scale: scaleAnim }
             ]
           }
         ]}
       >
-        <ImageBackground
-          source={require('../assets/images/logo.png')}
-          style={styles.logo}
-          resizeMode="contain"
-        />
+        <Animated.View
+          style={{
+            transform: [{ scale: logoBounceAnim }]
+          }}
+        >
+          <ImageBackground
+            source={require('../assets/images/logo.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+        </Animated.View>
         <Animated.Text 
           style={[
             styles.slug,
