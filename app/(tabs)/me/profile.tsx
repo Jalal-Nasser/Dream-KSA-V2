@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { I18nManager, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { getSupabase } from '@/lib/supabase';
-import { useSupabase } from '@/lib/supabaseProvider';
 import { resolveAvatarUrl } from '@/lib/storage';
 import { pickAvatar } from '@/lib/profileImageUtils';
 import { decode } from 'base64-arraybuffer';
