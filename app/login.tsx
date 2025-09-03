@@ -688,16 +688,16 @@ const styles = StyleSheet.create({
   slug: { color: '#fff', fontSize: 16, fontWeight: '800', textAlign: 'center', opacity: 0.95, textShadowColor: 'rgba(0,0,0,0.6)', textShadowRadius: 8 },
   
   // New login container styles
-  loginContainer: { position: 'absolute', left: 16, right: 16, bottom: 24, alignItems: 'center' },
+  loginContainer: { position: 'absolute', left: 14, right: 14, bottom: 20, alignItems: 'center' },
   loginBox: {
     backgroundColor: 'rgba(255, 255, 255, 0.50)',
-    borderRadius: 20,
-    padding: 20,
+    borderRadius: 17,
+    padding: 17,
     width: '100%',
     shadowColor: '#000',
     shadowOpacity: 0.1,
-    shadowRadius: 20,
-    elevation: 8,
+    shadowRadius: 17,
+    elevation: 7,
   },
   
   // Toggle buttons
