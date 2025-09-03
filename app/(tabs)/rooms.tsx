@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { View, Text, StyleSheet, FlatList, Pressable, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { PALETTE } from '../../lib/theme';
@@ -86,7 +87,12 @@ export default function Rooms() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: PALETTE.soft1, padding: 12 }}>
+    <LinearGradient
+      colors={['#FBE7EF', '#F2CAD6', '#F8D7DA', '#FBE7EF']}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.container}
+    >
       <View style={styles.creator}>
         <TextInput
           style={styles.input}
@@ -114,14 +120,52 @@ export default function Rooms() {
           </Pressable>
         )}
       />
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
+  container: { flex: 1, padding: 12 },
   creator: { flexDirection: 'row-reverse', gap: 8, marginBottom: 12 },
-  input: { flex: 1, backgroundColor: '#fff', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, fontWeight: '700' },
-  makeBtn: { backgroundColor: PALETTE.primary, borderRadius: 12, paddingHorizontal: 14, justifyContent: 'center', alignItems: 'center', flexDirection: 'row-reverse', gap: 6 },
-  roomRow: { backgroundColor: '#fff', borderRadius: 16, padding: 12, flexDirection: 'row', alignItems: 'center', gap: 10 },
+  input: { 
+    flex: 1, 
+    backgroundColor: '#fff', 
+    borderRadius: 12, 
+    paddingHorizontal: 12, 
+    paddingVertical: 10, 
+    fontWeight: '700',
+    shadowColor: '#800F2F',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  makeBtn: { 
+    backgroundColor: PALETTE.primary, 
+    borderRadius: 12, 
+    paddingHorizontal: 14, 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    flexDirection: 'row-reverse', 
+    gap: 6,
+    shadowColor: '#800F2F',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  roomRow: { 
+    backgroundColor: '#fff', 
+    borderRadius: 16, 
+    padding: 12, 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    gap: 10,
+    shadowColor: '#800F2F',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
   roomTitle: { flex: 1, textAlign: 'right', fontWeight: '800' },
 });
