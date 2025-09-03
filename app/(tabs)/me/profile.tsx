@@ -21,11 +21,9 @@ export default function ProfileScreen() {
   const [country, setCountry] = useState('');
   const [title, setTitle] = useState('');
   const [signature, setSignature] = useState('');
-  const [avatarPath, setAvatarPath] = useState<string | null>(null);
-  // Track if avatar has changed in this session (prevents wiping on save)
+  const [avatarPath, setAvatarPath] = useState<string | null>(null); // storage path only
+  // Track if avatar has changed in this session (for re-render only; not sent to DB)
   const avatarDirtyRef = useRef(false);
-  // Which column does the DB actually have? ('avatar_path' | 'avatar_url' | 'avatar' | null)
-  const avatarColRef = useRef<'avatar_path' | 'avatar_url' | 'avatar' | null>(null);
   // Snapshot of the loaded profile to compute diffs (avoid overwriting with nulls)
   const initialRef = useRef<{
     display_name?: string | null;
@@ -46,8 +44,7 @@ export default function ProfileScreen() {
       if (!currentUser) return;
       const { data, error } = await supabase
         .from('profiles')
-        // Select multiple possible avatar columns; we’ll detect which exists
-        .select('display_name, gender, birthday, country, title, signature, avatar_path, avatar_url, avatar')
+        .select('display_name, gender, birthday, country, title, signature')
         .eq('id', currentUser.id)
         .single();
       if (!mounted) return;
@@ -59,14 +56,8 @@ export default function ProfileScreen() {
         setCountry(data.country ?? '');
         setTitle(data.title ?? '');
         setSignature(data.signature ?? '');
-        // Determine real avatar column & value
-        const col: any =
-          'avatar_path' in data ? 'avatar_path' :
-          ('avatar_url' in data ? 'avatar_url' :
-          ('avatar' in data ? 'avatar' : null));
-        avatarColRef.current = col;
-        const avatarVal = col ? (data as any)[col] ?? null : null;
-        setAvatarPath(avatarVal);
+        // We no longer rely on a DB column for avatar; use stable storage path:
+        setAvatarPath(`u/${currentUser.id}/avatar`);
          // Fresh load → not dirty
          avatarDirtyRef.current = false;
          // Save initial snapshot for diffing
@@ -78,6 +69,9 @@ export default function ProfileScreen() {
            title: data.title ?? '',
            signature: data.signature ?? '',
          };
+      } else if (!error && !data) {
+        // No row yet → initialize avatar path only
+        setAvatarPath(`u/${currentUser.id}/avatar`);
       }
     })();
     return () => {
@@ -102,27 +96,16 @@ export default function ProfileScreen() {
     if (result?.canceled) return;
     const asset = result.assets?.[0];
     if (!asset) return;
-    
-    // Upload to Supabase Storage using FormData (more reliable for Expo)
+    // Upload to Supabase Storage as BLOB (Expo-friendly) to a STABLE key per user
     try {
-      const ext = (asset.fileName?.split('.').pop() ?? 'jpg').toLowerCase();
-      const path = `u/${user?.id}/${Date.now()}.${ext}`;
-      
-      // Create FormData for upload
-      const formData = new FormData();
-      formData.append('file', {
-        uri: asset.uri,
-        type: asset.mimeType ?? 'image/jpeg',
-        name: `avatar.${ext}`,
-      } as any);
+      const path = `u/${user?.id}/avatar`; // stable key → no DB column needed
+      const resp = await fetch(asset.uri);
+      const blob = await resp.blob();
       
       const { error: upErr } = await supabase
         .storage
         .from('avatars')
-        .upload(path, formData, { 
-          upsert: true, 
-          contentType: asset.mimeType ?? 'image/jpeg' 
-        });
+        .upload(path, blob, { upsert: true, contentType: asset.mimeType ?? 'image/jpeg' });
         
       if (upErr) {
         console.warn('[avatar] upload error', upErr);
@@ -172,10 +155,7 @@ export default function ProfileScreen() {
         payload[k as string] = normalizedNext === '' ? null : normalizedNext;
       }
     });
-    // Avatar only if changed this session AND the column exists
-    if (avatarDirtyRef.current && avatarPath && avatarColRef.current) {
-      (payload as any)[avatarColRef.current] = avatarPath;
-    }
+    // ⛔️ Do NOT send any avatar column to DB (table doesn’t have one).
 
     if (Object.keys(payload).length === 0) {
       setSaving(false);
@@ -184,11 +164,11 @@ export default function ProfileScreen() {
     }
 
     if (__DEV__) console.log('[profile save] payload →', payload);
+    // Use UPSERT so a missing profile row is created.
     const { data, error } = await supabase
       .from('profiles')
-      .update(payload)
-      .eq('id', user.id)
-      .select('display_name, gender, birthday, country, title, signature, avatar_path, avatar_url, avatar')
+      .upsert({ id: user.id, ...payload }, { onConflict: 'id' })
+      .select('display_name, gender, birthday, country, title, signature')
       .single();
 
     if (error) {
@@ -205,13 +185,8 @@ export default function ProfileScreen() {
     setCountry(data.country ?? '');
     setTitle(data.title ?? '');
     setSignature(data.signature ?? '');
-    // Refresh avatar with whichever column exists
-    const col: any =
-      'avatar_path' in data ? 'avatar_path' :
-      ('avatar_url' in data ? 'avatar_url' :
-      ('avatar' in data ? 'avatar' : null));
-    avatarColRef.current = col;
-    setAvatarPath(col ? (data as any)[col] ?? null : null);
+    // Keep stable storage path
+    setAvatarPath(`u/${user.id}/avatar`);
     initialRef.current = {
       display_name: data.display_name ?? '',
       gender: (data.gender as any) ?? '',
