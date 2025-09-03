@@ -58,23 +58,12 @@ export default function MeScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: PALETTE.soft1 }}>
       <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
         <View style={styles.headerCard}>
-          <View style={styles.avatarWrap}>
-            {avatarUrl ? (
-              <Image source={{ uri: avatarUrl }} style={styles.avatar} />
-            ) : (
-              <View style={styles.avatarPh}><Text style={styles.avatarGlyph}>👤</Text></View>
-            )}
-          </View>
-          <Text style={styles.nameText}>{displayName || 'بدون اسم'}</Text>
-        </View>
-
-        <View style={styles.card}>
           <Pressable style={styles.editIcon} onPress={() => router.push('/(tabs)/me/profile')}>
             <MaterialCommunityIcons name="pencil" size={18} color={PALETTE.textDim} />
           </Pressable>
-
-          <View style={styles.headerTopRow}>
-            <View style={styles.nameBlock}>
+          
+          <View style={styles.headerContent}>
+            <View style={styles.userInfo}>
               <View style={styles.nameRow}>
                 <MaterialCommunityIcons 
                   name={
@@ -85,14 +74,32 @@ export default function MeScreen() {
                   size={16} 
                   color={PALETTE.primary} 
                 />
-                <Text style={styles.name}>{displayName}</Text>
+                <Text style={styles.displayName}>{displayName || 'بدون اسم'}</Text>
+                {profile?.country && (
+                  <View style={styles.countryFlag}>
+                    <Text style={styles.flagEmoji}>🇱🇧</Text>
+                  </View>
+                )}
               </View>
               <View style={styles.idRow}>
                 <MaterialCommunityIcons name="clipboard-text-outline" size={14} color={PALETTE.textDim} />
-                <Text style={styles.idTxt}>ID: 23733397</Text>
+                <Text style={styles.idText}>ID: 23733397</Text>
               </View>
             </View>
+            
+            <View style={styles.avatarContainer}>
+              {avatarUrl ? (
+                <Image source={{ uri: avatarUrl }} style={styles.headerAvatar} />
+              ) : (
+                <View style={styles.headerAvatarPh}>
+                  <Text style={styles.headerAvatarGlyph}>👤</Text>
+                </View>
+              )}
+            </View>
           </View>
+        </View>
+
+        <View style={styles.card}>
 
           <View style={styles.statsRow}>
             <View style={styles.statBox}>
@@ -196,34 +203,86 @@ const styles = StyleSheet.create({
     writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
   },
   headerCard: {
-    backgroundColor: '#FBE7EF',
-    borderColor: '#F2CAD6',
-    borderWidth: 1,
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    padding: 14,
+    padding: 16,
     marginBottom: 12,
+    marginHorizontal: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  avatarWrap: {
-    alignSelf: 'center',
-    width: 72,
-    height: 72,
+  editIcon: { 
+    position: 'absolute', 
+    top: 12, 
+    left: 12, 
+    padding: 6, 
     borderRadius: 999,
-    overflow: 'hidden',
+    zIndex: 10,
+  },
+  headerContent: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: 8,
+  },
+  userInfo: {
+    flex: 1,
+    alignItems: 'flex-end',
+    paddingRight: 12,
+  },
+  nameRow: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 6,
+  },
+  displayName: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1a1a1a',
+  },
+  countryFlag: {
+    marginLeft: 6,
+  },
+  flagEmoji: {
+    fontSize: 16,
+  },
+  idRow: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: 6,
+  },
+  idText: {
+    color: '#8E8E93',
+    fontSize: 14,
+  },
+  avatarContainer: {
+    alignItems: 'center',
+  },
+  headerAvatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     borderWidth: 2,
     borderColor: '#800F2F',
-    backgroundColor: '#fff',
   },
-  avatar: { width: '100%', height: '100%' },
-  avatarPh: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff' },
-  avatarGlyph: { fontSize: 34, color: '#800F2F' },
-  nameText: { marginTop: 8, textAlign: 'center', fontWeight: '700', color: '#800F2F' },
-  editIcon: { position: 'absolute', top: 10, left: 10, padding: 6, borderRadius: 999 },
-  headerTopRow: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between' },
-  nameBlock: { flex: 1, alignItems: 'flex-end', paddingRight: 8, gap: 6 },
-  nameRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 6 },
-  name: { fontSize: 18, fontWeight: '700' },
-  idRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 6 },
-  idTxt: { color: '#8E8E93' },
+  headerAvatarPh: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#FBE7EF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#800F2F',
+  },
+  headerAvatarGlyph: {
+    fontSize: 28,
+    color: '#800F2F',
+  },
   statsRow: { flexDirection: 'row-reverse', justifyContent: 'space-between', backgroundColor: PALETTE.soft1, borderRadius: 12, paddingVertical: 10, paddingHorizontal: 16 },
   statBox: { alignItems: 'center', minWidth: 80 },
   statNum: { fontSize: 18, fontWeight: '700' },
