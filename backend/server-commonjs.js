@@ -1,0 +1,781 @@
+const express = require('express');
+const fetch = require('node-fetch');
+const { createClient } = require('@supabase/supabase-js');
+require('dotenv').config();
+const cors = require('cors');
+const jwt = require('jsonwebtoken');
+const { v4: uuidv4 } = require('uuid');
+const { parsePhoneNumberFromString } = require('libphonenumber-js');
+const path = require('path');
+
+const app = express();
+app.use(express.json());
+app.use(cors());
+
+// --- serve static legal pages (Privacy / Terms) ---
+// Serve ./public as static (for privacy/terms)
+app.use(express.static(path.join(__dirname, 'public'), {
+  maxAge: '1h',
+}));
+
+// Friendly shortcuts
+app.get('/privacy', (_req, res) =>
+  res.sendFile(path.join(__dirname, 'public', 'privacy.html'))
+);
+app.get('/terms', (_req, res) =>
+  res.sendFile(path.join(__dirname, 'public', 'terms.html'))
+);
+
+// Health check endpoint for Railway
+app.get('/', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    message: 'Dreams KSA Voice Chat Backend',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'healthy', uptime: process.uptime() });
+});
+
+// Simple route map to help diagnose deploy routing issues
+app.get('/routes', (_req, res) => {
+  res.json({
+    routes: [
+      'GET /',
+      'GET /health',
+      'GET /routes',
+      'GET /privacy',
+      'GET /terms',
+      'POST /auth/phone/start',
+      'POST /auth/phone/verify',
+      'GET /auth/phone/diag',
+      'POST /create-room',
+      'POST /get-token',
+      'GET /room/:roomId',
+      'GET /rooms',
+      'POST /leave-room',
+      'POST /admin/mute',
+      'POST /admin/kick',
+      'GET /api/rooms',
+      'POST /api/create-room',
+      'POST /api/get-token',
+      'GET /api/room/:roomId',
+      'POST /api/leave-room',
+      'POST /api/admin/mute',
+      'POST /api/admin/kick'
+    ]
+  });
+});
+
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+
+const HMS_MANAGEMENT_TOKEN = process.env.HMS_MANAGEMENT_TOKEN;
+const HMS_APP_ID = process.env.HMS_APP_ID;
+const HMS_APP_SECRET = process.env.HMS_APP_SECRET;
+
+// Twilio configuration
+const {
+  TWILIO_ACCOUNT_SID,
+  TWILIO_AUTH_TOKEN,
+  TWILIO_VERIFY_SERVICE_SID,
+  TWILIO_IS_TRIAL,
+  TWILIO_TRIAL_ALLOWED_NUMBERS,
+} = process.env;
+
+// Phone number utilities
+function toE164(raw, defaultCountry = 'SA') {
+  if (!raw) return null;
+  // Accept inputs like "05xxxxxxxx" and convert using default country
+  const normalized = String(raw).trim();
+  let p = parsePhoneNumberFromString(normalized, defaultCountry);
+  if (!p && normalized.startsWith('00')) {
+    // handle 00-prefixed intl numbers
+    p = parsePhoneNumberFromString(`+${normalized.slice(2)}`);
+  }
+  if (!p || !p.isValid()) return null;
+  return p.number; // E.164
+}
+
+// Initialize Twilio client
+let twilioClient = null;
+if (TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN) {
+  try {
+    // Lazy require to avoid bundlers
+    const Twilio = require('twilio');
+    twilioClient = Twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
+  } catch (e) {
+    console.warn('[twilio] failed to init client', e?.message || e);
+  }
+}
+
+// Twilio error mapping
+function mapTwilioError(err) {
+  const code = Number(err?.code) || 0;
+  const msg = err?.message || 'Unknown error';
+  // Common cases with friendly messages
+  const known = {
+    21211: 'رقم الهاتف غير صالح. تأكد من كتابة الرقم بصيغة دولية.',
+    21408: 'إرسال الرسائل غير مفعل لهذه الدولة في حساب Twilio. فعّل "Geo Permissions".',
+    21608: 'تحتاج رقم Twilio مُفعل للإرسال. (Trial لا يكفي).',
+    20003: 'مشكلة في مفاتيح Twilio (Account SID / Auth Token).',
+    60202: 'محاولات كثيرة. الرجاء المحاولة لاحقاً.',
+  };
+  return { code, message: known[code] || msg };
+}
+
+// Trial account restrictions
+function trialBlockIfNeeded(to) {
+  if (String(TWILIO_IS_TRIAL).toLowerCase() !== 'true') return null;
+  const allow = (TWILIO_TRIAL_ALLOWED_NUMBERS || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (!allow.includes(to)) {
+    return {
+      code: 'trial_only_verified',
+      message:
+        'حساب Twilio في وضع "Trial" — يمكن الإرسال فقط للأرقام الموثّقة في Twilio. أضف الرقم إلى قائمة TWILIO_TRIAL_ALLOWED_NUMBERS أو رقِّ الحساب.',
+    };
+  }
+  return null;
+}
+
+// Phone authentication endpoints
+// Start verification (SMS)
+app.post('/auth/phone/start', async (req, res) => {
+  try {
+    if (!twilioClient || !TWILIO_VERIFY_SERVICE_SID) {
+      return res.status(500).json({ ok: false, error: 'twilio_not_configured' });
+    }
+    const raw = String(req.body?.phone || '');
+    const country = (req.body?.country || 'SA').toUpperCase();
+    const to = toE164(raw, country);
+    if (!to) {
+      return res.status(400).json({ ok: false, error: 'invalid_phone_format' });
+    }
+    const trialErr = trialBlockIfNeeded(to);
+    if (trialErr) return res.status(403).json({ ok: false, error: trialErr.code, message: trialErr.message });
+
+    const verification = await twilioClient.verify.v2
+      .services(TWILIO_VERIFY_SERVICE_SID)
+      .verifications.create({ to, channel: 'sms', locale: 'ar' });
+
+    return res.json({ ok: true, sid: verification.sid });
+  } catch (err) {
+    const m = mapTwilioError(err);
+    console.warn('[phone/start] twilio error', m, err);
+    return res.status(400).json({ ok: false, error: 'twilio_error', code: m.code, message: m.message });
+  }
+});
+
+// Check code
+app.post('/auth/phone/verify', async (req, res) => {
+  try {
+    if (!twilioClient || !TWILIO_VERIFY_SERVICE_SID) {
+      return res.status(500).json({ ok: false, error: 'twilio_not_configured' });
+    }
+    const raw = String(req.body?.phone || '');
+    const code = String(req.body?.code || '');
+    const country = (req.body?.country || 'SA').toUpperCase();
+    const to = toE164(raw, country);
+    if (!to || !code) {
+      return res.status(400).json({ ok: false, error: 'invalid_params' });
+    }
+    const trialErr = trialBlockIfNeeded(to);
+    if (trialErr) return res.status(403).json({ ok: false, error: trialErr.code, message: trialErr.message });
+
+    const check = await twilioClient.verify.v2
+      .services(TWILIO_VERIFY_SERVICE_SID)
+      .verificationChecks.create({ to, code });
+
+    if (check.status === 'approved') {
+      return res.json({ ok: true });
+    }
+    return res.status(401).json({ ok: false, error: 'invalid_code' });
+  } catch (err) {
+    const m = mapTwilioError(err);
+    console.warn('[phone/verify] twilio error', m, err);
+    return res.status(400).json({ ok: false, error: 'twilio_error', code: m.code, message: m.message });
+  }
+});
+
+// Optional: simple diagnostics to confirm envs on Plesk
+app.get('/auth/phone/diag', (_req, res) => {
+  res.json({
+    ok: true,
+    verifyService: Boolean(TWILIO_VERIFY_SERVICE_SID),
+    isTrial: String(TWILIO_IS_TRIAL || 'false'),
+    trialAllowedCount: (TWILIO_TRIAL_ALLOWED_NUMBERS || '').split(',').filter(Boolean).length,
+  });
+});
+
+// Create a new room
+app.post('/create-room', async (req, res) => {
+  const {
+    name,
+    description = 'Voice chat room',
+    type = 'voice',
+    theme = '#4f46e5',
+    bannerImage = null,
+    backgroundImage = null,
+  } = req.body;
+
+  try {
+    if (!name || String(name).trim().length === 0) {
+      return res.status(400).json({ error: 'Missing required field: name' });
+    }
+
+    console.log('Create-room request received', {
+      name,
+      description,
+      theme,
+      bannerImage,
+      backgroundImage,
+    });
+
+    let createdRoomId = null;
+    let hmsRoomId = null;
+
+    const canUseHMS = Boolean(HMS_MANAGEMENT_TOKEN && HMS_APP_ID && HMS_APP_SECRET && process.env.HMS_ROOM_TEMPLATE_ID);
+
+    if (canUseHMS) {
+      try {
+        console.log('Creating room via 100ms…');
+        const roomResponse = await fetch('https://prod-in2.100ms.live/api/v2/rooms', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${HMS_MANAGEMENT_TOKEN}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: String(name).substring(0, 48), // HMS name limit safety
+            description,
+            template_id: process.env.HMS_ROOM_TEMPLATE_ID,
+            region: 'in',
+          }),
+        });
+
+        console.log('HMS response status:', roomResponse.status);
+
+        if (roomResponse.ok) {
+          const roomData = await roomResponse.json();
+          createdRoomId = roomData.id;
+          hmsRoomId = roomData.id;
+        } else {
+          const errorText = await roomResponse.text();
+          console.warn('HMS error response (continuing with fallback):', errorText);
+        }
+      } catch (hmsErr) {
+        console.warn('HMS request failed (continuing with fallback):', hmsErr?.message || hmsErr);
+      }
+    } else {
+      console.log('HMS is not configured; using local fallback room ID.');
+    }
+
+    // Fallback: generate a UUID if HMS is unavailable or failed
+    if (!createdRoomId) {
+      createdRoomId = uuidv4();
+    }
+
+    // Store in Supabase (best-effort)
+    try {
+      const { data: dbRoom, error: dbError } = await supabase
+        .from('rooms')
+        .upsert({
+          id: createdRoomId,
+          name: name,
+          description: description,
+          type: type,
+          theme: theme,
+          banner_image: bannerImage,
+          background_image: backgroundImage,
+          hms_room_id: hmsRoomId,
+          created_at: new Date().toISOString(),
+          is_active: true,
+        })
+        .select()
+        .single();
+
+      if (dbError && dbError.code !== '23505') {
+        console.warn('Database error (continuing anyway):', dbError);
+      } else {
+        console.log('Room stored in database:', dbRoom?.id || createdRoomId);
+      }
+    } catch (dbCatch) {
+      console.warn('Supabase insert failed (continuing anyway):', dbCatch?.message || dbCatch);
+    }
+
+    return res.json({
+      id: createdRoomId,
+      name,
+      description,
+      theme,
+      bannerImage,
+      backgroundImage,
+      hms_room_id: hmsRoomId,
+    });
+  } catch (error) {
+    console.error('Create room error:', error);
+    return res.status(500).json({ error: error.message || 'Unknown error' });
+  }
+});
+
+// Get authentication token for joining a room
+app.post('/get-token', async (req, res) => {
+  const { user_id, room_id, role = 'listener', user_name = 'Guest' } = req.body;
+
+  try {
+    console.log('Generating token for:', { user_id, room_id, role, user_name });
+
+    // Check if user is banned
+    const { data: banned, error: banError } = await supabase
+      .from('banned_users')
+      .select('*')
+      .eq('user_id', user_id)
+      .eq('room_id', room_id)
+      .single();
+
+    if (banError && banError.code !== 'PGRST116') {
+      console.error('Ban check error:', banError);
+    }
+
+    if (banned) {
+      return res.status(403).json({ error: 'You are banned from this room.' });
+    }
+
+    // Generate token using JWT (more reliable than API call)
+    const now = Math.floor(Date.now() / 1000);
+    const tokenPayload = {
+      access_key: HMS_APP_ID,
+      room_id: room_id,
+      user_id: user_id,
+      role: role,
+      type: 'app',
+      version: 2,
+      iat: now,
+      nbf: now,
+      exp: now + (24 * 60 * 60), // 24 hours expiry
+      jti: uuidv4() // unique token ID
+    };
+
+    console.log('Generating JWT token with payload:', tokenPayload);
+
+    try {
+      const authToken = jwt.sign(tokenPayload, HMS_APP_SECRET, { algorithm: 'HS256' });
+      console.log('JWT token generated successfully');
+
+      // Log user joining room
+      await supabase
+        .from('room_participants')
+        .upsert({
+          user_id: user_id,
+          room_id: room_id,
+          user_name: user_name,
+          role: role,
+          joined_at: new Date().toISOString(),
+          is_active: true
+        });
+
+      res.json({ 
+        token: authToken,
+        room_id: room_id,
+        user_id: user_id,
+        role: role
+      });
+
+    } catch (jwtError) {
+      console.error('JWT token generation error:', jwtError);
+      res.status(500).json({ error: 'Failed to generate authentication token' });
+    }
+
+  } catch (error) {
+    console.error('Token generation error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get room details
+app.get('/room/:roomId', async (req, res) => {
+  const { roomId } = req.params;
+
+  try {
+    // Get room from Supabase
+    const { data: room, error } = await supabase
+      .from('rooms')
+      .select('*')
+      .eq('id', roomId)
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    // Get active participants
+    const { data: participants } = await supabase
+      .from('room_participants')
+      .select('*')
+      .eq('room_id', roomId)
+      .eq('is_active', true);
+
+    res.json({
+      ...room,
+      participants: participants || []
+    });
+
+  } catch (error) {
+    console.error('Get room error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// List rooms (latest first)
+app.get('/rooms', async (_req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('rooms')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    if (error) throw error;
+
+    res.json({ rooms: data ?? [] });
+  } catch (err) {
+    console.error('List rooms error:', err);
+    res.status(500).json({ error: 'Failed to fetch rooms' });
+  }
+});
+
+// API route aliases for clients behind proxies where root paths might be intercepted
+app.get('/api/rooms', async (_req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('rooms')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    if (error) throw error;
+
+    res.json({ rooms: data ?? [] });
+  } catch (err) {
+    console.error('List rooms error:', err);
+    res.status(500).json({ error: 'Failed to fetch rooms' });
+  }
+});
+
+app.post('/api/create-room', async (req, res) => {
+  const {
+    name,
+    description = 'Voice chat room',
+    type = 'voice',
+    theme = '#4f46e5',
+    bannerImage = null,
+    backgroundImage = null,
+  } = req.body;
+
+  try {
+    if (!name || String(name).trim().length === 0) {
+      return res.status(400).json({ error: 'Missing required field: name' });
+    }
+
+    console.log('Create-room request received', {
+      name,
+      description,
+      theme,
+      bannerImage,
+      backgroundImage,
+    });
+
+    let createdRoomId = null;
+    let hmsRoomId = null;
+
+    const canUseHMS = Boolean(HMS_MANAGEMENT_TOKEN && HMS_APP_ID && HMS_APP_SECRET && process.env.HMS_ROOM_TEMPLATE_ID);
+
+    if (canUseHMS) {
+      try {
+        console.log('Creating room via 100ms…');
+        const roomResponse = await fetch('https://prod-in2.100ms.live/api/v2/rooms', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${HMS_MANAGEMENT_TOKEN}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: String(name).substring(0, 48), // HMS name limit safety
+            description,
+            template_id: process.env.HMS_ROOM_TEMPLATE_ID,
+            region: 'in',
+          }),
+        });
+
+        if (!roomResponse.ok) {
+          const errorText = await roomResponse.text();
+          console.error('100ms room creation failed:', errorText);
+          throw new Error(`100ms API error: ${roomResponse.status} ${errorText}`);
+        }
+
+        const roomData = await roomResponse.json();
+        hmsRoomId = roomData.id;
+        console.log('100ms room created:', hmsRoomId);
+      } catch (hmsError) {
+        console.error('100ms room creation error:', hmsError);
+        // Continue without HMS room - we'll create a database record anyway
+      }
+    }
+
+    // Create room in Supabase
+    const { data: room, error: roomError } = await supabase
+      .from('rooms')
+      .insert({
+        name: String(name).trim(),
+        description: String(description).trim(),
+        type,
+        theme,
+        banner_image: bannerImage,
+        background_image: backgroundImage,
+        hms_room_id: hmsRoomId,
+        is_live: false,
+        owner_id: req.body.owner_id || null,
+        country: req.body.country || 'SA'
+      })
+      .select()
+      .single();
+
+    if (roomError) {
+      console.error('Supabase room creation error:', roomError);
+      throw roomError;
+    }
+
+    createdRoomId = room.id;
+    console.log('Room created in database:', createdRoomId);
+
+    res.json({
+      success: true,
+      room: {
+        id: createdRoomId,
+        name: room.name,
+        description: room.description,
+        type: room.type,
+        theme: room.theme,
+        banner_image: room.banner_image,
+        background_image: room.background_image,
+        hms_room_id: hmsRoomId,
+        is_live: room.is_live,
+        owner_id: room.owner_id,
+        country: room.country,
+        created_at: room.created_at
+      }
+    });
+
+  } catch (error) {
+    console.error('Create room error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/get-token', async (req, res) => {
+  const { room_id, user_id, user_name, role = 'guest' } = req.body;
+
+  try {
+    if (!room_id || !user_id || !user_name) {
+      return res.status(400).json({ error: 'Missing required fields: room_id, user_id, user_name' });
+    }
+
+    if (!HMS_APP_SECRET) {
+      return res.status(500).json({ error: 'HMS app secret not configured' });
+    }
+
+    // Verify room exists
+    const { data: room, error: roomError } = await supabase
+      .from('rooms')
+      .select('id, hms_room_id')
+      .eq('id', room_id)
+      .single();
+
+    if (roomError || !room) {
+      return res.status(404).json({ error: 'Room not found' });
+    }
+
+    // Use HMS room ID if available, otherwise use our room ID
+    const hmsRoomId = room.hms_room_id || room_id;
+
+    const now = Math.floor(Date.now() / 1000);
+    const tokenPayload = {
+      room_id: hmsRoomId,
+      user_id,
+      role,
+      exp: now + (24 * 60 * 60), // 24 hours expiry
+      jti: uuidv4() // unique token ID
+    };
+
+    console.log('Generating JWT token with payload:', tokenPayload);
+
+    try {
+      const authToken = jwt.sign(tokenPayload, HMS_APP_SECRET, { algorithm: 'HS256' });
+      console.log('JWT token generated successfully');
+
+      // Log user joining room
+      await supabase
+        .from('room_participants')
+        .upsert({
+          user_id: user_id,
+          room_id: room_id,
+          user_name: user_name,
+          role: role,
+          joined_at: new Date().toISOString(),
+          is_active: true
+        });
+
+      res.json({ 
+        token: authToken,
+        room_id: room_id,
+        user_id: user_id,
+        role: role
+      });
+
+    } catch (jwtError) {
+      console.error('JWT token generation error:', jwtError);
+      res.status(500).json({ error: 'Failed to generate authentication token' });
+    }
+
+  } catch (error) {
+    console.error('Token generation error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/room/:roomId', async (req, res) => {
+  const { roomId } = req.params;
+
+  try {
+    // Get room from Supabase
+    const { data: room, error } = await supabase
+      .from('rooms')
+      .select('*')
+      .eq('id', roomId)
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    // Get active participants
+    const { data: participants } = await supabase
+      .from('room_participants')
+      .select('*')
+      .eq('room_id', roomId)
+      .eq('is_active', true);
+
+    res.json({
+      ...room,
+      participants: participants || []
+    });
+
+  } catch (error) {
+    console.error('Get room error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/leave-room', async (req, res) => {
+  const { user_id, room_id } = req.body;
+
+  try {
+    await supabase
+      .from('room_participants')
+      .update({ is_active: false, left_at: new Date().toISOString() })
+      .eq('user_id', user_id)
+      .eq('room_id', room_id);
+
+    res.json({ success: true });
+
+  } catch (error) {
+    console.error('Leave room error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/admin/mute', async (req, res) => {
+  const { admin_user_id, target_user_id, room_id } = req.body;
+
+  try {
+    // Verify admin permissions
+    const { data: adminParticipant } = await supabase
+      .from('room_participants')
+      .select('role')
+      .eq('user_id', admin_user_id)
+      .eq('room_id', room_id)
+      .eq('is_active', true)
+      .single();
+
+    if (!adminParticipant || adminParticipant.role !== 'moderator') {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
+    // Mute via 100ms API (this would need to be implemented based on your HMS setup)
+    // For now, just update the database
+    await supabase
+      .from('room_participants')
+      .update({ is_muted: true })
+      .eq('user_id', target_user_id)
+      .eq('room_id', room_id);
+
+    res.json({ success: true, message: 'Participant muted' });
+
+  } catch (error) {
+    console.error('Mute error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/admin/kick', async (req, res) => {
+  const { admin_user_id, target_user_id, room_id } = req.body;
+
+  try {
+    // Verify admin permissions
+    const { data: adminParticipant } = await supabase
+      .from('room_participants')
+      .select('role')
+      .eq('user_id', admin_user_id)
+      .eq('room_id', room_id)
+      .eq('is_active', true)
+      .single();
+
+    if (!adminParticipant || adminParticipant.role !== 'moderator') {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
+    // Remove participant
+    await supabase
+      .from('room_participants')
+      .update({ is_active: false, left_at: new Date().toISOString() })
+      .eq('user_id', target_user_id)
+      .eq('room_id', room_id);
+
+    res.json({ success: true, message: 'Participant kicked' });
+
+  } catch (error) {
+    console.error('Kick error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+const PORT = process.env.PORT || 3001;
+const HOST = process.env.HOST || '0.0.0.0';
+
+app.listen(PORT, HOST, () => {
+  console.log(`🚀 Dreams KSA Backend Server listening on ${HOST}:${PORT}`);
+  console.log(`📡 Health check: http://${HOST}:${PORT}/health`);
+});
+
+// Final JSON 404 to make it obvious the app handled the request
+// (and to help diagnose which paths are missing in production)
+app.use((req, res) => {
+  res.status(404).json({ error: 'Not found', path: req.path });
+});
