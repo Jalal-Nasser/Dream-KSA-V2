@@ -25,7 +25,10 @@
     "production": {
       "autoIncrement": true,
       "channel": "production",
-      "android": { "buildType": "app-bundle" }
+      "android": { 
+        "buildType": "app-bundle",
+        "gradleCommand": ":app:bundleRelease"
+      }
     }
   },
   "submit": {
