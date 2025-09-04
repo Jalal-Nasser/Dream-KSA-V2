@@ -310,7 +310,7 @@ const styles = StyleSheet.create({
   statNum: { fontSize: 18, fontWeight: '700' },
   statLbl: { color: '#7C8794', marginTop: 2 },
 
-  segmentRow: { flexDirection: 'row-reverse', gap: 10, marginTop: 4, alignSelf: 'center', maxWidth: '80%' },
+  segmentRow: { flexDirection: 'row-reverse', gap: 10, marginTop: 4, marginHorizontal: 12 },
   segment: { flex: 1, paddingVertical: 10, borderRadius: 10, alignItems: 'center', minWidth: 80 },
   segmentActive: { /* backgroundColor removed - using LinearGradient */ },
   segmentDim: { /* backgroundColor removed - using LinearGradient */ },
