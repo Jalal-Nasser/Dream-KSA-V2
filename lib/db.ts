@@ -17,7 +17,7 @@ export type RoomInsert = {
 export type RoomUpdate = Partial<RoomInsert> & {
   category?: string | null;
   region?: string | null;
-};
+};d
 
 export type MicRequestRow = {
   id: string;
