@@ -1,130 +1,59 @@
-# Android Beta Release Guide for DreamKSA
+# DreamKSA — Android Beta Release Guide
 
-## 🎯 Overview
-This guide will help you ship the Android Beta to Google Play Store using EAS Build and Submit.
+> Target: **Internal testing** (Google Play) using **EAS** with profile `beta`.
 
-## 📋 Prerequisites Checklist
+## Prerequisites
+1. **EAS Project** linked in `app.config.ts` (`extra.eas.projectId`).
+2. **Branding ready**: icon (512×512), feature graphic (1024×500), screenshots, Arabic store listing.
+3. **OAuth**: Android client created in Google Cloud:
+   - **Package**: `app.dreamksa`
+   - **SHA-1**: from `eas credentials -p android --display` (Upload key). After first upload, also add **App signing SHA-1** from Play Console → App integrity.
+4. **Privacy URLs** hosted on Plesk:
+   - Terms: `https://api.dreamsksa.online/terms`
+   - Privacy: `https://api.dreamsksa.online/privacy`
 
-### 1. Brand Assets (Required)
-- [ ] **App Icon**: `./assets/images/icon.png` (1024x1024px) - Cherry Blossom theme
-- [ ] **Feature Graphic**: `./assets/feature-graphic.png` (1024x500px) - For Play Store
-- [ ] **Splash Screen**: Aligned with Cherry Blossom theme
+## One-time Play API access
+1. In **Google Play Console** → **API access** → Link a Google Cloud project.
+2. Create a **Service Account** (Release Manager), download JSON → save as `play-service-account.json` (⚠️ ignored by git).
+   - A template is at `play-service-account.json.template`.
 
-### 2. Google Cloud Console Setup
-- [ ] **Create Android OAuth Client**:
-  - Package: `app.dreamksa`
-  - Get SHA-1 fingerprints:
-    - Upload key: `npx eas credentials -p android --display`
-    - App signing key: (after first upload from Play Console)
-  - Copy `androidClientId` to your environment
-
-### 3. EAS Project Setup
-- [ ] **Configure EAS**: `npx eas build:configure`
-- [ ] **Let EAS manage Android Keystore** (recommended)
-- [ ] **Set EAS_PROJECT_ID** in environment variables
-
-## 🚀 Release Process
-
-### Option A: Automated (Recommended)
-
-1. **Setup Service Account**:
-   ```bash
-   # Create service account in Google Cloud Console
-   # Download JSON key and save as play-service-account.json
-   cp play-service-account.json.template play-service-account.json
-   # Edit with your actual credentials
-   ```
-
-2. **Run Release Script**:
-   ```powershell
-   .\scripts\release-android-beta.ps1
-   ```
-
-### Option B: Manual Upload
-
-1. **Build AAB**:
-   ```bash
-   npx expo doctor
-   npx eas build -p android --profile beta
-   ```
-
-2. **Download & Upload**:
-   - Download `.aab` from EAS build page
-   - Upload to Google Play Console → Internal Testing
-
-## 📱 Google Play Console Setup
-
-### 1. Create App
-- **App Name**: DreamKSA (Arabic & English)
-- **Default Language**: ar-SA
-- **Package Name**: app.dreamksa
-
-### 2. App Content
-- **App Access**: Public
-- **Ads**: Select if showing ads
-- **Content Rating**: Complete questionnaire
-- **Target Audience**: Set appropriately
-- **Data Safety**: 
-  - Declare Supabase networking as "transmitted but not shared"
-  - Mark data as encrypted in transit
-  - No precise location if not used
-
-### 3. Store Listing
-- **App Name**: DreamKSA (Arabic & English)
-- **Short Description**: Voice chat app for Saudi Arabia
-- **Full Description**: Detailed description in Arabic and English
-- **Screenshots**: Minimum 2 phone screenshots
-- **Hi-res Icon**: 512×512px
-- **Feature Graphic**: 1024×500px
-
-### 4. Internal Testing
-- **Create Release**: Upload AAB file
-- **Add Testers**: Email addresses or Google Groups
-- **Roll Out**: Make available to testers
-
-## 🔧 Troubleshooting
-
-### Google Login Fails in Release
-- **Cause**: Missing SHA-1 on OAuth client
-- **Fix**: Add both "Upload" and "App signing" SHA-1 to Google OAuth client
-
-### Data Safety Rejection
-- **Cause**: Incorrect data safety declarations
-- **Fix**: Declare Supabase as "transmitted but not shared", mark as encrypted
-
-### Install Blocked
-- **Cause**: Testers not in Internal Testing program
-- **Fix**: Testers must join Internal Testing program via opt-in link
-
-## 📈 Roll Forward Process
-
-### Promote to Production
-1. **Internal → Closed Testing**: Add more testers
-2. **Closed → Open Testing**: Public beta
-3. **Open → Production**: Full release
-
-### Next Release
-- **Update Version**: `0.5.1-beta` in app.config.js
-- **Increment versionCode**: 6, 7, 8, etc.
-- **Tag Release**: `git tag v0.5.0-beta && git push --tags`
-
-## 🔑 Environment Variables
-
-Required in your `.env` file:
-```env
-EXPO_PUBLIC_SUPABASE_URL=your_supabase_url
-EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-EAS_PROJECT_ID=your_eas_project_id
+## Build & Submit
+### Windows (PowerShell)
+```powershell
+npm run release:android:beta:ps
 ```
+### macOS/Linux (Bash)
+```bash
+npm run release:android:beta
+```
+This will:
+1) Build an **.aab** with EAS (`--profile beta`)  
+2) Submit to Play **Internal testing** (requires `play-service-account.json`)
 
-## 📞 Support
+> To submit without rebuilding:  
+> PowerShell: `npm run release:android:beta:ps -- -SkipBuild`  
+> Bash: `SKIP_BUILD=true npm run release:android:beta`
 
-If you encounter issues:
-1. Check EAS build logs
-2. Verify Google OAuth configuration
-3. Ensure all required assets are present
-4. Check Play Console for specific error messages
+## Play Console checklist
+1. Create app **DreamKSA** (Default language: **Arabic**).  
+2. Store presence → set app name, short/long descriptions (AR & EN), upload icon/graphics/screenshots.  
+3. App content → App access, Ads, Content rating, Target audience, Data safety.  
+4. Testing → **Internal testing** → Create release → (script should have uploaded) → Add testers → Roll out.  
+5. Share the opt-in link with testers.
 
----
+## Common issues
+- **Google login fails in release** → Missing SHA-1 on the Android OAuth client. Add both **Upload** and **App signing** SHA-1. Rebuild if needed.
+- **Submit fails: no service account** → Ensure `play-service-account.json` exists and has Release Manager permissions.
+- **Version code conflict** → Bump `android.versionCode` in `app.config.ts` (must always increase).
+- **Twilio trial SMS restriction** → Only verified numbers work; upgrade or add tester numbers in Twilio.
 
-**Ready to ship?** Run `.\scripts\release-android-beta.ps1` to start the automated process!
+## Next release
+1. Update `app.config.ts`:
+   - `"version": "0.5.1-beta"`
+   - `android.versionCode: 6`
+2. Commit and tag:
+```bash
+git add -A && git commit -m "chore: 0.5.1-beta"
+git tag v0.5.1-beta && git push --tags
+```
+3. Run the release script again.

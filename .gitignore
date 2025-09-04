@@ -45,3 +45,6 @@ app-example
 archives/
 
 app_backup.disabled
+
+# Play Console service account key (DO NOT COMMIT)
+play-service-account.json
