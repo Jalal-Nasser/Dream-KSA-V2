@@ -742,7 +742,7 @@ export default function Login() {
 
       <View style={styles.topRow}>
         <Pressable onPress={() => router.push('/login/help')}>
-          <Text style={styles.help}>Can't login?</Text>
+          <Text style={styles.help}>لا استطيع الدخول؟</Text>
         </Pressable>
       </View>
 
@@ -926,7 +926,7 @@ export default function Login() {
         >
           <Pressable onPress={() => router.push('/legal/terms')} style={{ marginTop: 16 }}>
             <Text style={styles.legal}>
-              By continuing you agree to DreamKSA's <Text style={styles.link}>Terms of Service</Text> and <Text style={styles.link}>Privacy</Text>
+              بالمتابعة، أنت توافق على <Text style={styles.link}>شروط الخدمة</Text> و <Text style={styles.link}>سياسة الخصوصية</Text> لأحلام السعودية
             </Text>
           </Pressable>
         </Animated.View>
@@ -936,14 +936,14 @@ export default function Login() {
       <Modal visible={showTips} transparent animationType="fade" onRequestClose={()=>setShowTips(false)}>
         <View style={styles.backdrop}>
           <View style={styles.sheet}>
-            <Text style={styles.sheetTitle}>Tips</Text>
-            <Text style={styles.sheetBody}>By continuing, you agree to DreamKSA Terms of Service and Privacy Policy.</Text>
+            <Text style={styles.sheetTitle}>نصائح</Text>
+            <Text style={styles.sheetBody}>بالمتابعة، أنت توافق على شروط الخدمة وسياسة الخصوصية لأحلام السعودية.</Text>
             <View style={{ flexDirection:'row', gap:12 }}>
               <Pressable onPress={()=>setShowTips(false)} style={[styles.sheetBtn,{ backgroundColor:'#e5e7eb'}]}>
-                <Text style={[styles.sheetBtnTxt,{ color:'#111827'}]}>Cancel</Text>
+                <Text style={[styles.sheetBtnTxt,{ color:'#111827'}]}>إلغاء</Text>
               </Pressable>
               <Pressable onPress={()=>{ setShowTips(false); router.push('/login/phone'); }} style={styles.sheetBtn}>
-                <Text style={styles.sheetBtnTxt}>Confirm</Text>
+                <Text style={styles.sheetBtnTxt}>تأكيد</Text>
               </Pressable>
             </View>
           </View>
