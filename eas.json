@@ -11,11 +11,32 @@
     "preview": {
       "distribution": "internal"
     },
+    "beta": {
+      "channel": "beta",
+      "android": {
+        "buildType": "app-bundle",
+        "gradleCommand": ":app:bundleRelease"
+      },
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "${EXPO_PUBLIC_SUPABASE_URL}",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "${EXPO_PUBLIC_SUPABASE_ANON_KEY}"
+      }
+    },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "channel": "production",
+      "android": { "buildType": "app-bundle" }
     }
   },
   "submit": {
-    "production": {}
+    "beta": {
+      "android": {
+        "track": "internal",
+        "serviceAccountKeyPath": "./play-service-account.json"
+      }
+    },
+    "production": {
+      "android": { "track": "production", "serviceAccountKeyPath": "./play-service-account.json" }
+    }
   }
 }

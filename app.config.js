@@ -17,19 +17,20 @@ let EXPO_PUBLIC_SUPABASE_ANON_KEY = read('EXPO_PUBLIC_SUPABASE_ANON_KEY') || 'ey
 console.log('[app.config.js] URL prefix:', (EXPO_PUBLIC_SUPABASE_URL || '').slice(0, 40), '…  ANON len:', (EXPO_PUBLIC_SUPABASE_ANON_KEY || '').length);
 
 module.exports = {
-  name: 'Dream KSA',
-  slug: 'dream-ksa',
+  name: 'DreamKSA',
+  slug: 'dreams-ksa',
   owner: 'jnasser',
   scheme: 'dream-ksa',
+  version: '0.5.0-beta',
   icon: './assets/images/icon.png',
 
   android: {
     package: 'app.dreamksa',
+    versionCode: 5,
     adaptiveIcon: {
       foregroundImage: './assets/images/adaptive-icon.png',
       backgroundColor: '#FFF0F3',
     },
-    // Accept ANY path for the custom scheme to avoid matching issues
     intentFilters: [
       {
         action: 'VIEW',
@@ -37,6 +38,7 @@ module.exports = {
         data: [{ scheme: 'dream-ksa' }],
       },
     ],
+    permissions: [],
   },
   ios: {
     bundleIdentifier: 'app.dreamksa',
@@ -48,5 +50,9 @@ module.exports = {
   extra: {
     EXPO_PUBLIC_SUPABASE_URL,
     EXPO_PUBLIC_SUPABASE_ANON_KEY,
+    eas: { projectId: process.env.EAS_PROJECT_ID || 'your-eas-project-id' }
+  },
+  updates: { 
+    url: `https://u.expo.dev/${process.env.EAS_PROJECT_ID || 'your-eas-project-id'}` 
   },
 };
