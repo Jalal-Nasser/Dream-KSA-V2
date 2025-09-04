@@ -44,12 +44,12 @@ export default function PhoneLogin() {
     <KeyboardAvoidingView style={{ flex:1, backgroundColor:'#FFF' }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View style={s.header}>
         <Pressable hitSlop={10} onPress={() => router.back()}><Ionicons name="chevron-back" size={22} /></Pressable>
-        <Text style={s.h}>Phone Log in/Register</Text>
-        <Pressable onPress={() => router.push('/login/help')}><Text style={s.subLink}>Can't login?</Text></Pressable>
+        <Text style={s.h}>تسجيل الدخول/التسجيل بالهاتف</Text>
+        <Pressable onPress={() => router.push('/login/help')}><Text style={s.subLink}>لا استطيع الدخول؟</Text></Pressable>
       </View>
 
       <View style={s.body}>
-        <Text style={s.sub}>If not registered, a verification SMS will be sent automatically.</Text>
+        <Text style={s.sub}>إذا لم تكن مسجلاً، سيتم إرسال رسالة تحقق تلقائياً.</Text>
 
         <View style={s.row}>
           <Pressable style={s.ccBtn} onPress={()=>setPickerOpen(true)}>
@@ -58,7 +58,7 @@ export default function PhoneLogin() {
             <Ionicons name="chevron-down" size={16} />
           </Pressable>
           <TextInput
-            placeholder="Mobile number"
+            placeholder="رقم الهاتف المحمول"
             placeholderTextColor="#9CA3AF"
             keyboardType="phone-pad"
             value={phone}
@@ -70,7 +70,7 @@ export default function PhoneLogin() {
         {err ? <Text style={s.err}>{err}</Text> : <View style={{ height:8 }} />}
 
         <Pressable disabled={!valid || sending} onPress={sendOtp} style={[s.nextBtn, (!valid || sending) && { opacity:0.5 }]}>
-          <Text style={s.nextTxt}>Next</Text>
+          <Text style={s.nextTxt}>التالي</Text>
         </Pressable>
       </View>
 
