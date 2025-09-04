@@ -105,17 +105,17 @@ export default function PhoneLogin() {
 
 const s = StyleSheet.create({
   header:{ height:56, paddingHorizontal:16, flexDirection:'row', alignItems:'center', justifyContent:'space-between' },
-  h:{ fontWeight:'900', fontSize:18 },
-  subLink:{ fontWeight:'800', opacity:0.7 },
+  h:{ fontWeight:'900', fontSize:18, textAlign: 'right' },
+  subLink:{ fontWeight:'800', opacity:0.7, textAlign: 'right' },
   body:{ padding:16, gap:14 },
-  sub:{ opacity:0.65, fontWeight:'700' },
+  sub:{ opacity:0.65, fontWeight:'700', textAlign: 'right' },
   row:{ flexDirection:'row', gap:10 },
   ccBtn:{ width:120, backgroundColor:'#F3F4F6', borderRadius:12, alignItems:'center', justifyContent:'center', paddingVertical:12, flexDirection:'row', gap:6 },
-  input:{ flex:1, backgroundColor:'#F3F4F6', borderRadius:12, paddingHorizontal:12, paddingVertical:12, fontWeight:'800' },
+  input:{ flex:1, backgroundColor:'#F3F4F6', borderRadius:12, paddingHorizontal:12, paddingVertical:12, fontWeight:'800', textAlign: 'right' },
 
   nextBtn:{ marginTop:6, backgroundColor:PALETTE.primary, borderRadius:14, paddingVertical:14, alignItems:'center', shadowColor:'#000', shadowOpacity:0.12, shadowRadius:8, elevation:2 },
   nextTxt:{ color:'#fff', fontWeight:'900', fontSize:16 },
-  err:{ color:'#dc2626', fontWeight:'800' },
+  err:{ color:'#dc2626', fontWeight:'800', textAlign: 'right' },
 
   backdrop:{ flex:1, backgroundColor:'rgba(0,0,0,0.45)', padding:16, justifyContent:'center' },
   picker:{ backgroundColor:'#fff', borderRadius:16, padding:16, maxHeight:'70%', gap:12 },

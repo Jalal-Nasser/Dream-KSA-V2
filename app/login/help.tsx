@@ -9,4 +9,7 @@ export default function Help() {
     </ScrollView>
   );
 }
-const s = StyleSheet.create({ h:{ fontSize:22, fontWeight:'900' }, p:{ fontSize:14, fontWeight:'600' }});
+const s = StyleSheet.create({ 
+  h:{ fontSize:22, fontWeight:'900', textAlign: 'right' }, 
+  p:{ fontSize:14, fontWeight:'600', textAlign: 'right' }
+});
