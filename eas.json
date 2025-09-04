@@ -35,8 +35,23 @@
         "serviceAccountKeyPath": "./play-service-account.json"
       }
     },
+    "closed": {
+      "android": {
+        "track": "beta",
+        "serviceAccountKeyPath": "./play-service-account.json"
+      }
+    },
+    "open": {
+      "android": {
+        "track": "alpha",
+        "serviceAccountKeyPath": "./play-service-account.json"
+      }
+    },
     "production": {
-      "android": { "track": "production", "serviceAccountKeyPath": "./play-service-account.json" }
+      "android": { 
+        "track": "production", 
+        "serviceAccountKeyPath": "./play-service-account.json" 
+      }
     }
   }
 }

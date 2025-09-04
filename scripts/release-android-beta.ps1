@@ -31,7 +31,15 @@ if (-Not (Test-Path "./play-service-account.json")) {
 }
 
 Write-Host "`n→ Submitting to Google Play ($Track)..."
-npx eas submit -p android --profile beta --non-interactive --track $Track
+# Map track to submit profile
+$SubmitProfile = switch ($Track) {
+  "internal" { "beta" }
+  "closed" { "closed" }
+  "open" { "open" }
+  "production" { "production" }
+  default { "beta" }
+}
+npx eas submit -p android --profile $SubmitProfile --non-interactive --latest
 if ($LASTEXITCODE -ne 0) { throw "EAS submit failed" }
 
 Write-Host "`n✅ Done. Check Google Play Console → Testing → $Track."

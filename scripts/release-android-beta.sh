@@ -29,6 +29,14 @@ if [ ! -f "./play-service-account.json" ]; then
 fi
 
 echo "→ Submitting to Google Play (${TRACK})..."
-npx eas submit -p android --profile beta --non-interactive --track "${TRACK}"
+# Map track to submit profile
+case "${TRACK}" in
+  "internal") SUBMIT_PROFILE="beta" ;;
+  "closed") SUBMIT_PROFILE="closed" ;;
+  "open") SUBMIT_PROFILE="open" ;;
+  "production") SUBMIT_PROFILE="production" ;;
+  *) SUBMIT_PROFILE="beta" ;;
+esac
+npx eas submit -p android --profile "${SUBMIT_PROFILE}" --non-interactive --latest
 
 echo "✅ Done. Check Google Play Console → Testing → ${TRACK}."
