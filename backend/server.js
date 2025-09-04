@@ -1,18 +1,12 @@
-import express from 'express';
-import fetch from 'node-fetch';
-import { createClient } from '@supabase/supabase-js';
-import dotenv from 'dotenv';
-import cors from 'cors';
-import jwt from 'jsonwebtoken';
-import { v4 as uuidv4 } from 'uuid';
-import { parsePhoneNumberFromString } from 'libphonenumber-js';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-dotenv.config();
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const express = require('express');
+const fetch = require('node-fetch');
+const { createClient } = require('@supabase/supabase-js');
+require('dotenv').config();
+const cors = require('cors');
+const jwt = require('jsonwebtoken');
+const { v4: uuidv4 } = require('uuid');
+const { parsePhoneNumberFromString } = require('libphonenumber-js');
+const path = require('path');
 
 const app = express();
 app.use(express.json());
@@ -112,7 +106,7 @@ let twilioClient = null;
 if (TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN) {
   try {
     // Lazy require to avoid bundlers
-    const Twilio = (await import('twilio')).default;
+    const Twilio = require('twilio');
     twilioClient = Twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
   } catch (e) {
     console.warn('[twilio] failed to init client', e?.message || e);
