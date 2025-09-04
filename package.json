@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@100mslive/react-native-hms": "^1.11.0",
+    "libphonenumber-js": "^1.10.53",
     "@100mslive/react-native-room-kit": "^1.2.3",
     "@expo/vector-icons": "^14.1.0",
     "@gorhom/bottom-sheet": "^5.2.3",

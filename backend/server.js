@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
 
 dotenv.config();
 
@@ -33,6 +34,9 @@ app.get('/routes', (_req, res) => {
       'GET /',
       'GET /health',
       'GET /routes',
+      'POST /auth/phone/start',
+      'POST /auth/phone/verify',
+      'GET /auth/phone/diag',
       'POST /create-room',
       'POST /get-token',
       'GET /room/:roomId',
@@ -58,6 +62,142 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 const HMS_MANAGEMENT_TOKEN = process.env.HMS_MANAGEMENT_TOKEN;
 const HMS_APP_ID = process.env.HMS_APP_ID;
 const HMS_APP_SECRET = process.env.HMS_APP_SECRET;
+
+// Twilio configuration
+const {
+  TWILIO_ACCOUNT_SID,
+  TWILIO_AUTH_TOKEN,
+  TWILIO_VERIFY_SERVICE_SID,
+  TWILIO_IS_TRIAL,
+  TWILIO_TRIAL_ALLOWED_NUMBERS,
+} = process.env;
+
+// Phone number utilities
+function toE164(raw, defaultCountry = 'SA') {
+  if (!raw) return null;
+  // Accept inputs like "05xxxxxxxx" and convert using default country
+  const normalized = String(raw).trim();
+  let p = parsePhoneNumberFromString(normalized, defaultCountry);
+  if (!p && normalized.startsWith('00')) {
+    // handle 00-prefixed intl numbers
+    p = parsePhoneNumberFromString(`+${normalized.slice(2)}`);
+  }
+  if (!p || !p.isValid()) return null;
+  return p.number; // E.164
+}
+
+// Initialize Twilio client
+let twilioClient = null;
+if (TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN) {
+  try {
+    // Lazy require to avoid bundlers
+    const Twilio = (await import('twilio')).default;
+    twilioClient = Twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
+  } catch (e) {
+    console.warn('[twilio] failed to init client', e?.message || e);
+  }
+}
+
+// Twilio error mapping
+function mapTwilioError(err) {
+  const code = Number(err?.code) || 0;
+  const msg = err?.message || 'Unknown error';
+  // Common cases with friendly messages
+  const known = {
+    21211: 'رقم الهاتف غير صالح. تأكد من كتابة الرقم بصيغة دولية.',
+    21408: 'إرسال الرسائل غير مفعل لهذه الدولة في حساب Twilio. فعّل "Geo Permissions".',
+    21608: 'تحتاج رقم Twilio مُفعل للإرسال. (Trial لا يكفي).',
+    20003: 'مشكلة في مفاتيح Twilio (Account SID / Auth Token).',
+    60202: 'محاولات كثيرة. الرجاء المحاولة لاحقاً.',
+  };
+  return { code, message: known[code] || msg };
+}
+
+// Trial account restrictions
+function trialBlockIfNeeded(to) {
+  if (String(TWILIO_IS_TRIAL).toLowerCase() !== 'true') return null;
+  const allow = (TWILIO_TRIAL_ALLOWED_NUMBERS || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (!allow.includes(to)) {
+    return {
+      code: 'trial_only_verified',
+      message:
+        'حساب Twilio في وضع "Trial" — يمكن الإرسال فقط للأرقام الموثّقة في Twilio. أضف الرقم إلى قائمة TWILIO_TRIAL_ALLOWED_NUMBERS أو رقِّ الحساب.',
+    };
+  }
+  return null;
+}
+
+// Phone authentication endpoints
+// Start verification (SMS)
+app.post('/auth/phone/start', async (req, res) => {
+  try {
+    if (!twilioClient || !TWILIO_VERIFY_SERVICE_SID) {
+      return res.status(500).json({ ok: false, error: 'twilio_not_configured' });
+    }
+    const raw = String(req.body?.phone || '');
+    const country = (req.body?.country || 'SA').toUpperCase();
+    const to = toE164(raw, country);
+    if (!to) {
+      return res.status(400).json({ ok: false, error: 'invalid_phone_format' });
+    }
+    const trialErr = trialBlockIfNeeded(to);
+    if (trialErr) return res.status(403).json({ ok: false, error: trialErr.code, message: trialErr.message });
+
+    const verification = await twilioClient.verify.v2
+      .services(TWILIO_VERIFY_SERVICE_SID)
+      .verifications.create({ to, channel: 'sms', locale: 'ar' });
+
+    return res.json({ ok: true, sid: verification.sid });
+  } catch (err) {
+    const m = mapTwilioError(err);
+    console.warn('[phone/start] twilio error', m, err);
+    return res.status(400).json({ ok: false, error: 'twilio_error', code: m.code, message: m.message });
+  }
+});
+
+// Check code
+app.post('/auth/phone/verify', async (req, res) => {
+  try {
+    if (!twilioClient || !TWILIO_VERIFY_SERVICE_SID) {
+      return res.status(500).json({ ok: false, error: 'twilio_not_configured' });
+    }
+    const raw = String(req.body?.phone || '');
+    const code = String(req.body?.code || '');
+    const country = (req.body?.country || 'SA').toUpperCase();
+    const to = toE164(raw, country);
+    if (!to || !code) {
+      return res.status(400).json({ ok: false, error: 'invalid_params' });
+    }
+    const trialErr = trialBlockIfNeeded(to);
+    if (trialErr) return res.status(403).json({ ok: false, error: trialErr.code, message: trialErr.message });
+
+    const check = await twilioClient.verify.v2
+      .services(TWILIO_VERIFY_SERVICE_SID)
+      .verificationChecks.create({ to, code });
+
+    if (check.status === 'approved') {
+      return res.json({ ok: true });
+    }
+    return res.status(401).json({ ok: false, error: 'invalid_code' });
+  } catch (err) {
+    const m = mapTwilioError(err);
+    console.warn('[phone/verify] twilio error', m, err);
+    return res.status(400).json({ ok: false, error: 'twilio_error', code: m.code, message: m.message });
+  }
+});
+
+// Optional: simple diagnostics to confirm envs on Plesk
+app.get('/auth/phone/diag', (_req, res) => {
+  res.json({
+    ok: true,
+    verifyService: Boolean(TWILIO_VERIFY_SERVICE_SID),
+    isTrial: String(TWILIO_IS_TRIAL || 'false'),
+    trialAllowedCount: (TWILIO_TRIAL_ALLOWED_NUMBERS || '').split(',').filter(Boolean).length,
+  });
+});
 
 // Create a new room
 app.post('/create-room', async (req, res) => {
