@@ -1,13 +1,13 @@
 {
   "name": "voice-chat-backend",
   "version": "1.0.0",
-  "main": "server.js",
+  "main": "server-simple.js",
   "type": "commonjs",
   "engines": {
     "node": ">=18.0.0"
   },
   "scripts": {
-    "start": "node server.js",
+    "start": "node server-simple.js",
     "dev": "nodemon server.js",
     "build": "echo 'No build step required'"
   },

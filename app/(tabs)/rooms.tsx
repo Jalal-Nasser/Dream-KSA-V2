@@ -105,8 +105,8 @@ export default function Rooms() {
         <Pressable disabled={loading} onPress={createRoom} style={styles.makeBtn}>
           <MaterialCommunityIcons name="plus" size={18} color="#fff" />
           <Text style={{ color: '#fff', fontWeight: '800' }}>{loading ? '...' : 'إنشاء'}</Text>
-        </Pressable>
-      </View>
+          </Pressable>
+        </View>
 
       <FlatList
         data={rooms}
@@ -117,10 +117,10 @@ export default function Rooms() {
             <MaterialCommunityIcons name="account-voice" size={20} color={PALETTE.primaryDark} />
             <Text style={styles.roomTitle} numberOfLines={1}>{item.title}</Text>
             <Ionicons name="chevron-back" size={18} color="#B4B8BF" />
-          </Pressable>
+    </Pressable>
         )}
       />
-    </LinearGradient>
+      </LinearGradient>
   );
 }
 
