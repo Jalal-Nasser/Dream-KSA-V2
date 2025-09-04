@@ -50,9 +50,9 @@ module.exports = {
   extra: {
     EXPO_PUBLIC_SUPABASE_URL,
     EXPO_PUBLIC_SUPABASE_ANON_KEY,
-    eas: { projectId: process.env.EAS_PROJECT_ID || 'your-eas-project-id' }
+    eas: { projectId: '85a5b204-84e8-49fa-b88a-31b072ff798b' }
   },
   updates: { 
-    url: `https://u.expo.dev/${process.env.EAS_PROJECT_ID || 'your-eas-project-id'}` 
+    url: 'https://u.expo.dev/85a5b204-84e8-49fa-b88a-31b072ff798b' 
   },
 };
