@@ -6,12 +6,31 @@ import cors from 'cors';
 import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(express.json());
 app.use(cors());
+
+// --- serve static legal pages (Privacy / Terms) ---
+// Serve ./public as static (for privacy/terms)
+app.use(express.static(path.join(__dirname, 'public'), {
+  maxAge: '1h',
+}));
+
+// Friendly shortcuts
+app.get('/privacy', (_req, res) =>
+  res.sendFile(path.join(__dirname, 'public', 'privacy.html'))
+);
+app.get('/terms', (_req, res) =>
+  res.sendFile(path.join(__dirname, 'public', 'terms.html'))
+);
 
 // Health check endpoint for Railway
 app.get('/', (req, res) => {
@@ -34,6 +53,8 @@ app.get('/routes', (_req, res) => {
       'GET /',
       'GET /health',
       'GET /routes',
+      'GET /privacy',
+      'GET /terms',
       'POST /auth/phone/start',
       'POST /auth/phone/verify',
       'GET /auth/phone/diag',
