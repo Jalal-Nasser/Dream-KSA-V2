@@ -21,7 +21,7 @@ module.exports = {
   slug: 'dreams-ksa',
   owner: 'jnasser',
   scheme: 'dream-ksa',
-  version: '0.5.0-beta',
+  version: '0.5.0',
   icon: './assets/images/icon.png',
 
   android: {
@@ -43,6 +43,10 @@ module.exports = {
   ios: {
     bundleIdentifier: 'app.dreamksa',
     icon: './assets/images/icon.png',
+    infoPlist: {
+      ITSAppUsesNonExemptEncryption: false
+    },
+    associatedDomains: ['dream-ksa://auth-callback']
   },
 
   orientation: 'portrait',

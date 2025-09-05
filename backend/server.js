@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const paytabsRouter = require('./routes/paytabs');
 
 // Try to require other dependencies with error handling
 let fetch, supabase, cors, jwt, uuidv4, parsePhoneNumberFromString, twilioClient;
@@ -77,6 +78,9 @@ app.get('/terms', (_req, res) =>
   res.sendFile(path.join(__dirname, 'public', 'terms.html'))
 );
 
+// PayTabs payment routes
+app.use('/api/payments', paytabsRouter);
+
 // Health check endpoint
 app.get('/', (req, res) => {
   res.json({ 
@@ -123,7 +127,10 @@ app.get('/routes', (_req, res) => {
       'GET /api/room/:roomId',
       'POST /api/leave-room',
       'POST /api/admin/mute',
-      'POST /api/admin/kick'
+      'POST /api/admin/kick',
+      'POST /api/payments/create-payment',
+      'POST /api/payments/verify-callback',
+      'GET /api/payments/status/:payment_id'
     ]
   });
 });

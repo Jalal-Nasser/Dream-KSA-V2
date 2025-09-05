@@ -1,11 +1,22 @@
 // Polyfills MUST load before any Supabase or network code runs.
 import '@/lib/polyfills';
 import { Slot } from 'expo-router';
-import { LogBox } from 'react-native';
+import { LogBox, View, StyleSheet } from 'react-native';
 import * as React from 'react';
 import * as Linking from 'expo-linking';
 import { looksLikeAuthReturn } from '../lib/linking';
 import { completeSessionFromRedirect } from '../lib/auth/sessionFromUrl';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
+
+/**
+ * SafeLayout
+ * - ensures the whole app respects the top safe area inset (status bar / notch)
+ * - uses paddingTop = insets.top so header and content won't be under the system status icons
+ */
+function SafeLayout({ children }: { children: React.ReactNode }) {
+  const insets = useSafeAreaInsets();
+  return <View style={[styles.safeContainer, { paddingTop: insets.top }]}>{children}</View>;
+}
 
 export default function RootLayout() {
   // Silence flaky Metro websocket noise during OAuth/app switching
@@ -29,5 +40,19 @@ export default function RootLayout() {
     });
     return () => sub.remove();
   }, []);
-  return <Slot />;
+  
+  return (
+    <SafeAreaProvider>
+      <SafeLayout>
+        <Slot />
+      </SafeLayout>
+    </SafeAreaProvider>
+  );
 }
+
+const styles = StyleSheet.create({
+  safeContainer: {
+    flex: 1,
+    backgroundColor: "#fff", // keep existing background - change if your app uses a different bg
+  },
+});

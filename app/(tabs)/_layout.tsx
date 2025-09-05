@@ -18,8 +18,8 @@ function MyTabBar({ state, descriptors, navigation }: any) {
             const event = navigation.emit({ type:'tabPress', target: route.key, canPreventDefault:true });
             if (!isFocused && !event.defaultPrevented) navigation.navigate(route.name);
           };
-          const labelMap = { me:'أنا', messages:'الرسائل', moments:'لحظات', explore:'اكتشاف', rooms:'الغرف' };
-          const iconMap  = { me:'account-circle', messages:'message-text', moments:'flash', explore:'compass', rooms:'account-voice' };
+          const labelMap = { me:'أنا', messages:'الرسائل', moments:'لحظات', explore:'اكتشاف', rooms:'الغرف', payments:'المحفظة' };
+          const iconMap  = { me:'account-circle', messages:'message-text', moments:'flash', explore:'compass', rooms:'account-voice', payments:'wallet' };
           const label = (labelMap as any)[route.name] ?? route.name;
           const iconName = (iconMap as any)[route.name] ?? 'circle-outline';
           return (
@@ -43,6 +43,7 @@ export default function TabsLayout() {
       <Tabs.Screen name="moments" options={{ title: 'لحظات' }} />
       <Tabs.Screen name="explore" options={{ title: 'اكتشاف' }} />
       <Tabs.Screen name="rooms" options={{ title: 'الغرف' }} />
+      <Tabs.Screen name="payments" options={{ title: 'المحفظة' }} />
     </Tabs>
   );
 }

@@ -9,6 +9,7 @@ import { PALETTE } from '../../../lib/theme';
 import { getSupabase } from '../../../lib/supabase';
 import { resolveDisplayName } from '../../../lib/display';
 import { resolveAvatarUrl } from '../../../lib/storage';
+import { getCountryFlag } from '../../../lib/countryFlags';
 import LuxuryVipBanner from '../../../components/LuxuryVipBanner';
 
 export default function MeScreen() {
@@ -94,7 +95,7 @@ export default function MeScreen() {
                 <Text style={styles.displayName}>{displayName || 'بدون اسم'}</Text>
                 {profile?.country && (
                   <View style={styles.countryFlag}>
-                    <Text style={styles.flagEmoji}>🇱🇧</Text>
+                    <Text style={styles.flagEmoji}>{getCountryFlag(profile.country)}</Text>
                   </View>
                 )}
               </View>

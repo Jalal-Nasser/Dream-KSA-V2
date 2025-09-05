@@ -53,7 +53,7 @@ export default function SelectCountryScreen() {
       // Persist immediately so Profile loads it reliably
       const { error } = await supabase
         .from('profiles')
-        .upsert({ id: user.id, country: item.nameAr }, { onConflict: 'id' });
+        .upsert({ id: user.id, country: item.code }, { onConflict: 'id' });
       if (error) {
         Alert.alert('خطأ', 'تعذر حفظ الدولة. حاول مرة أخرى.');
         return;
