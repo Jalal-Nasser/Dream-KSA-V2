@@ -12,15 +12,6 @@ try {
   paytabsRouter = null;
 }
 
-// Try to load STC Pay router, but don't fail if it can't load
-let stcpayRouter;
-try {
-  stcpayRouter = require('./routes/stcpay');
-  console.log('✅ STC Pay router loaded');
-} catch (error) {
-  console.warn('❌ STC Pay router failed to load:', error.message);
-  stcpayRouter = null;
-}
 
 // Try to require other dependencies with error handling
 let fetch, supabase, cors, jwt, uuidv4, parsePhoneNumberFromString, twilioClient;
@@ -106,13 +97,6 @@ if (paytabsRouter) {
   console.log('⚠️ PayTabs routes disabled (missing environment variables)');
 }
 
-// STC Pay payment routes (only if router loaded successfully)
-if (stcpayRouter) {
-  app.use('/api/payments/stcpay', stcpayRouter);
-  console.log('✅ STC Pay routes enabled');
-} else {
-  console.log('⚠️ STC Pay routes disabled (missing environment variables)');
-}
 
 // Health check endpoint
 app.get('/', (req, res) => {
@@ -163,10 +147,7 @@ app.get('/routes', (_req, res) => {
       'POST /api/admin/kick',
       'POST /api/payments/paytabs/create',
       'POST /api/payments/paytabs/verify',
-      'GET /api/payments/paytabs/verify-callback',
-      'POST /api/payments/stcpay/create',
-      'POST /api/payments/stcpay/webhook',
-      'GET /api/payments/stcpay/return'
+      'GET /api/payments/paytabs/verify-callback'
     ]
   });
 });
