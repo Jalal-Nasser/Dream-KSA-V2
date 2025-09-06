@@ -1,0 +1,5 @@
+[33m0ff1617[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mSeptember[m[33m)[m fix: resolve .gitignore merge conflict and update payments screen for PayTabs integration
+[33medcfc3c[m feat(payments): update payment creation and verification process
+[33mb7635f0[m[33m ([m[1;31morigin/September[m[33m)[m change node files
+[33mfae03f1[m chore: remove test script for PayTabs integration
+[33m879b1cf[m feat(backend): enhance PayTabs integration and update environment variables
