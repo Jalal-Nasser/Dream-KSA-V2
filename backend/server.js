@@ -1,6 +1,16 @@
+require('dotenv').config();
 const express = require('express');
 const path = require('path');
-const paytabsRouter = require('./routes/paytabs');
+
+// Try to load PayTabs router, but don't fail if it can't load
+let paytabsRouter;
+try {
+  paytabsRouter = require('./routes/paytabs');
+  console.log('✅ PayTabs router loaded');
+} catch (error) {
+  console.warn('❌ PayTabs router failed to load:', error.message);
+  paytabsRouter = null;
+}
 
 // Try to require other dependencies with error handling
 let fetch, supabase, cors, jwt, uuidv4, parsePhoneNumberFromString, twilioClient;
@@ -52,6 +62,8 @@ try {
 
 try {
   const Twilio = require('twilio');
+  console.log('DEBUG: TWILIO_ACCOUNT_SID:', process.env.TWILIO_ACCOUNT_SID ? 'SET' : 'NOT SET');
+  console.log('DEBUG: TWILIO_AUTH_TOKEN:', process.env.TWILIO_AUTH_TOKEN ? 'SET' : 'NOT SET');
   twilioClient = Twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
   console.log('✅ Twilio loaded');
 } catch (e) {
@@ -78,8 +90,13 @@ app.get('/terms', (_req, res) =>
   res.sendFile(path.join(__dirname, 'public', 'terms.html'))
 );
 
-// PayTabs payment routes
-app.use('/api/payments', paytabsRouter);
+// PayTabs payment routes (only if router loaded successfully)
+if (paytabsRouter) {
+  app.use('/api/payments/paytabs', paytabsRouter);
+  console.log('✅ PayTabs routes enabled');
+} else {
+  console.log('⚠️ PayTabs routes disabled (missing environment variables)');
+}
 
 // Health check endpoint
 app.get('/', (req, res) => {
@@ -128,9 +145,9 @@ app.get('/routes', (_req, res) => {
       'POST /api/leave-room',
       'POST /api/admin/mute',
       'POST /api/admin/kick',
-      'POST /api/payments/create-payment',
-      'POST /api/payments/verify-callback',
-      'GET /api/payments/status/:payment_id'
+      'POST /api/payments/paytabs/create',
+      'POST /api/payments/paytabs/verify',
+      'GET /api/payments/paytabs/verify-callback'
     ]
   });
 });
