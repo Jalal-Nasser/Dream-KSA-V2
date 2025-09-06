@@ -114,23 +114,28 @@ export default function PaymentsScreen() {
 
     setPaymentLoading(true);
     try {
-      const response = await fetch('https://api.dreamsksa.online/api/payments/create-payment', {
+      const response = await fetch('https://api.dreamsksa.online/api/payments/paytabs/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           user_id: user.id,
-          amount: selectedPackage.price,
+          amount_major: selectedPackage.price,
           currency: selectedPackage.currency,
-          description: `شراء ${selectedPackage.coins} عملة ذهبية`,
+          email: user.email || `${user.id}@user.local`,
+          first_name: user.user_metadata?.first_name || 'User',
+          last_name: user.user_metadata?.last_name || '',
+          product_title: `شراء ${selectedPackage.coins} عملة ذهبية`,
+          coins_amount: selectedPackage.coins,
+          metadata: { client: 'expo' }
         }),
       });
 
       const data = await response.json();
 
-      if (data.success) {
-        setPaymentUrl(data.payment_url);
+      if (data.ok && data.paypage) {
+        setPaymentUrl(data.paypage);
       } else {
         Alert.alert('خطأ', data.error || 'فشل في إنشاء الدفع');
         setPaymentModalVisible(false);
@@ -157,6 +162,32 @@ export default function PaymentsScreen() {
     setPaymentUrl('');
     setSelectedPackage(null);
     Alert.alert('فشل الدفع', 'لم يتم إتمام عملية الدفع');
+  };
+
+  const verifyPayment = async (payment_reference: string, merchant_order_id: string) => {
+    try {
+      const response = await fetch('https://api.dreamsksa.online/api/payments/paytabs/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          payment_reference,
+          merchant_order_id
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (data.ok && data.success) {
+        handlePaymentSuccess();
+      } else {
+        handlePaymentError();
+      }
+    } catch (error) {
+      console.error('Payment verification error:', error);
+      handlePaymentError();
+    }
   };
 
   const renderPackageCard = (pkg: PaymentPackage) => (
@@ -274,10 +305,21 @@ export default function PaymentsScreen() {
                 source={{ uri: paymentUrl }}
                 style={styles.webView}
                 onNavigationStateChange={(navState) => {
-                  // Check if payment was successful
-                  if (navState.url.includes('success') || navState.url.includes('callback')) {
-                    handlePaymentSuccess();
-                  } else if (navState.url.includes('error') || navState.url.includes('cancel')) {
+                  const url = navState.url || '';
+                  
+                  // Detect PayTabs return URL
+                  if (url.includes('/api/payments/paytabs/verify-callback') || url.includes('payment_reference=')) {
+                    const refMatch = url.match(/payment_reference=([^&]+)/);
+                    const moMatch = url.match(/merchant_order_id=([^&]+)/);
+                    const payment_reference = refMatch?.[1] ? decodeURIComponent(refMatch[1]) : null;
+                    const merchant_order_id = moMatch?.[1] ? decodeURIComponent(moMatch[1]) : null;
+                    
+                    if (payment_reference && merchant_order_id) {
+                      verifyPayment(payment_reference, merchant_order_id);
+                    } else {
+                      handlePaymentError();
+                    }
+                  } else if (url.includes('error') || url.includes('cancel')) {
                     handlePaymentError();
                   }
                 }}

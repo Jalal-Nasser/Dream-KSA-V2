@@ -62,8 +62,6 @@ try {
 
 try {
   const Twilio = require('twilio');
-  console.log('DEBUG: TWILIO_ACCOUNT_SID:', process.env.TWILIO_ACCOUNT_SID ? 'SET' : 'NOT SET');
-  console.log('DEBUG: TWILIO_AUTH_TOKEN:', process.env.TWILIO_AUTH_TOKEN ? 'SET' : 'NOT SET');
   twilioClient = Twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
   console.log('✅ Twilio loaded');
 } catch (e) {
