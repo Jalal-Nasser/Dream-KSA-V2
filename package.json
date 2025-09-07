@@ -106,6 +106,7 @@
     "eslint-config-expo": "~9.2.0",
     "postinstall-postinstall": "^2.1.0",
     "react-native-svg-transformer": "^1.5.1",
+    "supabase": "^2.39.2",
     "typescript": "~5.8.3"
   },
   "private": true,

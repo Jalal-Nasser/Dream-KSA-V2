@@ -8,3 +8,4 @@ VALUES
   ('Rocket', 500, '🚀', jsonb_build_object('category', 'special')),
   ('Trophy', 1000, '🏆', jsonb_build_object('category', 'elite'))
 ON CONFLICT DO NOTHING;
+
