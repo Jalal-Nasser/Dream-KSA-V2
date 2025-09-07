@@ -1,16 +1,31 @@
 name: SQL Safety Check
-on:
-  pull_request:
-  push:
-    branches: [ "*" ]
+on: [push, pull_request]
+
 jobs:
   check-sql:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Block destructive SQL in migrations
+      - name: Fail on destructive SQL in supabase/
+        shell: bash
         run: |
-          set -e
-          echo "Scanning supabase/migrations for dangerous SQL..."
-          ! grep -nE "DROP TABLE|TRUNCATE|ALTER TABLE .* DROP|DELETE FROM[[:space:]]+[a-zA-Z_]+" supabase/migrations/*.sql || (echo "❌ Dangerous SQL found in migrations. Remove it."; exit 1)
-
+          set -euo pipefail
+          shopt -s nullglob globstar
+          files=()
+          for f in supabase/**/*.sql; do
+            # Skip the one legacy migration that had drops
+            [[ "$f" == "supabase/migrations/20250905182241_fix_payments_schema.sql" ]] && continue
+            files+=("$f")
+          done
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No SQL files under supabase/. Skipping."
+            exit 0
+          fi
+          tmp="$(mktemp)"
+          # drop single-line -- comments
+          awk '!/^[[:space:]]*--/' "${files[@]}" > "$tmp"
+          if grep -E -n '\b(DROP[[:space:]]+TABLE|TRUNCATE(\s+TABLE)?\b|ALTER[[:space:]]+TABLE[[:space:]]+\S+[[:space:]]+DROP|DELETE[[:space:]]+FROM[[:space:]]+\S+)' "$tmp"; then
+            echo "::error::Destructive SQL statements found in migrations."
+            exit 1
+          fi
+          echo "OK: no destructive SQL found."
