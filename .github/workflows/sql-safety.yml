@@ -1,0 +1,15 @@
+name: SQL Safety Check
+on:
+  pull_request:
+  push:
+    branches: [ "*" ]
+jobs:
+  check-sql:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Block destructive SQL in migrations
+        run: |
+          set -e
+          echo "Scanning supabase/migrations for dangerous SQL..."
+          ! grep -nE "DROP TABLE|TRUNCATE|ALTER TABLE .* DROP|DELETE FROM[[:space:]]+[a-zA-Z_]+" supabase/migrations/*.sql || (echo "❌ Dangerous SQL found in migrations. Remove it."; exit 1)

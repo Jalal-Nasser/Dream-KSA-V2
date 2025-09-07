@@ -1,6 +1,6 @@
--- Drop existing tables if they exist (from previous failed migration)
-DROP TABLE IF EXISTS transactions CASCADE;
-DROP TABLE IF EXISTS payments CASCADE;
+-- [SAFE EDIT 2025-09-07] Removed dangerous DROP lines to prevent data loss on fresh deploys.
+-- DROP TABLE IF EXISTS transactions CASCADE;
+-- DROP TABLE IF EXISTS payments CASCADE;
 
 -- Payments table (stores raw provider info)
 CREATE TABLE payments (
