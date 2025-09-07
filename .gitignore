@@ -58,3 +58,5 @@ play-service-account.json
 supabase/supabase/
 supabase/.temp/
 backups/
+
+backups/
