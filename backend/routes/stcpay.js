@@ -3,7 +3,7 @@ const axios = require('axios');
 const router = express.Router();
 const { createClient } = require('@supabase/supabase-js');
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
 const STC_BASE_URL = process.env.STC_BASE_URL; // TODO: set from docs
 const STC_MERCHANT_ID = process.env.STC_MERCHANT_ID;
