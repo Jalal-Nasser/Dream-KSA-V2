@@ -162,7 +162,7 @@ export default function MeScreen() {
           <MenuItem icon="account-edit-outline" label="معلومات شخصية" onPress={() => router.push('/(tabs)/me/profile')} />
           <MenuItem icon="wallet" label="محفظة" onPress={() => router.push('/(tabs)/me/wallet')} />
           <MenuItem icon="storefront-outline" label="متجر" onPress={() => router.push('/(tabs)/me/store')} />
-          <MenuItem icon="account-tie" label="وكالة" onPress={() => onMenu('وكالة')} />
+          <MenuItem icon="account-tie" label="وكالة" onPress={() => router.push('/agencies')} />
           <MenuItem icon="calendar-check-outline" label="مهام" onPress={() => router.push('/(tabs)/me/tasks')} isLast />
         </View>
 
