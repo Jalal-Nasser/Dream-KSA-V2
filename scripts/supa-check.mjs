@@ -1,3 +1,9 @@
+// Auto-load environment variables:
+// 1) Prefer .env.local at repo root
+// 2) Fallback to .env if present
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
+dotenv.config();
 // scripts/supa-check.mjs
 import { createClient } from '@supabase/supabase-js';
 

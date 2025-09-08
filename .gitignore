@@ -36,8 +36,11 @@ yarn-error.*
 
 # local env files
 .env
+.env.local
+.env.*
 .env*.local
 backend/.env
+!example.env
 app.json.bak_20250901
 
 # typescript
