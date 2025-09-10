@@ -21,12 +21,12 @@ module.exports = {
   slug: 'dreams-ksa',
   owner: 'jnasser',
   scheme: 'dream-ksa',
-  version: '0.5.0',
+  version: '1.0.0',
   icon: './assets/images/icon.png',
 
   android: {
     package: 'com.dreamska.app',
-    versionCode: 5,
+    versionCode: 1,
     adaptiveIcon: {
       foregroundImage: './assets/images/adaptive-icon.png',
       backgroundColor: '#FFF0F3',
@@ -42,6 +42,7 @@ module.exports = {
   },
   ios: {
     bundleIdentifier: 'com.dreamska.app',
+    buildNumber: '1.0.0',
     icon: './assets/images/icon.png',
     infoPlist: {
       ITSAppUsesNonExemptEncryption: false
