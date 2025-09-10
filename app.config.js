@@ -25,7 +25,7 @@ module.exports = {
   icon: './assets/images/icon.png',
 
   android: {
-    package: 'app.dreamksa',
+    package: 'com.dreamska.app',
     versionCode: 5,
     adaptiveIcon: {
       foregroundImage: './assets/images/adaptive-icon.png',
@@ -41,7 +41,7 @@ module.exports = {
     permissions: [],
   },
   ios: {
-    bundleIdentifier: 'app.dreamksa',
+    bundleIdentifier: 'com.dreamska.app',
     icon: './assets/images/icon.png',
     infoPlist: {
       ITSAppUsesNonExemptEncryption: false
