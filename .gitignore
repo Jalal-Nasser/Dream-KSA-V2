@@ -67,3 +67,5 @@ backups/
 android.bak/
 
 lib/supabase.js
+
+admin-dashboard/lib/supabase.js
