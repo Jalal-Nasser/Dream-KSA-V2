@@ -87,9 +87,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'app.dreamksa'
+    namespace 'com.dreamska.app'
     defaultConfig {
-        applicationId 'app.dreamksa'
+        applicationId 'com.dreamska.app'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

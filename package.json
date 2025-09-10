@@ -10,7 +10,9 @@
     "supa:invite:agencies": "node scripts/supa-invite.mjs my-agencies",
     "supa:invite:members": "node scripts/supa-invite.mjs members",
     "supa:invite:list": "node scripts/supa-invite.mjs list",
-    "supa:invite:help": "node scripts/supa-invite.mjs"
+    "supa:invite:help": "node scripts/supa-invite.mjs",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   },
   "dependencies": {
     "@100mslive/react-native-hms": "^1.11.0",

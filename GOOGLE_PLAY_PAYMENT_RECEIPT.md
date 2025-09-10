@@ -22,7 +22,7 @@
 
 ### **App Information**
 - **App Name:** DreamKSA
-- **Package Name:** app.dreamksa
+- **Package Name:** com.dreamska.app
 - **Version:** 0.5.0-Beta
 - **Platform:** Android
 - **Languages:** Arabic (Primary), English

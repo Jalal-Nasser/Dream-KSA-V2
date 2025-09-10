@@ -6,7 +6,7 @@
 1. **EAS Project** linked in `app.config.ts` (`extra.eas.projectId`).
 2. **Branding ready**: icon (512×512), feature graphic (1024×500), screenshots, Arabic store listing.
 3. **OAuth**: Android client created in Google Cloud:
-   - **Package**: `app.dreamksa`
+   - **Package**: `com.dreamska.app`
    - **SHA-1**: from `eas credentials -p android --display` (Upload key). After first upload, also add **App signing SHA-1** from Play Console → App integrity.
 4. **Privacy URLs** hosted on Plesk:
    - Terms: `https://api.dreamsksa.online/terms`

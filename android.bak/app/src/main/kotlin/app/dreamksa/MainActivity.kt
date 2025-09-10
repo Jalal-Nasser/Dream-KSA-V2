@@ -1,4 +1,4 @@
-package app.dreamksa
+package com.dreamska.app
 
 import android.os.Bundle
 import com.facebook.react.ReactActivity
