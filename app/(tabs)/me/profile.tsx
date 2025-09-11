@@ -465,9 +465,9 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   segmentRow: {
-    // Anchor chips to the RIGHT in RTL, left in LTR (keeps tab order but aligns correctly)
-    flexDirection: 'row',
-    justifyContent: I18nManager.isRTL ? 'flex-end' : 'flex-start',
+    // Use RTL direction for gender selection buttons
+    flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
+    justifyContent: 'flex-start',
     gap: 8,
   },
   segment: {
