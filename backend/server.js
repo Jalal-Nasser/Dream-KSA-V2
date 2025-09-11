@@ -1,628 +1,146 @@
-require('dotenv').config();
-const express = require('express');
-const path = require('path');
+// backend/server.js — single-file backend for Plesk/Passenger
+// - Health endpoint
+// - HMS token at /hms/token (and /api/hms/token) using pure Node crypto (no jsonwebtoken)
+// - Hand raise/lower at /rooms/handraise & /rooms/handlower (uses Supabase service key)
+// - Tries to mount existing rooms router if present, but won't crash if it's missing
 
-// --- PATCH: Mount rooms routes at /rooms/* and /api/rooms/* on the actual app ---
-const bodyParser = require("body-parser");
-const cors = require("cors");
+const express = require("express");
+const crypto = require("crypto");
 const { createClient } = require("@supabase/supabase-js");
-const hmsRouter = require("./routes/hms");
 
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const app = express();
 
-// Reuse the same Express app instance Plesk runs
-const app =
-  module.exports.app ||
-  global.app ||
-  (function () {
-    const a = express();
-    a.use(bodyParser.json());
-    a.use(require("body-parser").urlencoded({ extended: false }));
-    a.use(
-      cors({
-        origin: true,
-        methods: ["GET", "POST", "OPTIONS"],
-        allowedHeaders: ["Content-Type", "Authorization"],
-      })
-    );
-    module.exports.app = a;
-    global.app = a;
-    return a;
-  })();
-
-if (!global.supabaseService) {
-  global.supabaseService = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-}
-const sb = global.supabaseService;
-
-// ---- helpers: validation + profile fetch (resilient) ----
-function isUUID(v) {
-  return typeof v === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);
-}
-
-function maskEmail(email) {
-  if (!email || typeof email !== "string" || !email.includes("@")) return null;
-  const [name] = email.split("@");
-  return name || null;
-}
-
-const PROFILE_COLUMNS_PRIMARY = "id, username, display_name, avatar_url, email";
-const PROFILE_COLUMNS_MINIMAL = "id, username, avatar_url, email";
-
-/** Fetch profiles for a set of user_ids. If a selected column doesn't exist, fall back to a minimal set. */
-async function fetchProfilesResilient(sb, userIds) {
-  if (!userIds?.length) return [];
-  // First try primary set (may include 'display_name' which might not exist on some envs)
-  let res = await sb.from("profiles").select(PROFILE_COLUMNS_PRIMARY).in("id", userIds);
-  if (res.error && res.error.code === "42703") {
-    // Column missing on this env; fallback to minimal set
-    res = await sb.from("profiles").select(PROFILE_COLUMNS_MINIMAL).in("id", userIds);
-  }
-  if (res.error) throw res.error;
-  return res.data || [];
-}
-
-/** Build a display label on server (optional; client can still compute) */
-function deriveDisplay(profile) {
-  if (!profile) return "ضيف";
-  const dn = profile.display_name && String(profile.display_name).trim();
-  const un = profile.username && String(profile.username).trim();
-  const masked = maskEmail(profile.email);
-  return dn || un || masked || "ضيف";
-}
-
-// Health route (idempotent)
-if (!app._healthMounted) {
-  app.get("/health", (_req, res) => res.status(200).json({ ok: true, ts: new Date().toISOString() }));
-  app._healthMounted = true;
-}
-
-// HMS token routes (mount at both root and /api for proxy setups)
-if (!app._hmsMounted) {
-  app.use("/hms", hmsRouter);
-  app.use("/api/hms", hmsRouter);
-  app._hmsMounted = true;
-  console.log("[server] HMS routes mounted at: /hms/* and /api/hms/*");
-}
-
-// Build a router that we can mount at multiple prefixes
-function buildRoomsRouter() {
-  const r = express.Router();
-
-  async function upsertParticipant(room_id, user_id, role) {
-    const ins = await sb.from("room_participants").insert({
-      room_id,
-      user_id,
-      role,
-      joined_at: new Date().toISOString(),
-    });
-    if (ins.error) {
-      const upd = await sb
-        .from("room_participants")
-        .update({ role })
-        .eq("room_id", room_id)
-        .eq("user_id", user_id);
-      if (upd.error) throw upd.error;
-    }
-  }
-
-  r.post("/join", async (req, res) => {
-    try {
-      if (!req.is('application/json') && !req.is('application/x-www-form-urlencoded')) {
-        // still try to use parsed body, but return a clean JSON 400 if empty
-      }
-      if (!req.body || Object.keys(req.body).length === 0) {
-        return res.status(400).json({ ok: false, message: "empty request body" });
-      }
-      
-      const { room_id, user_id, role } = req.body || {};
-      if (!room_id || !user_id || !role) {
-        return res.status(400).json({ ok: false, message: "room_id, user_id, role required" });
-      }
-      await upsertParticipant(room_id, user_id, role);
-      res.json({ ok: true, data: { room_id, user_id, role } });
-    } catch (e) {
-      res.status(500).json({ ok: false, message: "join failed", details: e });
-    }
-  });
-
-  r.post("/role", async (req, res) => {
-    try {
-      if (!req.is('application/json') && !req.is('application/x-www-form-urlencoded')) {
-        // still try to use parsed body, but return a clean JSON 400 if empty
-      }
-      if (!req.body || Object.keys(req.body).length === 0) {
-        return res.status(400).json({ ok: false, message: "empty request body" });
-      }
-      
-      const { room_id, user_id, enable } = req.body || {};
-      if (!room_id || !user_id || typeof enable !== "boolean") {
-        return res.status(400).json({ ok: false, message: "room_id, user_id, enable required" });
-      }
-      const role = enable ? "speaker" : "listener";
-      const { error } = await sb
-        .from("room_participants")
-        .update({ role })
-        .eq("room_id", room_id)
-        .eq("user_id", user_id);
-      if (error) throw error;
-      res.json({ ok: true, data: { room_id, user_id, role } });
-    } catch (e) {
-      res.status(500).json({ ok: false, message: "role update failed", details: e });
-    }
-  });
-
-  // Return 200 with ok:true even if room has no members; never 404 (route exists)
-  r.get("/:id/participants", async (req, res) => {
-    try {
-      const room_id = req.params.id;
-      if (!isUUID(room_id)) {
-        return res.status(400).json({ ok: false, message: "invalid room_id (uuid required)" });
-      }
-
-      const { data: members, error: memErr } = await sb
-        .from("room_participants")
-        .select("user_id, role, joined_at")
-        .eq("room_id", room_id);
-      if (memErr) return res.status(500).json({ ok: false, message: "participants fetch failed", details: memErr });
-
-      const userIds = (members || []).map(m => m.user_id);
-      const profiles = await fetchProfilesResilient(sb, userIds);
-
-      const result = (members || []).map(m => {
-        const p = profiles.find(x => x.id === m.user_id) || null;
-        return {
-          ...m,
-          profile: p && {
-            id: p.id,
-            username: p.username ?? null,
-            display_name: p.display_name ?? null, // may be undefined in minimal set
-            avatar_url: p.avatar_url ?? null,
-            email: p.email ?? null,
-            display: deriveDisplay(p),
-          },
-        };
-      });
-
-      return res.json({ ok: true, data: result });
-    } catch (e) {
-      return res.status(500).json({ ok: false, message: "unexpected error", details: e });
-    }
-  });
-
-  return r;
-}
-
-// Additional room endpoints (mounted at root level)
-if (!app._additionalRoomsMounted) {
-  // LEAVE: remove participant row
-  app.post("/rooms/leave", async (req, res) => {
-    try {
-      const { room_id, user_id } = req.body || {};
-      if (!isUUID(room_id) || !isUUID(user_id)) {
-        return res.status(400).json({ ok: false, message: "room_id and user_id (uuid) required" });
-      }
-      const { error } = await sb
-        .from("room_participants")
-        .delete()
-        .eq("room_id", room_id)
-        .eq("user_id", user_id);
-      if (error) return res.status(500).json({ ok: false, message: "leave failed", details: error });
-      return res.json({ ok: true, data: { room_id, user_id, left: true } });
-    } catch (e) {
-      return res.status(500).json({ ok: false, message: "unexpected error", details: e });
-    }
-  });
-
-  // HAND RAISE: insert (idempotent upsert-ish)
-  app.post("/rooms/handraise", async (req, res) => {
-    try {
-      const { room_id, user_id } = req.body || {};
-      if (!isUUID(room_id) || !isUUID(user_id)) {
-        return res.status(400).json({ ok: false, message: "room_id and user_id (uuid) required" });
-      }
-      // try insert; ignore duplicate if unique constraint exists
-      let ins = await sb.from("hand_raises").insert({
-        room_id,
-        user_id,
-        created_at: new Date().toISOString(),
-      });
-      if (ins.error && ins.error.code !== "23505") {
-        return res.status(500).json({ ok: false, message: "hand raise failed", details: ins.error });
-      }
-      return res.json({ ok: true, data: { room_id, user_id, raised: true } });
-    } catch (e) {
-      return res.status(500).json({ ok: false, message: "unexpected error", details: e });
-    }
-  });
-
-  // HAND LOWER: delete
-  app.post("/rooms/handlower", async (req, res) => {
-    try {
-      const { room_id, user_id } = req.body || {};
-      if (!isUUID(room_id) || !isUUID(user_id)) {
-        return res.status(400).json({ ok: false, message: "room_id and user_id (uuid) required" });
-      }
-      const { error } = await sb
-        .from("hand_raises")
-        .delete()
-        .eq("room_id", room_id)
-        .eq("user_id", user_id);
-      if (error) return res.status(500).json({ ok: false, message: "hand lower failed", details: error });
-      return res.json({ ok: true, data: { room_id, user_id, raised: false } });
-    } catch (e) {
-      return res.status(500).json({ ok: false, message: "unexpected error", details: e });
-    }
-  });
-
-  app._additionalRoomsMounted = true;
-  console.log("[server] Additional room endpoints mounted: /rooms/leave, /rooms/handraise, /rooms/handlower");
-}
-
-// Mount at BOTH /rooms/* and /api/rooms/* to cover proxy setups
-if (!app._roomsMounted) {
-  const router = buildRoomsRouter();
-  app.use("/rooms", router);
-  app.use("/api/rooms", router);
-  app._roomsMounted = true;
-  console.log("[server] Rooms routes mounted at: /rooms/* and /api/rooms/*");
-}
-
-// Optional: landing route that lists what's mounted (quick 200 check)
-if (!app._indexMounted) {
-  app.get("/", (_req, res) => {
-    res.json({
-      ok: true,
-      routes: [
-        "GET  /health",
-        "GET  /rooms/:id/participants",
-        "POST /rooms/join",
-        "POST /rooms/role",
-        "GET  /api/rooms/:id/participants",
-        "POST /api/rooms/join",
-        "POST /api/rooms/role",
-      ],
-    });
-  });
-  app._indexMounted = true;
-}
-
-module.exports = app;
-// --- END PATCH ---
-
-// Try to load PayTabs router, but don't fail if it can't load
-let paytabsRouter;
-try {
-  paytabsRouter = require('./routes/paytabs');
-  console.log('✅ PayTabs router loaded');
-} catch (error) {
-  console.warn('❌ PayTabs router failed to load:', error.message);
-  paytabsRouter = null;
-}
-
-// Try to load STC Pay router, but don't fail if it can't load
-let stcpayRouter;
-try {
-  stcpayRouter = require('./routes/stcpay');
-  console.log('✅ STC Pay router loaded');
-} catch (error) {
-  console.warn('❌ STC Pay router failed to load:', error.message);
-  stcpayRouter = null;
-}
-
-
-// Try to require other dependencies with error handling
-let fetch, supabase, _cors_noop, jwt, uuidv4, parsePhoneNumberFromString, twilioClient;
-
-try {
-  fetch = require('node-fetch');
-  console.log('✅ node-fetch loaded');
-} catch (e) {
-  console.warn('❌ node-fetch failed:', e.message);
-}
-
-try {
-  const { createClient } = require('@supabase/supabase-js');
-  supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
-  console.log('✅ Supabase loaded');
-} catch (e) {
-  console.warn('❌ Supabase failed:', e.message);
-}
-
-try {
-  _cors_noop = require('cors');
-  console.log('✅ CORS loaded');
-} catch (e) {
-  console.warn('❌ CORS failed:', e.message);
-}
-
-try {
-  jwt = require('jsonwebtoken');
-  console.log('✅ JWT loaded');
-} catch (e) {
-  console.warn('❌ JWT failed:', e.message);
-}
-
-try {
-  const { v4 } = require('uuid');
-  uuidv4 = v4;
-  console.log('✅ UUID loaded');
-} catch (e) {
-  console.warn('❌ UUID failed:', e.message);
-}
-
-try {
-  const { parsePhoneNumberFromString: parsePhone } = require('libphonenumber-js');
-  parsePhoneNumberFromString = parsePhone;
-  console.log('✅ libphonenumber-js loaded');
-} catch (e) {
-  console.warn('❌ libphonenumber-js failed:', e.message);
-}
-
-try {
-  const Twilio = require('twilio');
-  twilioClient = Twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-  console.log('✅ Twilio loaded');
-} catch (e) {
-  console.warn('❌ Twilio failed:', e.message);
-}
-
+// ---------- middleware ----------
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
-// --- serve static legal pages (Privacy / Terms) ---
-app.use(express.static(path.join(__dirname, 'public'), {
-  maxAge: '1h',
-}));
+// (optional) very open CORS; adjust if you want stricter
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization");
+  if (req.method === "OPTIONS") return res.sendStatus(200);
+  next();
+});
 
-// Friendly shortcuts
-app.get('/privacy', (_req, res) =>
-  res.sendFile(path.join(__dirname, 'public', 'privacy.html'))
-);
-app.get('/terms', (_req, res) =>
-  res.sendFile(path.join(__dirname, 'public', 'terms.html'))
-);
+// ---------- health ----------
+app.get("/health", (req, res) => res.json({ ok: true, ts: new Date().toISOString() }));
 
-// PayTabs payment routes (only if router loaded successfully)
-if (paytabsRouter) {
-  app.use('/api/payments/paytabs', paytabsRouter);
-  console.log('✅ PayTabs routes enabled');
-} else {
-  console.log('⚠️ PayTabs routes disabled (missing environment variables)');
+// ---------- Supabase admin (for hand endpoints) ----------
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+const supabaseAdmin =
+  SUPABASE_URL && SUPABASE_SERVICE_KEY
+    ? createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } })
+    : null;
+
+// ---------- tiny JWT (HS256) helpers (no external deps) ----------
+const b64url = (buf) =>
+  Buffer.from(buf)
+    .toString("base64")
+    .replace(/=/g, "")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_");
+
+function signHS256(payload, secret) {
+  const header = { alg: "HS256", typ: "JWT" };
+  const encHeader = b64url(JSON.stringify(header));
+  const encPayload = b64url(JSON.stringify(payload));
+  const data = `${encHeader}.${encPayload}`;
+  const sig = crypto.createHmac("sha256", secret).update(data).digest("base64");
+  const encSig = sig.replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
+  return `${data}.${encSig}`;
 }
 
-// STC Pay payment routes (only if router loaded successfully)
-if (stcpayRouter) {
-  app.use('/api/payments/stcpay', stcpayRouter);
-  console.log('✅ STC Pay routes enabled');
-} else {
-  console.log('⚠️ STC Pay routes disabled (missing environment variables)');
+// ---------- HMS token ----------
+function buildHMSToken({ room_id, user_id, role, name }) {
+  const accessKey = process.env.HMS_ACCESS_KEY;
+  const secret = process.env.HMS_SECRET;
+  if (!accessKey || !secret) {
+    return { error: "HMS server keys missing" };
+  }
+  const nowSec = Math.floor(Date.now() / 1000);
+  const payload = {
+    access_key: accessKey,
+    type: "app",
+    version: 2,
+    room_id,
+    user_id,
+    role: role || "listener",
+    iat: nowSec,
+    exp: nowSec + 60 * 60, // 1h
+    // metadata: { name }  // optional
+  };
+  const token = signHS256(payload, secret);
+  return { token };
 }
 
-
-// Health check endpoint
-app.get('/', (req, res) => {
-  res.json({ 
-    status: 'OK', 
-    message: 'Dreams KSA Voice Chat Backend - Full Version',
-    timestamp: new Date().toISOString(),
-    dependencies: {
-      fetch: !!fetch,
-      supabase: !!supabase,
-      cors: true,
-      jwt: !!jwt,
-      uuid: !!uuidv4,
-      phone: !!parsePhoneNumberFromString,
-      twilio: !!twilioClient
+const hmsTokenHandler = (req, res) => {
+  try {
+    const { room_id, user_id, name, role } = req.body || {};
+    if (!room_id || !user_id) {
+      return res.status(400).json({ ok: false, message: "room_id and user_id required" });
     }
-  });
+    const { token, error } = buildHMSToken({ room_id, user_id, name, role });
+    if (error) return res.status(500).json({ ok: false, message: error });
+    return res.json({ ok: true, token });
+  } catch (e) {
+    return res
+      .status(500)
+      .json({ ok: false, message: "token generation failed", details: String(e?.message || e) });
+  }
+};
+
+// mount at both paths for proxy setups
+app.post("/hms/token", hmsTokenHandler);
+app.post("/api/hms/token", hmsTokenHandler);
+
+// ---------- Hand raise / lower ----------
+app.post("/rooms/handraise", async (req, res) => {
+  try {
+    const { room_id, user_id } = req.body || {};
+    if (!room_id || !user_id) return res.status(400).json({ ok: false, message: "room_id and user_id required" });
+    if (!supabaseAdmin) return res.status(500).json({ ok: false, message: "Supabase admin not configured" });
+
+    const { error } = await supabaseAdmin
+      .from("hand_raises")
+      .upsert({ room_id, user_id, raised_at: new Date().toISOString() }, { onConflict: "room_id,user_id" });
+    if (error) return res.status(500).json({ ok: false, message: "hand raise failed", details: error.message });
+    return res.json({ ok: true });
+  } catch (e) {
+    return res.status(500).json({ ok: false, message: "hand raise failed", details: String(e?.message || e) });
+  }
 });
 
-app.get('/routes', (_req, res) => {
-  res.json({
-    routes: [
-      'GET /',
-      'GET /health',
-      'GET /routes',
-      'GET /privacy',
-      'GET /terms',
-      'POST /auth/phone/start',
-      'POST /auth/phone/verify',
-      'GET /auth/phone/diag',
-      'POST /create-room',
-      'POST /get-token',
-      'GET /room/:roomId',
-      'GET /rooms',
-      'POST /leave-room',
-      'POST /admin/mute',
-      'POST /admin/kick',
-      'GET /api/rooms',
-      'POST /api/create-room',
-      'POST /api/get-token',
-      'GET /api/room/:roomId',
-      'POST /api/leave-room',
-      'POST /api/admin/mute',
-      'POST /api/admin/kick',
-      'POST /api/payments/paytabs/create',
-      'POST /api/payments/paytabs/verify',
-      'GET /api/payments/paytabs/verify-callback',
-      'POST /api/payments/stcpay/create',
-      'POST /api/payments/stcpay/webhook',
-      'GET /api/payments/stcpay/return'
-    ]
-  });
+app.post("/rooms/handlower", async (req, res) => {
+  try {
+    const { room_id, user_id } = req.body || {};
+    if (!room_id || !user_id) return res.status(400).json({ ok: false, message: "room_id and user_id required" });
+    if (!supabaseAdmin) return res.status(500).json({ ok: false, message: "Supabase admin not configured" });
+
+    const { error } = await supabaseAdmin.from("hand_raises").delete().eq("room_id", room_id).eq("user_id", user_id);
+    if (error) return res.status(500).json({ ok: false, message: "hand lower failed", details: error.message });
+    return res.json({ ok: true });
+  } catch (e) {
+    return res.status(500).json({ ok: false, message: "hand lower failed", details: String(e?.message || e) });
+  }
 });
 
-// Phone authentication endpoints (if Twilio is available)
-if (twilioClient) {
-  app.post('/auth/phone/start', async (req, res) => {
-    try {
-      if (!process.env.TWILIO_VERIFY_SERVICE_SID) {
-        return res.status(500).json({ ok: false, error: 'twilio_not_configured' });
-      }
-      
-      const raw = String(req.body?.phone || '');
-      const country = (req.body?.country || 'SA').toUpperCase();
-      
-      if (!parsePhoneNumberFromString) {
-        return res.status(500).json({ ok: false, error: 'phone_parser_not_available' });
-      }
-      
-      const to = parsePhoneNumberFromString(raw, country);
-      if (!to || !to.isValid()) {
-        return res.status(400).json({ ok: false, error: 'invalid_phone_format' });
-      }
-
-      const verification = await twilioClient.verify.v2
-        .services(process.env.TWILIO_VERIFY_SERVICE_SID)
-        .verifications.create({ to: to.number, channel: 'sms', locale: 'ar' });
-
-      return res.json({ ok: true, sid: verification.sid });
-    } catch (err) {
-      console.warn('[phone/start] error', err);
-      return res.status(400).json({ ok: false, error: 'twilio_error', message: err.message });
-    }
-  });
-
-  app.post('/auth/phone/verify', async (req, res) => {
-    try {
-      if (!process.env.TWILIO_VERIFY_SERVICE_SID) {
-        return res.status(500).json({ ok: false, error: 'twilio_not_configured' });
-      }
-      
-      const raw = String(req.body?.phone || '');
-      const code = String(req.body?.code || '');
-      const country = (req.body?.country || 'SA').toUpperCase();
-      
-      if (!parsePhoneNumberFromString) {
-        return res.status(500).json({ ok: false, error: 'phone_parser_not_available' });
-      }
-      
-      const to = parsePhoneNumberFromString(raw, country);
-      if (!to || !to.isValid() || !code) {
-        return res.status(400).json({ ok: false, error: 'invalid_params' });
-      }
-
-      const check = await twilioClient.verify.v2
-        .services(process.env.TWILIO_VERIFY_SERVICE_SID)
-        .verificationChecks.create({ to: to.number, code });
-
-      if (check.status === 'approved') {
-        return res.json({ ok: true });
-      }
-      return res.status(401).json({ ok: false, error: 'invalid_code' });
-    } catch (err) {
-      console.warn('[phone/verify] error', err);
-      return res.status(400).json({ ok: false, error: 'twilio_error', message: err.message });
-    }
-  });
+// ---------- Existing rooms router (if present) ----------
+try {
+  const roomsRouter = require("./routes/rooms");
+  app.use("/rooms", roomsRouter);
+  app.use("/api/rooms", roomsRouter);
+  console.log("[boot] rooms router mounted");
+} catch (e) {
+  console.warn("[boot] rooms router not found or failed to load:", e?.message || e);
 }
 
-app.get('/auth/phone/diag', (_req, res) => {
-  res.json({
-    ok: true,
-    verifyService: Boolean(process.env.TWILIO_VERIFY_SERVICE_SID),
-    isTrial: String(process.env.TWILIO_IS_TRIAL || 'false'),
-    twilioAvailable: !!twilioClient,
-    phoneParserAvailable: !!parsePhoneNumberFromString
-  });
-});
+// ---------- export & standalone ----------
+module.exports = app;
 
-// Room management (if Supabase is available)
-if (supabase) {
-  app.post('/create-room', async (req, res) => {
-    try {
-      const { name, description = 'Voice chat room', type = 'voice', theme = '#4f46e5' } = req.body;
-
-      if (!name || String(name).trim().length === 0) {
-        return res.status(400).json({ error: 'Missing required field: name' });
-      }
-
-      let createdRoomId = uuidv4 ? uuidv4() : `room_${Date.now()}`;
-
-      // Store in Supabase
-      try {
-        const { data: dbRoom, error: dbError } = await supabase
-          .from('rooms')
-          .upsert({
-            id: createdRoomId,
-            name: name,
-            description: description,
-            type: type,
-            theme: theme,
-            created_at: new Date().toISOString(),
-            is_active: true,
-          })
-          .select()
-          .single();
-
-        if (dbError && dbError.code !== '23505') {
-          console.warn('Database error:', dbError);
-        } else {
-          console.log('Room stored in database:', dbRoom?.id || createdRoomId);
-        }
-      } catch (dbCatch) {
-        console.warn('Supabase insert failed:', dbCatch?.message || dbCatch);
-      }
-
-      return res.json({
-        id: createdRoomId,
-        name,
-        description,
-        theme
-      });
-    } catch (error) {
-      console.error('Create room error:', error);
-      return res.status(500).json({ error: error.message || 'Unknown error' });
-    }
-  });
-
-  app.get('/rooms', async (_req, res) => {
-    try {
-      const { data, error } = await supabase
-        .from('rooms')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(50);
-
-      if (error) throw error;
-
-      res.json({ rooms: data ?? [] });
-    } catch (err) {
-      console.error('List rooms error:', err);
-      res.status(500).json({ error: 'Failed to fetch rooms' });
-    }
-  });
-
-  app.get('/api/rooms', async (_req, res) => {
-    try {
-      const { data, error } = await supabase
-        .from('rooms')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(50);
-
-      if (error) throw error;
-
-      res.json({ rooms: data ?? [] });
-    } catch (err) {
-      console.error('List rooms error:', err);
-      res.status(500).json({ error: 'Failed to fetch rooms' });
-    }
-  });
+// Passenger will require() this file. If running standalone, listen:
+if (require.main === module) {
+  const port = process.env.PORT || 3000;
+  app.listen(port, () => console.log("[boot] server listening on", port));
 }
-
-const PORT = process.env.PORT || 3001;
-const HOST = process.env.HOST || '0.0.0.0';
-
-app.listen(PORT, HOST, () => {
-  console.log(`🚀 Dreams KSA Backend Server listening on ${HOST}:${PORT}`);
-  console.log(`📡 Health check: http://${HOST}:${PORT}/health`);
-});
-
-// Final JSON 404
-app.use((req, res) => {
-  res.status(404).json({ error: 'Not found', path: req.path });
-});
