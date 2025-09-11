@@ -7,6 +7,14 @@ import * as Linking from 'expo-linking';
 import { looksLikeAuthReturn } from '../lib/linking';
 import { completeSessionFromRedirect } from '../lib/auth/sessionFromUrl';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { getBackendBase } from '@/lib/api';
+
+// Boot log - confirm backend URL at runtime
+try {
+  console.log("[boot] backend base:", getBackendBase());
+} catch (e: any) {
+  console.log("[boot] backend base error:", e?.message);
+}
 
 /**
  * SafeLayout
