@@ -36,6 +36,42 @@ if (!global.supabaseService) {
 }
 const sb = global.supabaseService;
 
+// ---- helpers: validation + profile fetch (resilient) ----
+function isUUID(v) {
+  return typeof v === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);
+}
+
+function maskEmail(email) {
+  if (!email || typeof email !== "string" || !email.includes("@")) return null;
+  const [name] = email.split("@");
+  return name || null;
+}
+
+const PROFILE_COLUMNS_PRIMARY = "id, username, display_name, avatar_url, email";
+const PROFILE_COLUMNS_MINIMAL = "id, username, avatar_url, email";
+
+/** Fetch profiles for a set of user_ids. If a selected column doesn't exist, fall back to a minimal set. */
+async function fetchProfilesResilient(sb, userIds) {
+  if (!userIds?.length) return [];
+  // First try primary set (may include 'display_name' which might not exist on some envs)
+  let res = await sb.from("profiles").select(PROFILE_COLUMNS_PRIMARY).in("id", userIds);
+  if (res.error && res.error.code === "42703") {
+    // Column missing on this env; fallback to minimal set
+    res = await sb.from("profiles").select(PROFILE_COLUMNS_MINIMAL).in("id", userIds);
+  }
+  if (res.error) throw res.error;
+  return res.data || [];
+}
+
+/** Build a display label on server (optional; client can still compute) */
+function deriveDisplay(profile) {
+  if (!profile) return "ضيف";
+  const dn = profile.display_name && String(profile.display_name).trim();
+  const un = profile.username && String(profile.username).trim();
+  const masked = maskEmail(profile.email);
+  return dn || un || masked || "ضيف";
+}
+
 // Health route (idempotent)
 if (!app._healthMounted) {
   app.get("/health", (_req, res) => res.status(200).json({ ok: true, ts: new Date().toISOString() }));
@@ -97,30 +133,37 @@ function buildRoomsRouter() {
   r.get("/:id/participants", async (req, res) => {
     try {
       const room_id = req.params.id;
+      if (!isUUID(room_id)) {
+        return res.status(400).json({ ok: false, message: "invalid room_id (uuid required)" });
+      }
+
       const { data: members, error: memErr } = await sb
         .from("room_participants")
         .select("user_id, role, joined_at")
         .eq("room_id", room_id);
       if (memErr) return res.status(500).json({ ok: false, message: "participants fetch failed", details: memErr });
 
-      const userIds = (members || []).map((m) => m.user_id);
-      let profiles = [];
-      if (userIds.length) {
-        const { data: profs, error: profErr } = await sb
-          .from("profiles")
-          .select("id, username, display_name, nickname, avatar_url, email")
-          .in("id", userIds);
-        if (profErr) return res.status(500).json({ ok: false, message: "profiles fetch failed", details: profErr });
-        profiles = profs || [];
-      }
+      const userIds = (members || []).map(m => m.user_id);
+      const profiles = await fetchProfilesResilient(sb, userIds);
 
-      const result = (members || []).map((m) => ({
-        ...m,
-        profile: profiles.find((p) => p.id === m.user_id) || null,
-      }));
-      res.json({ ok: true, data: result });
+      const result = (members || []).map(m => {
+        const p = profiles.find(x => x.id === m.user_id) || null;
+        return {
+          ...m,
+          profile: p && {
+            id: p.id,
+            username: p.username ?? null,
+            display_name: p.display_name ?? null, // may be undefined in minimal set
+            avatar_url: p.avatar_url ?? null,
+            email: p.email ?? null,
+            display: deriveDisplay(p),
+          },
+        };
+      });
+
+      return res.json({ ok: true, data: result });
     } catch (e) {
-      res.status(500).json({ ok: false, message: "unexpected error", details: e });
+      return res.status(500).json({ ok: false, message: "unexpected error", details: e });
     }
   });
 
