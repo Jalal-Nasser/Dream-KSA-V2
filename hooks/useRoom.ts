@@ -2,31 +2,36 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { RealtimeChannel } from '@supabase/supabase-js'
 
-export interface RoomParticipant {
-  id: string
-  room_id: string
+export interface RoomMember {
   user_id: string
-  role: 'room_admin' | 'speaker' | 'listener'
-  hand_raised: boolean
-  mic_granted: boolean
+  role: 'host' | 'speaker' | 'listener'
   joined_at: string
-  left_at?: string
-  profiles: {
-    display_name: string
-    avatar_url?: string
-    role: string
-  }
+}
+
+export interface Profile {
+  id: string
+  display_name: string | null
+  avatar_url: string | null
+}
+
+export interface Participant {
+  user_id: string
+  role: 'host' | 'speaker' | 'listener'
+  joined_at: string
+  profile: Profile | null
+  speakingEnabled: boolean
 }
 
 export interface Room {
   id: string
-  name: string
+  title?: string
+  name?: string
   description?: string
   owner_id: string
+  host_id: string
   agency_id?: string
   hms_room_id?: string
   is_live: boolean
-  is_active: boolean
   max_speakers: number
   current_speakers: number
   country: string
@@ -39,7 +44,7 @@ export interface Room {
 
 export function useRoom(roomId: string) {
   const [room, setRoom] = useState<Room | null>(null)
-  const [participants, setParticipants] = useState<RoomParticipant[]>([])
+  const [participants, setParticipants] = useState<Participant[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [channel, setChannel] = useState<RealtimeChannel | null>(null)
@@ -65,9 +70,8 @@ export function useRoom(roomId: string) {
 
       const { data, error } = await supabase
         .from('rooms')
-        .select('*')
+        .select('id, title, name, description, owner_id, host_id, agency_id, hms_room_id, is_live, max_speakers, current_speakers, country, theme, banner_image, background_image, created_at, updated_at')
         .eq('id', roomId)
-        .eq('is_active', true)
         .single()
 
       if (error) throw error
@@ -83,23 +87,47 @@ export function useRoom(roomId: string) {
 
   async function getParticipants() {
     try {
-      const { data, error } = await supabase
-        .from('room_participants')
-        .select(`
-          *,
-          profiles (
-            display_name,
-            avatar_url,
-            role
-          )
-        `)
+      console.log('[participants] fetching for room', roomId)
+
+      // 1) Get room members
+      const { data: members, error: memErr } = await supabase
+        .from('room_members')
+        .select('user_id, role, joined_at')
         .eq('room_id', roomId)
-        .is('left_at', null)
-        .order('joined_at', { ascending: true })
 
-      if (error) throw error
+      if (memErr) {
+        console.log('[participants] room_members error:', memErr)
+        throw memErr
+      }
 
-      setParticipants(data || [])
+      // 2) Fetch profiles for those user_ids
+      const userIds = (members ?? []).map(m => m.user_id)
+      let profiles: Profile[] = []
+      if (userIds.length) {
+        const { data: profs, error: profErr } = await supabase
+          .from('profiles')
+          .select('id, display_name, avatar_url')
+          .in('id', userIds)
+
+        if (profErr) {
+          console.log('[participants] profiles error:', profErr)
+          // non-fatal; proceed with empty profiles
+        } else {
+          profiles = profs ?? []
+        }
+      }
+
+      // 3) Join in JS
+      const participants = (members ?? []).map(m => ({
+        user_id: m.user_id,
+        role: m.role as 'host' | 'speaker' | 'listener',
+        joined_at: m.joined_at,
+        profile: profiles.find(p => p.id === m.user_id) ?? null,
+        speakingEnabled: m.role === 'host' || m.role === 'speaker',
+      }))
+
+      console.log('[participants] fetched', participants.length)
+      setParticipants(participants)
     } catch (err) {
       console.error('Error fetching participants:', err)
     }
@@ -113,28 +141,13 @@ export function useRoom(roomId: string) {
         {
           event: '*',
           schema: 'public',
-          table: 'room_participants',
+          table: 'room_members',
           filter: `room_id=eq.${roomId}`
         },
         (payload) => {
-          console.log('Room participant change:', payload)
-          
-          if (payload.eventType === 'INSERT') {
-            // New participant joined
-            setParticipants(prev => [...prev, payload.new as RoomParticipant])
-          } else if (payload.eventType === 'UPDATE') {
-            // Participant updated (role change, mic granted, etc.)
-            setParticipants(prev => 
-              prev.map(p => 
-                p.id === payload.new.id ? payload.new as RoomParticipant : p
-              )
-            )
-          } else if (payload.eventType === 'DELETE') {
-            // Participant left
-            setParticipants(prev => 
-              prev.filter(p => p.id !== payload.old.id)
-            )
-          }
+          console.log('Room member change:', payload)
+          // Refresh participants when room_members changes
+          getParticipants()
         }
       )
       .on(
@@ -158,16 +171,15 @@ export function useRoom(roomId: string) {
     setChannel(newChannel)
   }
 
-  async function joinRoom(userId: string, role: 'room_admin' | 'speaker' | 'listener' = 'listener') {
+  async function joinRoom(userId: string, role: 'host' | 'speaker' | 'listener' = 'listener') {
     try {
+      console.log('[join] upserting membership', { roomId, userId, role })
       const { data, error } = await supabase
-        .from('room_participants')
+        .from('room_members')
         .upsert({
           room_id: roomId,
           user_id: userId,
           role,
-          hand_raised: false,
-          mic_granted: role === 'room_admin' || role === 'speaker',
           joined_at: new Date().toISOString()
         }, {
           onConflict: 'room_id,user_id'
@@ -175,7 +187,10 @@ export function useRoom(roomId: string) {
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.log('[join] room_members upsert error:', error)
+        throw error
+      }
 
       return { data, error: null }
     } catch (err) {
@@ -187,10 +202,8 @@ export function useRoom(roomId: string) {
   async function leaveRoom(userId: string) {
     try {
       const { error } = await supabase
-        .from('room_participants')
-        .update({
-          left_at: new Date().toISOString()
-        })
+        .from('room_members')
+        .delete()
         .eq('room_id', roomId)
         .eq('user_id', userId)
 
@@ -203,60 +216,41 @@ export function useRoom(roomId: string) {
     }
   }
 
-  async function raiseHand(userId: string) {
+  async function setMicRole(roomId: string, userId: string, enable: boolean) {
+    const role = enable ? 'speaker' : 'listener'
+    console.log('[mic] set role', { roomId, userId, role })
     try {
       const { error } = await supabase
-        .from('room_participants')
-        .update({
-          hand_raised: true
-        })
+        .from('room_members')
+        .update({ role })
         .eq('room_id', roomId)
         .eq('user_id', userId)
 
-      if (error) throw error
+      if (error) {
+        console.log('[mic] update error:', error)
+        throw error
+      }
 
       return { error: null }
     } catch (err) {
-      console.error('Error raising hand:', err)
+      console.error('Error setting mic role:', err)
       return { error: err }
     }
   }
 
-  async function lowerHand(userId: string) {
-    try {
-      const { error } = await supabase
-        .from('room_participants')
-        .update({
-          hand_raised: false
-        })
-        .eq('room_id', roomId)
-        .eq('user_id', userId)
-
-      if (error) throw error
-
-      return { error: null }
-    } catch (err) {
-      console.error('Error lowering hand:', err)
-      return { error: err }
-    }
-  }
-
-  const speakers = participants.filter(p => p.role === 'speaker' || p.role === 'room_admin')
+  const speakers = participants.filter(p => p.role === 'speaker' || p.role === 'host')
   const listeners = participants.filter(p => p.role === 'listener')
-  const handRaised = participants.filter(p => p.hand_raised)
 
   return {
     room,
     participants,
     speakers,
     listeners,
-    handRaised,
     loading,
     error,
     joinRoom,
     leaveRoom,
-    raiseHand,
-    lowerHand,
+    setMicRole,
     refreshRoom: getRoom,
     refreshParticipants: getParticipants
   }
