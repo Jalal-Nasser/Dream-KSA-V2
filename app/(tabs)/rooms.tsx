@@ -19,15 +19,14 @@ export default function Rooms() {
   const fetchRooms = React.useCallback(async () => {
     const { data, error } = await supabase
       .from('rooms')
-      .select('id, name, created_at')
+      .select('id, title, name, created_at')
       .order('created_at', { ascending: false })
       .limit(50);
     if (!error && data) {
-      // Map to expected format
-      const mappedRooms = data.map(room => ({
+      const mappedRooms = data.map((room: any) => ({
         id: room.id,
-        title: room.name,
-        created_at: room.created_at
+        title: room.title || room.name,
+        created_at: room.created_at,
       }));
       setRooms(mappedRooms as Room[]);
     }
@@ -65,15 +64,30 @@ export default function Rooms() {
     
     console.log('[createRoom] User authenticated:', user.id);
     
-    const { data, error } = await supabase
+    // Try title first (remote schema may not have name column); fallback to name.
+    let data: any = null;
+    let error: any = null;
+    let res = await supabase
       .from('rooms')
-      .insert({ 
-        name: title.trim(),
-        description: `غرفة ${title.trim()}` 
-        // owner_id will be auto-set by our trigger
-      })
+      .insert({ title: title.trim() })
       .select()
-      .single();
+      .maybeSingle();
+    if (!res.error && res.data) {
+      data = res.data;
+    } else {
+      error = res.error;
+      res = await supabase
+        .from('rooms')
+        .insert({ name: title.trim() })
+        .select()
+        .maybeSingle();
+      if (!res.error && res.data) {
+        data = res.data;
+        error = null;
+      } else {
+        error = error || res.error;
+      }
+    }
     
     setLoading(false);
     if (error) {
