@@ -52,7 +52,7 @@ export default function MeScreen() {
   
   // Derive avatar from stable storage path (no DB column needed)
   const avatarUrl = useMemo(
-    () => (user ? resolveAvatarUrl(getSupabase(), `u/${user.id}/avatar`) : null),
+    () => (user ? resolveAvatarUrl(getSupabase(), `${user.id}/avatar`) : null),
     [user?.id]
   );
   const avatarSrc = avatarUrl ? { uri: avatarUrl } : undefined;

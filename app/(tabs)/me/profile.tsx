@@ -62,7 +62,7 @@ export default function ProfileScreen() {
         setTitle('');
         setSignature('');
         // We no longer rely on a DB column for avatar; use stable storage path:
-        setAvatarPath(`u/${currentUser.id}/avatar`);
+        setAvatarPath(`${currentUser.id}/avatar`);
          // Fresh load → not dirty
          avatarDirtyRef.current = false;
          // Save initial snapshot for diffing
@@ -76,7 +76,7 @@ export default function ProfileScreen() {
          };
       } else if (!error && !data) {
         // No row yet → initialize avatar path only
-        setAvatarPath(`u/${currentUser.id}/avatar`);
+        setAvatarPath(`${currentUser.id}/avatar`);
       }
     })();
     return () => {
@@ -101,7 +101,7 @@ export default function ProfileScreen() {
     }
     // Upload to Supabase Storage using base64-arraybuffer (most reliable on Expo)
     try {
-      const path = `u/${user?.id}/avatar`; // stable key → no DB column needed
+      const path = `${user?.id}/avatar`; // stable key → matches storage RLS policy
       const contentType = asset.mimeType ?? 'image/jpeg';
       const arrayBuffer = decode(asset.base64);
 
@@ -218,7 +218,7 @@ export default function ProfileScreen() {
     setTitle('');
     setSignature('');
     // Keep stable storage path
-    setAvatarPath(`u/${user.id}/avatar`);
+    setAvatarPath(`${user.id}/avatar`);
     initialRef.current = {
       display_name: data.display_name ?? '',
       gender: '',
