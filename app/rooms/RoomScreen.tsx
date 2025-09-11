@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, TextInput, FlatList, Alert } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { supabase } from '../../lib/supabase';
+import { api } from '../../lib/api';
 import { useRoomRealtime } from '../../hooks/useRoomRealtime';
 import { HMSInstance } from '@100mslive/react-native-hms';
 
@@ -24,25 +25,11 @@ export default function RoomScreen() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return Alert.alert('Login required');
     
-    // Try INSERT first, fallback to UPDATE
-    const { error: insErr } = await supabase.from('room_participants').insert({
-      room_id: roomId,
-      user_id: user.id,
-      role: 'listener',
-      joined_at: new Date().toISOString(),
-    });
-    
-    if (insErr) {
-      console.log('[join] insert failed, trying update:', insErr);
-      const { error: updErr } = await supabase
-        .from('room_participants')
-        .update({ role: 'listener' })
-        .eq('room_id', roomId)
-        .eq('user_id', user.id);
-      
-      if (updErr) {
-        console.log('[join] update failed:', updErr);
-      }
+    try {
+      console.log('[join] (backend) membership', { roomId, user_id: user.id, role: 'listener' });
+      await api.joinRoom(roomId, user.id, 'listener');
+    } catch (err) {
+      console.log('[join] backend error:', err);
     }
     
     const resp = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/hms/token`, {

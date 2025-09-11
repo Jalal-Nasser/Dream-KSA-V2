@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { api } from '@/lib/api'
 import { RealtimeChannel } from '@supabase/supabase-js'
 
 export interface RoomMember {
@@ -87,46 +88,30 @@ export function useRoom(roomId: string) {
 
   async function getParticipants() {
     try {
-      console.log('[participants] fetching for room', roomId)
+      console.log('[participants] (backend) fetching', roomId)
+      const rows = await api.getParticipants(roomId)
+      // normalize to UI model
+      const participants = (rows as any[]).map(r => {
+        const p = r?.profile || {}
+        const display =
+          p.display_name?.trim?.() ||
+          p.nickname?.trim?.() ||
+          p.username?.trim?.() ||
+          null
 
-      // 1) Get room participants
-      const { data: members, error: memErr } = await supabase
-        .from('room_participants')
-        .select('user_id, role, joined_at')
-        .eq('room_id', roomId)
-
-      if (memErr) {
-        console.log('[participants] room_participants error:', memErr)
-        throw memErr
-      }
-
-      // 2) Fetch profiles for those user_ids
-      const userIds = (members ?? []).map(m => m.user_id)
-      let profiles: Array<{ id: string; username: string | null; avatar_url: string | null }> = []
-      if (userIds.length) {
-        const { data: profs, error: profErr } = await supabase
-          .from('profiles')
-          .select('id, username, avatar_url')
-          .in('id', userIds)
-
-        if (profErr) {
-          console.log('[participants] profiles error:', profErr)
-          // non-fatal; proceed with empty profiles
-        } else {
-          profiles = profs ?? []
+        return {
+          user_id: r.user_id,
+          role: r.role as 'host' | 'speaker' | 'listener',
+          joined_at: r.joined_at || null,
+          profile: {
+            id: p.id,
+            name: display || 'ضيف',
+            avatar_url: p.avatar_url || null,
+          },
+          speakingEnabled: r.role === 'host' || r.role === 'speaker',
         }
-      }
-
-      // 3) Join in JS
-      const participants = (members ?? []).map(m => ({
-        user_id: m.user_id,
-        role: m.role as 'host' | 'speaker' | 'listener',
-        joined_at: m.joined_at ?? null,
-        profile: profiles.find(p => p.id === m.user_id) ?? null,
-        speakingEnabled: m.role === 'host' || m.role === 'speaker',
-      }))
-
-      console.log('[participants] fetched', participants.length)
+      })
+      console.log('[participants] (backend) fetched', participants.length)
       setParticipants(participants)
     } catch (err) {
       console.error('Error fetching participants:', err)
@@ -173,29 +158,8 @@ export function useRoom(roomId: string) {
 
   async function joinRoom(userId: string, role: 'host' | 'speaker' | 'listener' = 'listener') {
     try {
-      console.log('[join] upserting membership', { roomId, userId, role })
-      
-      // Try INSERT first
-      const { error: insErr } = await supabase.from('room_participants').insert({
-        room_id: roomId,
-        user_id: userId,
-        role,
-        joined_at: new Date().toISOString(),
-      })
-      if (!insErr) return { data: { success: true }, error: null }
-
-      console.log('[join] insert failed, trying update:', insErr)
-      // Fallback: update existing row for this (room_id, user_id)
-      const { error: updErr } = await supabase
-        .from('room_participants')
-        .update({ role })
-        .eq('room_id', roomId)
-        .eq('user_id', userId)
-
-      if (updErr) {
-        console.log('[join] update failed:', updErr)
-        throw updErr
-      }
+      console.log('[join] (backend) membership', { roomId, userId, role })
+      await api.joinRoom(roomId, userId, role)
       return { data: { success: true }, error: null }
     } catch (err) {
       console.error('Error joining room:', err)
@@ -221,20 +185,9 @@ export function useRoom(roomId: string) {
   }
 
   async function setMicRole(roomId: string, userId: string, enable: boolean) {
-    const role = enable ? 'speaker' : 'listener'
-    console.log('[mic] set role', { roomId, userId, role })
+    console.log('[mic] (backend) set role', { roomId, userId, enable })
     try {
-      const { error } = await supabase
-        .from('room_participants')
-        .update({ role })
-        .eq('room_id', roomId)
-        .eq('user_id', userId)
-
-      if (error) {
-        console.log('[mic] update error:', error)
-        throw error
-      }
-
+      await api.setMicRole(roomId, userId, enable)
       return { error: null }
     } catch (err) {
       console.error('Error setting mic role:', err)

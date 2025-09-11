@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, TextInput, TouchableOpacity, Text, Alert } from 'react-native';
 import { supabase } from '../../lib/supabase';
+import { api } from '../../lib/api';
 import { useRouter } from 'expo-router';
 
 export default function CreateRoomScreen() {
@@ -46,20 +47,11 @@ export default function CreateRoomScreen() {
       }
     }
     // Ensure host membership
-    const { error: insErr } = await supabase.from('room_participants').insert({
-      room_id: created.id,
-      user_id: user.id,
-      role: 'host',
-      joined_at: new Date().toISOString(),
-    });
-    
-    if (insErr) {
-      console.log('[createRoom] host insert failed, trying update:', insErr);
-      await supabase
-        .from('room_participants')
-        .update({ role: 'host' })
-        .eq('room_id', created.id)
-        .eq('user_id', user.id);
+    try {
+      console.log('[createRoom] (backend) host membership', { room_id: created.id, user_id: user.id, role: 'host' });
+      await api.joinRoom(created.id, user.id, 'host');
+    } catch (err) {
+      console.log('[createRoom] host backend error:', err);
     }
     router.replace({ pathname: '/rooms/RoomScreen', params: { roomId: created.id } });
   };

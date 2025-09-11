@@ -6,6 +6,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { PALETTE } from '../../lib/theme';
 import { getSupabase } from '../../lib/supabase';
+import { api } from '../../lib/api';
 
 type Room = { id: string; title: string; created_at: string };
 
@@ -109,20 +110,11 @@ export default function Rooms() {
     console.log('[createRoom] Room created successfully:', data);
     setTitle('');
     // Ensure host membership
-    const { error: insErr } = await supabase.from('room_participants').insert({
-      room_id: data!.id,
-      user_id: user.id,
-      role: 'host',
-      joined_at: new Date().toISOString(),
-    });
-    
-    if (insErr) {
-      console.log('[createRoom] host insert failed, trying update:', insErr);
-      await supabase
-        .from('room_participants')
-        .update({ role: 'host' })
-        .eq('room_id', data!.id)
-        .eq('user_id', user.id);
+    try {
+      console.log('[createRoom] (backend) host membership', { room_id: data!.id, user_id: user.id, role: 'host' });
+      await api.joinRoom(data!.id, user.id, 'host');
+    } catch (err) {
+      console.log('[createRoom] host backend error:', err);
     }
     router.push(`/room/${data!.id}`);
   };

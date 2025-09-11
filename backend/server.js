@@ -248,6 +248,101 @@ app.get('/auth/phone/diag', (_req, res) => {
   });
 });
 
+// --- PATCH START: participants endpoints ---
+// helper functions
+function ok(res, data) { return res.status(200).json({ ok: true, data }); }
+function fail(res, code, message, details = null) { 
+  return res.status(code).json({ ok: false, message, details }); 
+}
+
+/**
+ * POST /rooms/join
+ * body: { room_id: string, user_id: string, role: "listener" | "speaker" | "host" }
+ * behavior: insert (room_id,user_id) or update role if exists
+ */
+app.post('/rooms/join', async (req, res) => {
+  try {
+    const { room_id, user_id, role } = req.body || {};
+    if (!room_id || !user_id || !role) return fail(res, 400, "room_id, user_id, role required");
+
+    // try insert
+    const insertRes = await supabase.from("room_participants").insert({
+      room_id, user_id, role, joined_at: new Date().toISOString(),
+    });
+    if (insertRes.error) {
+      // fallback update (unique constraint or RLS quirks)
+      const updRes = await supabase.from("room_participants")
+        .update({ role })
+        .eq("room_id", room_id)
+        .eq("user_id", user_id);
+      if (updRes.error) return fail(res, 500, "join/update failed", updRes.error);
+    }
+    return ok(res, { room_id, user_id, role });
+  } catch (e) {
+    return fail(res, 500, "unexpected error", String(e));
+  }
+});
+
+/**
+ * POST /rooms/role
+ * body: { room_id: string, user_id: string, enable: boolean }
+ * behavior: enable → role "speaker", disable → "listener"
+ */
+app.post('/rooms/role', async (req, res) => {
+  try {
+    const { room_id, user_id, enable } = req.body || {};
+    if (!room_id || !user_id || typeof enable !== "boolean") {
+      return fail(res, 400, "room_id, user_id, enable required");
+    }
+    const role = enable ? "speaker" : "listener";
+    const { error } = await supabase.from("room_participants")
+      .update({ role })
+      .eq("room_id", room_id)
+      .eq("user_id", user_id);
+    if (error) return fail(res, 500, "role update failed", error);
+    return ok(res, { room_id, user_id, role });
+  } catch (e) {
+    return fail(res, 500, "unexpected error", String(e));
+  }
+});
+
+/**
+ * GET /rooms/:id/participants
+ * returns [{ user_id, role, joined_at, profile: { id, username, display_name, avatar_url } }]
+ */
+app.get('/rooms/:id/participants', async (req, res) => {
+  try {
+    const room_id = req.params.id;
+    if (!room_id) return fail(res, 400, "room id required");
+
+    const { data: members, error: memErr } = await supabase
+      .from("room_participants")
+      .select("user_id, role, joined_at")
+      .eq("room_id", room_id);
+    if (memErr) return fail(res, 500, "participants fetch failed", memErr);
+
+    const userIds = (members || []).map(m => m.user_id);
+    let profiles = [];
+    if (userIds.length) {
+      const { data: profs, error: profErr } = await supabase
+        .from("profiles")
+        .select("id, username, display_name, nickname, avatar_url, email")
+        .in("id", userIds);
+      if (profErr) return fail(res, 500, "profiles fetch failed", profErr);
+      profiles = profs || [];
+    }
+
+    const result = (members || []).map(m => ({
+      ...m,
+      profile: profiles.find(p => p.id === m.user_id) || null,
+    }));
+    return ok(res, result);
+  } catch (e) {
+    return fail(res, 500, "unexpected error", String(e));
+  }
+});
+// --- PATCH END ---
+
 // Room management (if Supabase is available)
 if (supabase) {
   app.post('/create-room', async (req, res) => {
