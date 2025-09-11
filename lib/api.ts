@@ -194,15 +194,15 @@ export const api = {
     });
   },
   raiseHand(room_id: string, user_id: string) {
-    return fetchJSON("/rooms/handraise", {
+    return fetchJSON("/rooms/hand", {
       method: "POST",
-      body: JSON.stringify({ room_id, user_id } as JSONish),
+      body: JSON.stringify({ room_id, user_id, raise: true }),
     });
   },
   lowerHand(room_id: string, user_id: string) {
-    return fetchJSON("/rooms/handlower", {
+    return fetchJSON("/rooms/hand", {
       method: "POST",
-      body: JSON.stringify({ room_id, user_id } as JSONish),
+      body: JSON.stringify({ room_id, user_id, raise: false }),
     });
   },
   getHMSToken(room_id: string, user_id: string, name?: string) {
