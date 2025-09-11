@@ -70,7 +70,7 @@ export function useRoom(roomId: string) {
 
       const { data, error } = await supabase
         .from('rooms')
-        .select('id, title, name, description, owner_id, host_id, agency_id, hms_room_id, is_live, max_speakers, current_speakers, country, theme, banner_image, background_image, created_at, updated_at')
+        .select('id, title, host_id, owner_id')
         .eq('id', roomId)
         .single()
 
@@ -89,24 +89,24 @@ export function useRoom(roomId: string) {
     try {
       console.log('[participants] fetching for room', roomId)
 
-      // 1) Get room members
+      // 1) Get room participants
       const { data: members, error: memErr } = await supabase
-        .from('room_members')
+        .from('room_participants')
         .select('user_id, role, joined_at')
         .eq('room_id', roomId)
 
       if (memErr) {
-        console.log('[participants] room_members error:', memErr)
+        console.log('[participants] room_participants error:', memErr)
         throw memErr
       }
 
       // 2) Fetch profiles for those user_ids
       const userIds = (members ?? []).map(m => m.user_id)
-      let profiles: Profile[] = []
+      let profiles: Array<{ id: string; username: string | null; avatar_url: string | null }> = []
       if (userIds.length) {
         const { data: profs, error: profErr } = await supabase
           .from('profiles')
-          .select('id, display_name, avatar_url')
+          .select('id, username, avatar_url')
           .in('id', userIds)
 
         if (profErr) {
@@ -121,7 +121,7 @@ export function useRoom(roomId: string) {
       const participants = (members ?? []).map(m => ({
         user_id: m.user_id,
         role: m.role as 'host' | 'speaker' | 'listener',
-        joined_at: m.joined_at,
+        joined_at: m.joined_at ?? null,
         profile: profiles.find(p => p.id === m.user_id) ?? null,
         speakingEnabled: m.role === 'host' || m.role === 'speaker',
       }))
@@ -141,12 +141,12 @@ export function useRoom(roomId: string) {
         {
           event: '*',
           schema: 'public',
-          table: 'room_members',
+          table: 'room_participants',
           filter: `room_id=eq.${roomId}`
         },
         (payload) => {
-          console.log('Room member change:', payload)
-          // Refresh participants when room_members changes
+          console.log('Room participant change:', payload)
+          // Refresh participants when room_participants changes
           getParticipants()
         }
       )
@@ -174,25 +174,29 @@ export function useRoom(roomId: string) {
   async function joinRoom(userId: string, role: 'host' | 'speaker' | 'listener' = 'listener') {
     try {
       console.log('[join] upserting membership', { roomId, userId, role })
-      const { data, error } = await supabase
-        .from('room_members')
-        .upsert({
-          room_id: roomId,
-          user_id: userId,
-          role,
-          joined_at: new Date().toISOString()
-        }, {
-          onConflict: 'room_id,user_id'
-        })
-        .select()
-        .single()
+      
+      // Try INSERT first
+      const { error: insErr } = await supabase.from('room_participants').insert({
+        room_id: roomId,
+        user_id: userId,
+        role,
+        joined_at: new Date().toISOString(),
+      })
+      if (!insErr) return { data: { success: true }, error: null }
 
-      if (error) {
-        console.log('[join] room_members upsert error:', error)
-        throw error
+      console.log('[join] insert failed, trying update:', insErr)
+      // Fallback: update existing row for this (room_id, user_id)
+      const { error: updErr } = await supabase
+        .from('room_participants')
+        .update({ role })
+        .eq('room_id', roomId)
+        .eq('user_id', userId)
+
+      if (updErr) {
+        console.log('[join] update failed:', updErr)
+        throw updErr
       }
-
-      return { data, error: null }
+      return { data: { success: true }, error: null }
     } catch (err) {
       console.error('Error joining room:', err)
       return { data: null, error: err }
@@ -202,7 +206,7 @@ export function useRoom(roomId: string) {
   async function leaveRoom(userId: string) {
     try {
       const { error } = await supabase
-        .from('room_members')
+        .from('room_participants')
         .delete()
         .eq('room_id', roomId)
         .eq('user_id', userId)
@@ -221,7 +225,7 @@ export function useRoom(roomId: string) {
     console.log('[mic] set role', { roomId, userId, role })
     try {
       const { error } = await supabase
-        .from('room_members')
+        .from('room_participants')
         .update({ role })
         .eq('room_id', roomId)
         .eq('user_id', userId)

@@ -19,13 +19,13 @@ export default function Rooms() {
   const fetchRooms = React.useCallback(async () => {
     const { data, error } = await supabase
       .from('rooms')
-      .select('id, title, name, created_at')
+      .select('id, title, created_at')
       .order('created_at', { ascending: false })
       .limit(50);
     if (!error && data) {
       const mappedRooms = data.map((room: any) => ({
         id: room.id,
-        title: room.title || room.name,
+        title: room.title || 'Room',
         created_at: room.created_at,
       }));
       setRooms(mappedRooms as Room[]);
@@ -65,21 +65,32 @@ export default function Rooms() {
     console.log('[createRoom] User authenticated:', user.id);
     
     // Try title first (remote schema may not have name column); fallback to name.
+    // IMPORTANT: include host_id (and keep owner_id) to satisfy NOT NULL / RLS.
     let data: any = null;
     let error: any = null;
+    const insertTitle: Record<string, any> = {
+      title: title.trim() || 'Room',
+      host_id: user.id,
+      owner_id: user.id,
+    };
     let res = await supabase
       .from('rooms')
-      .insert({ title: title.trim() })
-      .select()
+      .insert(insertTitle)
+      .select('id')
       .maybeSingle();
     if (!res.error && res.data) {
       data = res.data;
     } else {
       error = res.error;
+      const insertName: Record<string, any> = {
+        name: title.trim() || 'Room',
+        host_id: user.id,
+        owner_id: user.id,
+      };
       res = await supabase
         .from('rooms')
-        .insert({ name: title.trim() })
-        .select()
+        .insert(insertName)
+        .select('id')
         .maybeSingle();
       if (!res.error && res.data) {
         data = res.data;
@@ -97,6 +108,22 @@ export default function Rooms() {
     
     console.log('[createRoom] Room created successfully:', data);
     setTitle('');
+    // Ensure host membership
+    const { error: insErr } = await supabase.from('room_participants').insert({
+      room_id: data!.id,
+      user_id: user.id,
+      role: 'host',
+      joined_at: new Date().toISOString(),
+    });
+    
+    if (insErr) {
+      console.log('[createRoom] host insert failed, trying update:', insErr);
+      await supabase
+        .from('room_participants')
+        .update({ role: 'host' })
+        .eq('room_id', data!.id)
+        .eq('user_id', user.id);
+    }
     router.push(`/room/${data!.id}`);
   };
 

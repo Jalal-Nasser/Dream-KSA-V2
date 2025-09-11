@@ -23,18 +23,32 @@ export default function RoomScreen() {
   const join = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return Alert.alert('Login required');
-    const mem = await supabase
-      .from('room_members')
-      .select('role')
-      .eq('room_id', roomId)
-      .eq('user_id', user.id)
-      .maybeSingle();
-    if (!mem.data) await supabase.from('room_members').upsert({ room_id: roomId, user_id: user.id, role: 'listener' });
-    const role = mem.data?.role ?? 'listener';
+    
+    // Try INSERT first, fallback to UPDATE
+    const { error: insErr } = await supabase.from('room_participants').insert({
+      room_id: roomId,
+      user_id: user.id,
+      role: 'listener',
+      joined_at: new Date().toISOString(),
+    });
+    
+    if (insErr) {
+      console.log('[join] insert failed, trying update:', insErr);
+      const { error: updErr } = await supabase
+        .from('room_participants')
+        .update({ role: 'listener' })
+        .eq('room_id', roomId)
+        .eq('user_id', user.id);
+      
+      if (updErr) {
+        console.log('[join] update failed:', updErr);
+      }
+    }
+    
     const resp = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/hms/token`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ room_id: roomId, user_id: user.id, role, user_name: user.email?.split('@')[0] || 'Guest' })
+      body: JSON.stringify({ room_id: roomId, user_id: user.id, role: 'listener', user_name: user.email?.split('@')[0] || 'Guest' })
     });
     const js = await resp.json();
     if (!resp.ok || !js?.token) return Alert.alert('HMS token error', JSON.stringify(js));
