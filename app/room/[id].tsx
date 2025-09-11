@@ -199,8 +199,7 @@ export default function RoomChat() {
         />
       </View>
       
-      {/* Small status chip only if needed */}
-      {!joining && !connected ? <Chip text="غير متصل بالصوت" danger /> : null}
+      {/* status chip removed intentionally; logs only */}
 
 
       {/* Voice bar above chat input (adjust bottom offset to your chat height) */}

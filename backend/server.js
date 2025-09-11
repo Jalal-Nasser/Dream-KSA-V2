@@ -6,6 +6,7 @@ const path = require('path');
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const { createClient } = require("@supabase/supabase-js");
+const hmsRouter = require("./routes/hms");
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -77,6 +78,14 @@ function deriveDisplay(profile) {
 if (!app._healthMounted) {
   app.get("/health", (_req, res) => res.status(200).json({ ok: true, ts: new Date().toISOString() }));
   app._healthMounted = true;
+}
+
+// HMS token routes (mount at both root and /api for proxy setups)
+if (!app._hmsMounted) {
+  app.use("/hms", hmsRouter);
+  app.use("/api/hms", hmsRouter);
+  app._hmsMounted = true;
+  console.log("[server] HMS routes mounted at: /hms/* and /api/hms/*");
 }
 
 // Build a router that we can mount at multiple prefixes
