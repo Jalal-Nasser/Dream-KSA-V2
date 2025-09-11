@@ -101,7 +101,14 @@ export default function ProfileScreen() {
     }
     // Upload to Supabase Storage using base64-arraybuffer (most reliable on Expo)
     try {
-      const path = `${user?.id}/avatar`; // stable key → matches storage RLS policy
+      // Re-fetch the current user to ensure we have a valid auth.uid() and id
+      const { data: userData } = await supabase.auth.getUser();
+      const current = userData?.user;
+      if (!current?.id) {
+        Alert.alert('لم يتم تسجيل الدخول', 'رجاءً سجّل الدخول أولاً.');
+        return;
+      }
+      const path = `${current.id}/avatar`; // stable key → matches storage RLS policy
       const contentType = asset.mimeType ?? 'image/jpeg';
       const arrayBuffer = decode(asset.base64);
 
