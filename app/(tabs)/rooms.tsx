@@ -35,6 +35,13 @@ export default function Rooms() {
 
   React.useEffect(() => {
     fetchRooms();
+    
+    // Health check on mount (non-blocking, log-only)
+    api.health().then(
+      () => console.log("[api] health ok"),
+      (e) => console.log("[api] health failed", String(e?.message || e))
+    );
+    
     const channel = supabase
       .channel('rooms_changes')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'rooms' }, (payload) => {

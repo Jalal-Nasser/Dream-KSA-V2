@@ -83,7 +83,14 @@ const app = express();
 app.use(express.json());
 
 if (cors) {
-  app.use(cors());
+  app.use(
+    cors({
+      origin: true, // reflect request origin
+      methods: ["GET", "POST", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+      credentials: false,
+    })
+  );
 }
 
 // --- serve static legal pages (Privacy / Terms) ---
@@ -134,8 +141,8 @@ app.get('/', (req, res) => {
   });
 });
 
-app.get('/health', (req, res) => {
-  res.json({ status: 'healthy', uptime: process.uptime() });
+app.get('/health', (_req, res) => {
+  res.status(200).json({ ok: true, ts: new Date().toISOString() });
 });
 
 app.get('/routes', (_req, res) => {
