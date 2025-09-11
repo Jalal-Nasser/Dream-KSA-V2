@@ -7,6 +7,7 @@ import { resolveAvatarUrl } from '@/lib/storage';
 import { pickAvatar } from '@/lib/profileImageUtils';
 import { decode } from 'base64-arraybuffer';
 import DateTimePicker, { AndroidNativeProps, IOSNativeProps } from '@react-native-community/datetimepicker';
+import GenderSelector from '@/components/forms/GenderSelector';
 
 const ACCENT = '#800F2F';
 const CARD = '#FBE7EF'; // soft cherry blossom surface
@@ -251,7 +252,7 @@ export default function ProfileScreen() {
       end={{ x: 1, y: 1 }}
       style={{ flex: 1 }}
     >
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView contentContainerStyle={[styles.container, { writingDirection: "rtl" }]}>
       {/* Header */}
       <Text style={styles.h1}>معلومات شخصية</Text>
 
@@ -285,35 +286,11 @@ export default function ProfileScreen() {
         </View>
 
         {/* Gender */}
-        <View style={styles.field}>
-          <Text style={styles.label}>جنس</Text>
-          <View style={styles.segmentRow}>
-            <Pressable
-              onPress={() => setGender('male')}
-              style={[styles.segment, gender === 'male' && styles.segmentActive]}
-            >
-              <Text style={[styles.segmentText, gender === 'male' && styles.segmentTextActive]}>
-                ذكر
-              </Text>
-            </Pressable>
-            <Pressable
-              onPress={() => setGender('female')}
-              style={[styles.segment, gender === 'female' && styles.segmentActive]}
-            >
-              <Text style={[styles.segmentText, gender === 'female' && styles.segmentTextActive]}>
-                أنثى
-              </Text>
-            </Pressable>
-            <Pressable
-              onPress={() => setGender('other')}
-              style={[styles.segment, gender === 'other' && styles.segmentActive]}
-            >
-              <Text style={[styles.segmentText, gender === 'other' && styles.segmentTextActive]}>
-                أخرى
-              </Text>
-            </Pressable>
-          </View>
-        </View>
+        <GenderSelector
+          value={gender}
+          onChange={setGender}
+          label="جنس"
+        />
 
         {/* Birthday */}
         <View style={styles.field}>
