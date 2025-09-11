@@ -9,6 +9,9 @@ import { completeSessionFromRedirect } from '../lib/auth/sessionFromUrl';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getBackendBase } from '@/lib/api';
 
+// Runtime override for backend URL (no rebuild needed)
+(globalThis as any).__BACKEND_URL = "https://api.dreamsksa.online";
+
 // Boot log - confirm backend URL at runtime
 try {
   console.log("[boot] backend base:", getBackendBase());

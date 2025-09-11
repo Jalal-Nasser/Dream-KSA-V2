@@ -1,35 +1,111 @@
 import Constants from "expo-constants";
+// optional: OTA manifest (do not hard-import to avoid bundling issues when not installed)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+declare const Updates: any;
 
-const rawUrl =
-  process.env.EXPO_PUBLIC_BACKEND_URL ||
-  (Constants?.expoConfig as any)?.extra?.backendUrl ||
-  "";
-
-let BASE = rawUrl?.trim?.() || "";
-if (BASE.endsWith("/")) BASE = BASE.slice(0, -1);
-
-let warned = false;
-export function getBackendBase(): string {
-  if (!BASE || !/^https?:\/\//i.test(BASE)) {
-    const msg =
-      "[api] BACKEND URL missing/invalid. Set EXPO_PUBLIC_BACKEND_URL to https://your-domain.tld";
-    if (!warned) {
-      console.log(msg, { rawUrl });
-      warned = true;
-    }
-    throw new Error(msg);
+function tryGet<T>(fn: () => T): T | undefined {
+  try {
+    return fn();
+  } catch {
+    return undefined;
   }
+}
+
+// Allow runtime override for dev
+declare global {
+  // eslint-disable-next-line no-var
+  var __BACKEND_URL: string | undefined;
+  // eslint-disable-next-line no-var
+  var __BACKEND_PREFIX: string | undefined;
+}
+
+function candidateList(): string[] {
+  const cands: string[] = [];
+
+  // 0) Runtime override (works without rebuild)
+  const rt = (globalThis as any).__BACKEND_URL;
+  if (typeof rt === "string") cands.push(rt);
+
+  // 1) Public env (inlined at Metro build time)
+  if (typeof process?.env?.EXPO_PUBLIC_BACKEND_URL === "string") {
+    cands.push(process.env.EXPO_PUBLIC_BACKEND_URL!);
+  }
+
+  // 2) app.config extra (embedded at native build time)
+  const extra = tryGet(() => (Constants as any).expoConfig?.extra) ?? {};
+  if (typeof (extra as any)?.backendUrl === "string") cands.push((extra as any).backendUrl);
+
+  // 3) OTA/production manifest extra
+  const m2 = tryGet(() => (Updates as any)?.manifest)?.extra ?? {};
+  if (typeof (m2 as any)?.backendUrl === "string") cands.push((m2 as any).backendUrl);
+
+  return cands.filter(Boolean as any);
+}
+
+let BASE = "";
+function resolveBase(): string {
+  if (BASE) return BASE;
+  const list = candidateList().map((v) => (v || "").trim());
+  const chosen = list.find((v) => /^https?:\/\//i.test(v)) || "";
+  if (chosen.endsWith("/")) BASE = chosen.slice(0, -1);
+  else BASE = chosen;
+
+  // One-time verbose log of all candidates + the winner
+  console.log("[api] backend url candidates:", {
+    runtimeOverride: (globalThis as any).__BACKEND_URL ?? null,
+    env: (process as any)?.env?.EXPO_PUBLIC_BACKEND_URL ?? null,
+    constantsExtra: tryGet(() => (Constants as any).expoConfig?.extra?.backendUrl) ?? null,
+    updatesExtra: tryGet(() => (Updates as any)?.manifest?.extra?.backendUrl) ?? null,
+    chosen: BASE || null,
+  });
+
   return BASE;
 }
 
-type JSONish = Record<string, any> | undefined;
+export function getBackendBase(): string {
+  const base = resolveBase();
+  if (!base) {
+    throw new Error(
+      "[api] BACKEND URL missing/invalid. Set EXPO_PUBLIC_BACKEND_URL or global.__BACKEND_URL or extra.backendUrl"
+    );
+  }
+  return base;
+}
+
+type JSONish = Record<string, any>;
+
+// --- PATCH: prefix auto-detect in lib/api.ts ---
+let _prefix: string | null = null;
+const PREFIX_CANDIDATES = ["", "/api"]; // add more if needed e.g. "/v1"
+
+async function pickPrefix(base: string): Promise<string> {
+  if (globalThis.__BACKEND_PREFIX) return (_prefix = globalThis.__BACKEND_PREFIX);
+  if (_prefix !== null) return _prefix;
+  for (const cand of PREFIX_CANDIDATES) {
+    try {
+      const url = `${base}${cand}/health`;
+      const res = await fetch(url, { method: "GET" });
+      if (res.ok) {
+        _prefix = cand;
+        console.log("[api] selected prefix:", _prefix || "(root)");
+        return _prefix;
+      }
+    } catch {
+      // ignore, try next
+    }
+  }
+  _prefix = ""; // fallback to root; we'll still see 404s if wrong, but we tried
+  console.log("[api] prefix autodetect failed; using root");
+  return _prefix;
+}
 
 async function fetchJSON(
   path: string,
   init: RequestInit & { timeoutMs?: number } = {}
 ) {
   const base = getBackendBase();
-  const url = `${base}${path.startsWith("/") ? path : `/${path}`}`;
+  const pfx = await pickPrefix(base);
+  const url = `${base}${pfx}${path.startsWith("/") ? path : `/${path}`}`;
 
   const timeoutMs = init.timeoutMs ?? 8000;
   const controller = new AbortController();
@@ -112,10 +188,3 @@ export const api = {
     return fetchJSON(`/rooms/${room_id}/participants`, { method: "GET" });
   },
 };
-
-// Log backend base once at startup (import this file early)
-try {
-  console.log("[api] BACKEND BASE:", getBackendBase());
-} catch (e: any) {
-  console.log("[api] BACKEND BASE error:", e?.message);
-}
