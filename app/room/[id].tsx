@@ -58,7 +58,10 @@ export default function RoomChat() {
       
       await channel.subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
-          await channel.track({ username: user?.email || user?.id?.slice(0, 6) || 'ضيف' });
+          // Find user's display name from participants
+          const userParticipant = participants.find(p => p.user_id === user?.id);
+          const displayName = userParticipant?.profile?.name || user?.email?.split('@')[0] || 'ضيف';
+          await channel.track({ username: displayName });
         }
       });
     })();
@@ -80,7 +83,10 @@ export default function RoomChat() {
 
   const send = async () => {
     const user = (await supabase.auth.getUser()).data.user;
-    const msg: Msg = { id: uid(), from: user?.email || user?.id?.slice(0,6) || 'أنا', text: text.trim(), at: Date.now() };
+    // Find user's display name from participants
+    const userParticipant = participants.find(p => p.user_id === user?.id);
+    const displayName = userParticipant?.profile?.name || user?.email?.split('@')[0] || 'مستخدم';
+    const msg: Msg = { id: uid(), from: displayName, text: text.trim(), at: Date.now() };
     if (!msg.text) return;
     setText('');
     await chanRef.current?.send({ type: 'broadcast', event: 'message', payload: msg });

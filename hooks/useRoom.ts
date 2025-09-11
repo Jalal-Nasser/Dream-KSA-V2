@@ -93,11 +93,7 @@ export function useRoom(roomId: string) {
       // normalize to UI model
       const participants = (rows as any[]).map(r => {
         const p = r?.profile || {}
-        const display =
-          p.display_name?.trim?.() ||
-          p.nickname?.trim?.() ||
-          p.username?.trim?.() ||
-          null
+        const display = r?.profile?.display ?? r?.profile?.username ?? "ضيف"
 
         return {
           user_id: r.user_id,
@@ -105,7 +101,7 @@ export function useRoom(roomId: string) {
           joined_at: r.joined_at || null,
           profile: {
             id: p.id,
-            name: display || 'ضيف',
+            name: display,
             avatar_url: p.avatar_url || null,
           },
           speakingEnabled: r.role === 'host' || r.role === 'speaker',
