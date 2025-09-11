@@ -2,6 +2,162 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 
+// --- PATCH: Mount rooms routes at /rooms/* and /api/rooms/* on the actual app ---
+const bodyParser = require("body-parser");
+const cors = require("cors");
+const { createClient } = require("@supabase/supabase-js");
+
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+// Reuse the same Express app instance Plesk runs
+const app =
+  module.exports.app ||
+  global.app ||
+  (function () {
+    const a = express();
+    a.use(bodyParser.json());
+    a.use(
+      cors({
+        origin: true,
+        methods: ["GET", "POST", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Authorization"],
+      })
+    );
+    module.exports.app = a;
+    global.app = a;
+    return a;
+  })();
+
+if (!global.supabaseService) {
+  global.supabaseService = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+}
+const sb = global.supabaseService;
+
+// Health route (idempotent)
+if (!app._healthMounted) {
+  app.get("/health", (_req, res) => res.status(200).json({ ok: true, ts: new Date().toISOString() }));
+  app._healthMounted = true;
+}
+
+// Build a router that we can mount at multiple prefixes
+function buildRoomsRouter() {
+  const r = express.Router();
+
+  async function upsertParticipant(room_id, user_id, role) {
+    const ins = await sb.from("room_participants").insert({
+      room_id,
+      user_id,
+      role,
+      joined_at: new Date().toISOString(),
+    });
+    if (ins.error) {
+      const upd = await sb
+        .from("room_participants")
+        .update({ role })
+        .eq("room_id", room_id)
+        .eq("user_id", user_id);
+      if (upd.error) throw upd.error;
+    }
+  }
+
+  r.post("/join", async (req, res) => {
+    try {
+      const { room_id, user_id, role } = req.body || {};
+      if (!room_id || !user_id || !role)
+        return res.status(400).json({ ok: false, message: "room_id, user_id, role required" });
+      await upsertParticipant(room_id, user_id, role);
+      res.json({ ok: true, data: { room_id, user_id, role } });
+    } catch (e) {
+      res.status(500).json({ ok: false, message: "join failed", details: e });
+    }
+  });
+
+  r.post("/role", async (req, res) => {
+    try {
+      const { room_id, user_id, enable } = req.body || {};
+      if (!room_id || !user_id || typeof enable !== "boolean")
+        return res.status(400).json({ ok: false, message: "room_id, user_id, enable required" });
+      const role = enable ? "speaker" : "listener";
+      const { error } = await sb
+        .from("room_participants")
+        .update({ role })
+        .eq("room_id", room_id)
+        .eq("user_id", user_id);
+      if (error) throw error;
+      res.json({ ok: true, data: { room_id, user_id, role } });
+    } catch (e) {
+      res.status(500).json({ ok: false, message: "role update failed", details: e });
+    }
+  });
+
+  // Return 200 with ok:true even if room has no members; never 404 (route exists)
+  r.get("/:id/participants", async (req, res) => {
+    try {
+      const room_id = req.params.id;
+      const { data: members, error: memErr } = await sb
+        .from("room_participants")
+        .select("user_id, role, joined_at")
+        .eq("room_id", room_id);
+      if (memErr) return res.status(500).json({ ok: false, message: "participants fetch failed", details: memErr });
+
+      const userIds = (members || []).map((m) => m.user_id);
+      let profiles = [];
+      if (userIds.length) {
+        const { data: profs, error: profErr } = await sb
+          .from("profiles")
+          .select("id, username, display_name, nickname, avatar_url, email")
+          .in("id", userIds);
+        if (profErr) return res.status(500).json({ ok: false, message: "profiles fetch failed", details: profErr });
+        profiles = profs || [];
+      }
+
+      const result = (members || []).map((m) => ({
+        ...m,
+        profile: profiles.find((p) => p.id === m.user_id) || null,
+      }));
+      res.json({ ok: true, data: result });
+    } catch (e) {
+      res.status(500).json({ ok: false, message: "unexpected error", details: e });
+    }
+  });
+
+  return r;
+}
+
+// Mount at BOTH /rooms/* and /api/rooms/* to cover proxy setups
+if (!app._roomsMounted) {
+  const router = buildRoomsRouter();
+  app.use("/rooms", router);
+  app.use("/api/rooms", router);
+  app._roomsMounted = true;
+  console.log("[server] Rooms routes mounted at: /rooms/* and /api/rooms/*");
+}
+
+// Optional: landing route that lists what's mounted (quick 200 check)
+if (!app._indexMounted) {
+  app.get("/", (_req, res) => {
+    res.json({
+      ok: true,
+      routes: [
+        "GET  /health",
+        "GET  /rooms/:id/participants",
+        "POST /rooms/join",
+        "POST /rooms/role",
+        "GET  /api/rooms/:id/participants",
+        "POST /api/rooms/join",
+        "POST /api/rooms/role",
+      ],
+    });
+  });
+  app._indexMounted = true;
+}
+
+module.exports = app;
+// --- END PATCH ---
+
 // Try to load PayTabs router, but don't fail if it can't load
 let paytabsRouter;
 try {
@@ -24,7 +180,7 @@ try {
 
 
 // Try to require other dependencies with error handling
-let fetch, supabase, cors, jwt, uuidv4, parsePhoneNumberFromString, twilioClient;
+let fetch, supabase, _cors_noop, jwt, uuidv4, parsePhoneNumberFromString, twilioClient;
 
 try {
   fetch = require('node-fetch');
@@ -42,7 +198,7 @@ try {
 }
 
 try {
-  cors = require('cors');
+  _cors_noop = require('cors');
   console.log('✅ CORS loaded');
 } catch (e) {
   console.warn('❌ CORS failed:', e.message);
@@ -79,19 +235,7 @@ try {
   console.warn('❌ Twilio failed:', e.message);
 }
 
-const app = express();
 app.use(express.json());
-
-if (cors) {
-  app.use(
-    cors({
-      origin: true, // reflect request origin
-      methods: ["GET", "POST", "OPTIONS"],
-      allowedHeaders: ["Content-Type", "Authorization"],
-      credentials: false,
-    })
-  );
-}
 
 // --- serve static legal pages (Privacy / Terms) ---
 app.use(express.static(path.join(__dirname, 'public'), {
@@ -132,17 +276,13 @@ app.get('/', (req, res) => {
     dependencies: {
       fetch: !!fetch,
       supabase: !!supabase,
-      cors: !!cors,
+      cors: true,
       jwt: !!jwt,
       uuid: !!uuidv4,
       phone: !!parsePhoneNumberFromString,
       twilio: !!twilioClient
     }
   });
-});
-
-app.get('/health', (_req, res) => {
-  res.status(200).json({ ok: true, ts: new Date().toISOString() });
 });
 
 app.get('/routes', (_req, res) => {
@@ -254,101 +394,6 @@ app.get('/auth/phone/diag', (_req, res) => {
     phoneParserAvailable: !!parsePhoneNumberFromString
   });
 });
-
-// --- PATCH START: participants endpoints ---
-// helper functions
-function ok(res, data) { return res.status(200).json({ ok: true, data }); }
-function fail(res, code, message, details = null) { 
-  return res.status(code).json({ ok: false, message, details }); 
-}
-
-/**
- * POST /rooms/join
- * body: { room_id: string, user_id: string, role: "listener" | "speaker" | "host" }
- * behavior: insert (room_id,user_id) or update role if exists
- */
-app.post('/rooms/join', async (req, res) => {
-  try {
-    const { room_id, user_id, role } = req.body || {};
-    if (!room_id || !user_id || !role) return fail(res, 400, "room_id, user_id, role required");
-
-    // try insert
-    const insertRes = await supabase.from("room_participants").insert({
-      room_id, user_id, role, joined_at: new Date().toISOString(),
-    });
-    if (insertRes.error) {
-      // fallback update (unique constraint or RLS quirks)
-      const updRes = await supabase.from("room_participants")
-        .update({ role })
-        .eq("room_id", room_id)
-        .eq("user_id", user_id);
-      if (updRes.error) return fail(res, 500, "join/update failed", updRes.error);
-    }
-    return ok(res, { room_id, user_id, role });
-  } catch (e) {
-    return fail(res, 500, "unexpected error", String(e));
-  }
-});
-
-/**
- * POST /rooms/role
- * body: { room_id: string, user_id: string, enable: boolean }
- * behavior: enable → role "speaker", disable → "listener"
- */
-app.post('/rooms/role', async (req, res) => {
-  try {
-    const { room_id, user_id, enable } = req.body || {};
-    if (!room_id || !user_id || typeof enable !== "boolean") {
-      return fail(res, 400, "room_id, user_id, enable required");
-    }
-    const role = enable ? "speaker" : "listener";
-    const { error } = await supabase.from("room_participants")
-      .update({ role })
-      .eq("room_id", room_id)
-      .eq("user_id", user_id);
-    if (error) return fail(res, 500, "role update failed", error);
-    return ok(res, { room_id, user_id, role });
-  } catch (e) {
-    return fail(res, 500, "unexpected error", String(e));
-  }
-});
-
-/**
- * GET /rooms/:id/participants
- * returns [{ user_id, role, joined_at, profile: { id, username, display_name, avatar_url } }]
- */
-app.get('/rooms/:id/participants', async (req, res) => {
-  try {
-    const room_id = req.params.id;
-    if (!room_id) return fail(res, 400, "room id required");
-
-    const { data: members, error: memErr } = await supabase
-      .from("room_participants")
-      .select("user_id, role, joined_at")
-      .eq("room_id", room_id);
-    if (memErr) return fail(res, 500, "participants fetch failed", memErr);
-
-    const userIds = (members || []).map(m => m.user_id);
-    let profiles = [];
-    if (userIds.length) {
-      const { data: profs, error: profErr } = await supabase
-        .from("profiles")
-        .select("id, username, display_name, nickname, avatar_url, email")
-        .in("id", userIds);
-      if (profErr) return fail(res, 500, "profiles fetch failed", profErr);
-      profiles = profs || [];
-    }
-
-    const result = (members || []).map(m => ({
-      ...m,
-      profile: profiles.find(p => p.id === m.user_id) || null,
-    }));
-    return ok(res, result);
-  } catch (e) {
-    return fail(res, 500, "unexpected error", String(e));
-  }
-});
-// --- PATCH END ---
 
 // Room management (if Supabase is available)
 if (supabase) {
