@@ -6,7 +6,7 @@ import { api } from '../../lib/api';
 import { useRoomRealtime } from '../../hooks/useRoomRealtime';
 import { useRoom } from '../../hooks/useRoom';
 import { HMSInstance } from '@100mslive/react-native-hms';
-import RoomVoiceBar from '../../components/RoomVoiceBar';
+import VoiceBar from '../../components/rooms/VoiceBar';
 import { Audio } from 'expo-av';
 
 export default function RoomScreen() {
@@ -69,47 +69,34 @@ export default function RoomScreen() {
     setJoined(true);
   };
 
-  const handleToggleMic = async () => {
-    if (!hmsRef.current || !meId) return;
+  const onToggleMic = async () => {
     try {
-      const enableSpeaking = muted; // if currently muted -> enable speaking
-      // Update role on server
-      await api.setMicRole(roomId, meId, enableSpeaking);
-      // Update 100ms track
-      if (muted) {
-        await hmsRef.current.setLocalAudioEnabled(true);
-        setMuted(false);
-      } else {
-        await hmsRef.current.setLocalAudioEnabled(false);
-        setMuted(true);
-      }
+      const enableSpeaking = muted; // if muted -> enable
+      await api.setMicRole(roomId, meId!, enableSpeaking);
+      setMuted(!muted);
+      console.log("[mic] toggled ->", !muted);
     } catch (e) {
-      console.log('[mic] toggle error', String((e as any)?.message || e));
+      console.log("[mic] toggle error", String((e as any)?.message || e));
     }
   };
 
-  const handleRaiseLower = async () => {
-    if (!meId) return;
+  const onRaiseLower = async () => {
     try {
-      const raised = hands?.some((h: any) => h.user_id === meId);
-      if (raised) {
-        await api.lowerHand(roomId, meId);
-      } else {
-        await api.raiseHand(roomId, meId);
-      }
+      const raised = hands?.some((h) => h.user_id === meId);
+      if (raised) await api.lowerHand(roomId, meId!);
+      else await api.raiseHand(roomId, meId!);
+      console.log("[hand] toggled ->", !raised);
     } catch (e) {
-      console.log('[hand] error', String((e as any)?.message || e));
+      console.log("[hand] error", String((e as any)?.message || e));
     }
   };
 
-  const handleLeave = async () => {
-    if (!meId) return;
+  const onLeave = async () => {
     try {
-      await api.leaveRoom(roomId, meId);
+      await api.leaveRoom(roomId, meId!);
     } catch (e) {
-      console.log('[leave] backend error (ignored)', String((e as any)?.message || e));
+      console.log("[leave] backend error (ignored)", String((e as any)?.message || e));
     } finally {
-      // navigate back after backend cleanup
       router.back?.();
     }
   };
@@ -166,13 +153,13 @@ export default function RoomScreen() {
 
       {/* Voice controls bar - only show when joined */}
       {joined && (
-        <View style={{ position: "absolute", left: 0, right: 0, bottom: 60 }}>
-          <RoomVoiceBar
+        <View style={{ position: "absolute", left: 0, right: 0, bottom: 64, zIndex: 5 }}>
+          <VoiceBar
             role={myRole}
             muted={muted}
-            onToggleMic={handleToggleMic}
-            onRaiseLower={handleRaiseLower}
-            onLeave={handleLeave}
+            onToggleMic={onToggleMic}
+            onRaiseLower={onRaiseLower}
+            onLeave={onLeave}
           />
         </View>
       )}
