@@ -25,7 +25,15 @@ const config: ExpoConfig = {
       "expo-build-properties",
       {
         android: {
-          // keep defaults; no special NDK/Proguard edits needed for 100ms
+          // Increase heap size for 100ms native module compilation
+          minSdkVersion: 24,
+          compileSdkVersion: 35,
+          targetSdkVersion: 35,
+          buildToolsVersion: "35.0.0",
+          proguardMinifyEnabled: false,
+          enableProguardInReleaseBuilds: false,
+          enableShrinkResourcesInReleaseBuilds: false,
+          kotlinVersion: "2.1.0",
         },
       },
     ],
