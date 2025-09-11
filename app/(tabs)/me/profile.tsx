@@ -467,7 +467,7 @@ const styles = StyleSheet.create({
   segmentRow: {
     // Use RTL direction for gender selection buttons
     flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
-    justifyContent: I18nManager.isRTL ? 'flex-end' : 'flex-start',
+    justifyContent: 'flex-start',
     gap: 8,
   },
   segment: {
