@@ -17,6 +17,7 @@ const app =
   (function () {
     const a = express();
     a.use(bodyParser.json());
+    a.use(require("body-parser").urlencoded({ extended: false }));
     a.use(
       cors({
         origin: true,
@@ -101,9 +102,17 @@ function buildRoomsRouter() {
 
   r.post("/join", async (req, res) => {
     try {
+      if (!req.is('application/json') && !req.is('application/x-www-form-urlencoded')) {
+        // still try to use parsed body, but return a clean JSON 400 if empty
+      }
+      if (!req.body || Object.keys(req.body).length === 0) {
+        return res.status(400).json({ ok: false, message: "empty request body" });
+      }
+      
       const { room_id, user_id, role } = req.body || {};
-      if (!room_id || !user_id || !role)
+      if (!room_id || !user_id || !role) {
         return res.status(400).json({ ok: false, message: "room_id, user_id, role required" });
+      }
       await upsertParticipant(room_id, user_id, role);
       res.json({ ok: true, data: { room_id, user_id, role } });
     } catch (e) {
@@ -113,9 +122,17 @@ function buildRoomsRouter() {
 
   r.post("/role", async (req, res) => {
     try {
+      if (!req.is('application/json') && !req.is('application/x-www-form-urlencoded')) {
+        // still try to use parsed body, but return a clean JSON 400 if empty
+      }
+      if (!req.body || Object.keys(req.body).length === 0) {
+        return res.status(400).json({ ok: false, message: "empty request body" });
+      }
+      
       const { room_id, user_id, enable } = req.body || {};
-      if (!room_id || !user_id || typeof enable !== "boolean")
+      if (!room_id || !user_id || typeof enable !== "boolean") {
         return res.status(400).json({ ok: false, message: "room_id, user_id, enable required" });
+      }
       const role = enable ? "speaker" : "listener";
       const { error } = await sb
         .from("room_participants")
