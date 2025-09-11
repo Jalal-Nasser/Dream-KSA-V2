@@ -31,6 +31,7 @@ export default function RoomChat() {
   const [joining, setJoining] = React.useState(false);
   const [muted, setMuted] = React.useState(true);
   const [connected, setConnected] = React.useState(false);
+  const [handRaised, setHandRaised] = React.useState(false);
   
   React.useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setAuthUser(data?.user));
@@ -125,15 +126,17 @@ export default function RoomChat() {
     }
   }
 
-  async function onRaiseLower() {
+  async function onToggleHand() {
     if (!myId || !roomId) return;
     try {
-      const raised = (hands || []).some((h: any) => h.user_id === myId);
-      if (raised) await api.lowerHand(roomId, myId);
-      else await api.raiseHand(roomId, myId);
-    } catch (e: any) {
-        console.log("[hand] error:", e?.message || String(e));
-    }
+      if (handRaised) {
+        await api.lowerHand(roomId, myId);
+        setHandRaised(false);
+      } else {
+        await api.raiseHand(roomId, myId);
+        setHandRaised(true);
+      }
+    } catch (e:any) { console.log("[hand] error", e?.message || String(e)); }
   }
 
   async function onLeave() {
@@ -146,6 +149,17 @@ export default function RoomChat() {
     router.back?.();
   }
     
+  // --- UI tweaks ---
+  const Chip = ({text, danger}:{text:string; danger?:boolean}) => (
+    <View style={{
+      position:"absolute", top: 6, alignSelf: "center",
+      backgroundColor: danger ? "rgba(185,28,28,0.90)" : "rgba(0,0,0,0.45)",
+      paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12
+    }}>
+      <Text style={{ color:"#fff", fontSize:12 }}>{text}</Text>
+    </View>
+  );
+
   return (
     <LinearGradient
       colors={['#FBE7EF', '#F2CAD6', '#F8D7DA', '#FBE7EF']}
@@ -185,25 +199,18 @@ export default function RoomChat() {
         />
       </View>
       
-      {/* small connection hint */}
-      {joining && (
-        <View style={{ position: "absolute", top: 12, alignSelf: "center", backgroundColor: "rgba(0,0,0,0.35)", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 }}>
-          <Text style={{ color: "#fff" }}>جارٍ الاتصال بالصوت…</Text>
-        </View>
-      )}
-      {!joining && !connected && (
-        <View style={{ position: "absolute", top: 12, alignSelf: "center", backgroundColor: "rgba(185,28,28,0.85)", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 }}>
-          <Text style={{ color: "#fff" }}>غير متصل بالصوت</Text>
-        </View>
-      )}
+      {/* Small status chip only if needed */}
+      {!joining && !connected ? <Chip text="غير متصل بالصوت" danger /> : null}
+
 
       {/* Voice bar above chat input (adjust bottom offset to your chat height) */}
       <View style={{ position: "absolute", left: 0, right: 0, bottom: 0, zIndex: 5 }}>
         <VoiceBar
           role={myRole}
           muted={muted}
+          handRaised={handRaised}
           onToggleMic={onToggleMic}
-          onRaiseLower={onRaiseLower}
+          onToggleHand={onToggleHand}
           onLeave={onLeave}
         />
       </View>

@@ -168,6 +168,14 @@ async function fetchJSON(
   }
 }
 
+async function fetchFirst(paths: string[], init?: RequestInit) {
+  let lastErr: any;
+  for (const p of paths) {
+    try { return await fetchJSON(p, init); } catch (e: any) { lastErr = e; }
+  }
+  throw lastErr;
+}
+
 export const api = {
   async health() {
     return fetchJSON("/health", { method: "GET" });
@@ -194,21 +202,21 @@ export const api = {
     });
   },
   raiseHand(room_id: string, user_id: string) {
-    return fetchJSON("/rooms/hand", {
+    return fetchJSON("/rooms/handraise", {
       method: "POST",
-      body: JSON.stringify({ room_id, user_id, raise: true }),
+      body: JSON.stringify({ room_id, user_id }),
     });
   },
   lowerHand(room_id: string, user_id: string) {
-    return fetchJSON("/rooms/hand", {
+    return fetchJSON("/rooms/handlower", {
       method: "POST",
-      body: JSON.stringify({ room_id, user_id, raise: false }),
+      body: JSON.stringify({ room_id, user_id }),
     });
   },
   getHMSToken(room_id: string, user_id: string, name?: string) {
-    return fetchJSON("/hms/token", {
-      method: "POST",
-      body: JSON.stringify({ room_id, user_id, name }),
-    }).then((res: any) => (res?.token ? res.token : res)); // accept { token } or raw token
+    return fetchFirst(
+      ["/hms/token", "/api/hms/token"],
+      { method: "POST", body: JSON.stringify({ room_id, user_id, name }) }
+    ).then((res: any) => res?.token ?? res);
   },
 };
