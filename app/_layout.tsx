@@ -8,6 +8,7 @@ import { looksLikeAuthReturn } from '../lib/linking';
 import { completeSessionFromRedirect } from '../lib/auth/sessionFromUrl';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getBackendBase } from '@/lib/api';
+import { NativeModules, Platform } from "react-native";
 
 // Runtime override for backend URL (no rebuild needed)
 (globalThis as any).__BACKEND_URL = "https://api.dreamsksa.online";
@@ -18,6 +19,12 @@ try {
 } catch (e: any) {
   console.log("[boot] backend base error:", e?.message);
 }
+
+// HMS diagnostic
+try {
+  const hasHMS = !!(NativeModules as any)?.HMSManager;
+  console.log("[hms] native module present:", Platform.OS, hasHMS);
+} catch {}
 
 /**
  * SafeLayout

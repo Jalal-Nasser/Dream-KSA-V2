@@ -20,6 +20,17 @@ const config: ExpoConfig = {
   version: '1.0.0',
   icon: './assets/images/icon.png',
 
+  plugins: [
+    [
+      "expo-build-properties",
+      {
+        android: {
+          // keep defaults; no special NDK/Proguard edits needed for 100ms
+        },
+      },
+    ],
+  ],
+
   android: {
     package: 'com.dreamska.app',
     versionCode: 1,
@@ -34,7 +45,13 @@ const config: ExpoConfig = {
         data: [{ scheme: 'dream-ksa' }],
       },
     ],
-    permissions: [],
+    permissions: [
+      "RECORD_AUDIO",
+      "MODIFY_AUDIO_SETTINGS",
+      "BLUETOOTH_CONNECT",   // Android 12+ for BT headsets
+      "WAKE_LOCK",
+      "FOREGROUND_SERVICE"
+    ],
   },
   ios: {
     bundleIdentifier: 'com.dreamska.app',
