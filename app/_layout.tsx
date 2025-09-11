@@ -2,14 +2,14 @@
 import '@/lib/polyfills';
 import { Slot } from 'expo-router';
 import { LogBox, View, StyleSheet } from 'react-native';
-import * as React from 'react';
+import React from 'react';
 import * as Linking from 'expo-linking';
 import { looksLikeAuthReturn } from '../lib/linking';
 import { completeSessionFromRedirect } from '../lib/auth/sessionFromUrl';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getBackendBase } from '@/lib/api';
 import { NativeModules, Platform } from "react-native";
-import { HMSRoomProvider } from "@100mslive/react-native-hms";
+import * as HMS from "@100mslive/react-native-hms";
 
 // Runtime override for backend URL (no rebuild needed)
 (globalThis as any).__BACKEND_URL = "https://api.dreamsksa.online";
@@ -37,7 +37,17 @@ function SafeLayout({ children }: { children: React.ReactNode }) {
   return <View style={[styles.safeContainer, { paddingTop: insets.top }]}>{children}</View>;
 }
 
+const HMSProviderSafe: React.ComponentType<{ children?: React.ReactNode }> =
+  (HMS as any)?.HMSRoomProvider || React.Fragment;
+
 export default function RootLayout() {
+  const hasProvider = !!(HMS as any)?.HMSRoomProvider;
+  // one-time diagnostic
+  if (!hasProvider) {
+    console.warn("[hms] HMSRoomProvider is NOT available. Voice will not work. Check your @100mslive/react-native-hms installation.");
+  }
+  console.log("[hms] provider present:", hasProvider);
+
   // Silence flaky Metro websocket noise during OAuth/app switching
   LogBox.ignoreLogs([
     'Cannot connect to Metro',
@@ -61,13 +71,13 @@ export default function RootLayout() {
   }, []);
   
   return (
-    <HMSRoomProvider>
+    <HMSProviderSafe>
       <SafeAreaProvider>
         <SafeLayout>
           <Slot />
         </SafeLayout>
       </SafeAreaProvider>
-    </HMSRoomProvider>
+    </HMSProviderSafe>
   );
 }
 
