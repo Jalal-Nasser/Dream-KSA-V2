@@ -9,6 +9,7 @@ import { completeSessionFromRedirect } from '../lib/auth/sessionFromUrl';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getBackendBase } from '@/lib/api';
 import { NativeModules, Platform } from "react-native";
+import { HMSRoomProvider } from "@100mslive/react-native-hms";
 
 // Runtime override for backend URL (no rebuild needed)
 (globalThis as any).__BACKEND_URL = "https://api.dreamsksa.online";
@@ -60,11 +61,13 @@ export default function RootLayout() {
   }, []);
   
   return (
-    <SafeAreaProvider>
-      <SafeLayout>
-        <Slot />
-      </SafeLayout>
-    </SafeAreaProvider>
+    <HMSRoomProvider>
+      <SafeAreaProvider>
+        <SafeLayout>
+          <Slot />
+        </SafeLayout>
+      </SafeAreaProvider>
+    </HMSRoomProvider>
   );
 }
 

@@ -1,11 +1,17 @@
 import * as React from 'react';
-import { View, Text, StyleSheet, FlatList, TextInput, Pressable, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TextInput, Pressable } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { getSupabase } from '../../lib/supabase';
+import { getSupabase, supabase } from '../../lib/supabase';
 import { PALETTE } from '../../lib/theme';
 import { useRoom } from '../../hooks/useRoom';
+import { Audio } from "expo-av";
+import { useHMSActions, useHMSStore, selectIsConnectedToRoom, selectIsLocalAudioEnabled } from "@100mslive/react-native-hms";
+import { api } from "@/lib/api";
+import VoiceBar from "@/components/rooms/VoiceBar"; 
+import { useRoomRealtime } from '@/hooks/useRoomRealtime';
+
 
 type Msg = { id: string; from: string; text: string; at: number };
 const uid = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`;
@@ -13,16 +19,32 @@ const uid = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice
 export default function RoomChat() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const supabase = getSupabase();
+  // const supabase = getSupabase(); // supabase is directly imported now
   const chanRef = React.useRef<ReturnType<typeof supabase.channel> | null>(null);
   
   // Use room hook for participant management
-  const { room, participants, joinRoom, leaveRoom } = useRoom(id!);
+  const { room, participants, joinRoom, leaveRoom, setMicRole } = useRoom(id!);
+  const { hands } = useRoomRealtime(id!);
+
 
   const [messages, setMessages] = React.useState<Msg[]>([]);
   const [text, setText] = React.useState('');
   const [peers, setPeers] = React.useState<string[]>([]);
   const [hasJoined, setHasJoined] = React.useState(false);
+  const [authUser, setAuthUser] = React.useState<any>(null);
+  React.useEffect(() => { supabase.auth.getUser().then(({ data }) => setAuthUser(data?.user)); }, []);
+  const myId = React.useMemo(() => authUser?.id, [authUser?.id]);
+
+  // ---- 100ms hooks ----
+  const hmsActions = useHMSActions();
+  const isConnected = useHMSStore(selectIsConnectedToRoom);
+  const isLocalAudioEnabled = useHMSStore(selectIsLocalAudioEnabled);
+  const [joining, setJoining] = React.useState(false);
+  
+  // derive my current role in your app (speaker/host/listener) from participants
+  const my = React.useMemo(() => (participants || []).find((p: any) => p.user_id === myId), [participants, myId]);
+  const myRole: "host" | "speaker" | "listener" = (my?.role as any) || "listener";
+
 
   React.useEffect(() => {
     let mounted = true;
@@ -30,6 +52,34 @@ export default function RoomChat() {
       config: { broadcast: { self: true }, presence: { key: uid() } }
     });
     chanRef.current = channel;
+
+    // ---- join 100ms on mount ----
+    let cancelled = false;
+    (async () => {
+      if (!id || !myId) return;
+      try {
+        setJoining(true);
+        await Audio.requestPermissionsAsync().catch(() => {});
+        // name preference: display_name -> username -> masked email -> fallback
+        const name =
+          my?.profile?.display ||
+          my?.profile?.display_name ||
+          my?.profile?.username ||
+          "مستخدم";
+        const token = await api.getHMSToken(id, myId, name);
+        if (cancelled) return;
+        if (token) {
+          await hmsActions.join({ authToken: token, userName: name });
+          console.log("[hms] join OK");
+        } else {
+          console.log("[hms] join error: token is missing");
+        }
+      } catch (e: any) {
+        console.log("[hms] join error:", e?.message || String(e));
+      } finally {
+        setJoining(false);
+      }
+    })();
 
     channel.on('broadcast', { event: 'message' }, (payload) => {
       if (!mounted) return;
@@ -78,8 +128,10 @@ export default function RoomChat() {
       
       if (chanRef.current) supabase.removeChannel(chanRef.current);
       chanRef.current = null;
+      // leave 100ms when screen unmounts
+      hmsActions.leave().catch(() => {});
     };
-  }, [id, hasJoined]);
+  }, [id, hasJoined, myId]);
 
   const send = async () => {
     const user = (await supabase.auth.getUser()).data.user;
@@ -90,8 +142,48 @@ export default function RoomChat() {
     if (!msg.text) return;
     setText('');
     await chanRef.current?.send({ type: 'broadcast', event: 'message', payload: msg });
-    supabase.from('messages').insert({ room_id: id, user_id: user?.id, content: msg.text }).catch(()=>{});
+    supabase.from('messages').insert({ room_id: id, user_id: authUser?.id, content: msg.text }).catch(()=>{});
   };
+
+  // ---- controls handlers ----
+  async function onToggleMic() {
+    if (!myId) return;
+    try {
+      // Prefer high-level toggle
+      await hmsActions.setLocalAudioEnabled(!isLocalAudioEnabled);
+      // Also reflect on your backend role if you use it to gate speaking
+      const enableSpeaking = !isLocalAudioEnabled;
+      await api.setMicRole(id!, myId!, enableSpeaking);
+    } catch (e: any) {
+      console.log("[mic] toggle failed:", e?.message || String(e));
+    }
+  }
+
+  async function onRaiseLower() {
+    if (!myId) return;
+    try {
+      const raised = (hands || []).some((h: any) => h.user_id === myId);
+      if (raised) await api.lowerHand(id!, myId!);
+      else await api.raiseHand(id!, myId!);
+    } catch (e: any) {
+      console.log("[hand] error:", e?.message || String(e));
+    }
+  }
+
+  async function onLeave() {
+    if (!myId) return;
+    try {
+      await leaveRoom(myId);
+    } catch {}
+    try {
+      await hmsActions.leave();
+    } catch {}
+    router.back?.();
+  }
+    
+  // ---- UI ----
+  const showVoiceBar = true; 
+  const muted = !isLocalAudioEnabled;
 
   return (
     <LinearGradient
@@ -131,6 +223,31 @@ export default function RoomChat() {
           textAlign="right"
         />
       </View>
+      
+      {/* small connection hint */}
+      {joining && (
+        <View style={{ position: "absolute", top: 12, alignSelf: "center", backgroundColor: "rgba(0,0,0,0.35)", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 }}>
+          <Text style={{ color: "#fff" }}>جارٍ الاتصال بالصوت…</Text>
+        </View>
+      )}
+      {!joining && !isConnected && (
+        <View style={{ position: "absolute", top: 12, alignSelf: "center", backgroundColor: "rgba(185,28,28,0.85)", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 }}>
+          <Text style={{ color: "#fff" }}>غير متصل بالصوت</Text>
+        </View>
+      )}
+
+      {/* Voice bar above chat input (adjust bottom offset to your chat height) */}
+      {showVoiceBar && (
+        <View style={{ position: "absolute", left: 0, right: 0, bottom: 0, zIndex: 5 }}>
+          <VoiceBar
+            role={myRole}
+            muted={muted}
+            onToggleMic={onToggleMic}
+            onRaiseLower={onRaiseLower}
+            onLeave={onLeave}
+          />
+        </View>
+      )}
     </LinearGradient>
   );
 }

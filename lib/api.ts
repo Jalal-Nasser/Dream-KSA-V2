@@ -205,4 +205,10 @@ export const api = {
       body: JSON.stringify({ room_id, user_id } as JSONish),
     });
   },
+  getHMSToken(room_id: string, user_id: string, name?: string) {
+    return fetchJSON("/hms/token", {
+      method: "POST",
+      body: JSON.stringify({ room_id, user_id, name }),
+    }).then((res: any) => (res?.token ? res.token : res)); // accept { token } or raw token
+  },
 };
