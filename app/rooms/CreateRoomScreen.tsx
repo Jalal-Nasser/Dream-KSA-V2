@@ -9,16 +9,25 @@ export default function CreateRoomScreen() {
   const onCreate = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return Alert.alert('Login required');
-    const ins = await supabase
-      .from('rooms')
-      .insert({ name, created_by: user.id, is_live: true })
-      .select('*')
-      .single();
-    if (ins.error) return Alert.alert('Error', ins.error.message);
-    await supabase
-      .from('room_members')
-      .upsert({ room_id: ins.data.id, user_id: user.id, role: 'host' });
-    router.replace({ pathname: '/rooms/RoomScreen', params: { roomId: ins.data.id } });
+    // Try minimal insert compatible with remote schema: prefer "name", fallback to "title".
+    let created: any = null;
+    let errMsg = '';
+    // Attempt with name
+    let res = await supabase.from('rooms').insert({ name }).select('*').maybeSingle();
+    if (!res.error && res.data) {
+      created = res.data;
+    } else {
+      errMsg = res.error?.message || '';
+      // Fallback with title
+      res = await supabase.from('rooms').insert({ title: name }).select('*').maybeSingle();
+      if (!res.error && res.data) {
+        created = res.data;
+      } else {
+        return Alert.alert('Error', res.error?.message || errMsg || 'Failed to create room');
+      }
+    }
+    await supabase.from('room_members').upsert({ room_id: created.id, user_id: user.id, role: 'host' });
+    router.replace({ pathname: '/rooms/RoomScreen', params: { roomId: created.id } });
   };
   return (
     <View style={{ padding: 16 }}>
