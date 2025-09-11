@@ -9,17 +9,17 @@ export default function CreateRoomScreen() {
   const onCreate = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return Alert.alert('Login required');
-    // Try minimal insert compatible with remote schema: prefer "name", fallback to "title".
+    // Try minimal insert compatible with remote schema: prefer "title", fallback to "name".
     let created: any = null;
     let errMsg = '';
-    // Attempt with name
-    let res = await supabase.from('rooms').insert({ name }).select('*').maybeSingle();
+    // Attempt with title
+    let res = await supabase.from('rooms').insert({ title: name }).select('*').maybeSingle();
     if (!res.error && res.data) {
       created = res.data;
     } else {
       errMsg = res.error?.message || '';
-      // Fallback with title
-      res = await supabase.from('rooms').insert({ title: name }).select('*').maybeSingle();
+      // Fallback with name
+      res = await supabase.from('rooms').insert({ name }).select('*').maybeSingle();
       if (!res.error && res.data) {
         created = res.data;
       } else {

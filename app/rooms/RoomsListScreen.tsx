@@ -37,7 +37,7 @@ export default function RoomsListScreen() {
             onPress={() => router.push({ pathname: '/rooms/RoomScreen', params: { roomId: item.id } })}
             style={{ padding: 16, borderWidth: 1, borderColor: '#e5e7eb', borderRadius: 12, marginBottom: 10 }}
           >
-            <Text style={{ fontSize: 16, fontWeight: '600' }}>{item.name}</Text>
+            <Text style={{ fontSize: 16, fontWeight: '600' }}>{item.title || item.name}</Text>
             <Text style={{ color: '#6b7280' }}>{item.is_live ? 'LIVE' : 'Offline'}</Text>
           </TouchableOpacity>
         )}
