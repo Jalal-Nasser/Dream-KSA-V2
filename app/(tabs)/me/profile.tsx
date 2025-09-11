@@ -48,19 +48,19 @@ export default function ProfileScreen() {
       if (!currentUser) return;
       const { data, error } = await supabase
         .from('profiles')
-        .select('display_name, gender, birthday, country, title, signature')
+        .select('display_name, birthday, country')
         .eq('id', currentUser.id)
         .single();
       if (!mounted) return;
       if (!error && data) {
         setProfile(data);
         setDisplayName(data.display_name ?? '');
-        setGender((data.gender as any) ?? '');
+        setGender('');
         setBirthday(data.birthday ?? '');
         setBirthdayDate(data.birthday ? new Date(data.birthday) : null);
         setCountry(data.country ?? '');
-        setTitle(data.title ?? '');
-        setSignature(data.signature ?? '');
+        setTitle('');
+        setSignature('');
         // We no longer rely on a DB column for avatar; use stable storage path:
         setAvatarPath(`u/${currentUser.id}/avatar`);
          // Fresh load → not dirty
@@ -68,11 +68,11 @@ export default function ProfileScreen() {
          // Save initial snapshot for diffing
          initialRef.current = {
            display_name: data.display_name ?? '',
-           gender: (data.gender as any) ?? '',
+           gender: '',
            birthday: data.birthday ?? '',
            country: data.country ?? '',
-           title: data.title ?? '',
-           signature: data.signature ?? '',
+           title: '',
+           signature: '',
          };
       } else if (!error && !data) {
         // No row yet → initialize avatar path only
@@ -189,12 +189,18 @@ export default function ProfileScreen() {
       return;
     }
 
-    if (__DEV__) console.log('[profile save] payload →', payload);
+    // Restrict to columns that exist on remote schema for now.
+    const allowedKeys = ['display_name', 'birthday', 'country'] as const;
+    const filteredPayload = Object.fromEntries(
+      Object.entries(payload).filter(([k]) => (allowedKeys as unknown as string[]).includes(k))
+    );
+
+    if (__DEV__) console.log('[profile save] payload (filtered) →', filteredPayload);
     // Use UPSERT so a missing profile row is created.
     const { data, error } = await supabase
       .from('profiles')
-      .upsert({ id: user.id, ...payload }, { onConflict: 'id' })
-      .select('display_name, gender, birthday, country, title, signature')
+      .upsert({ id: user.id, ...filteredPayload }, { onConflict: 'id' })
+      .select('display_name, birthday, country')
       .single();
 
     if (error) {
@@ -206,20 +212,20 @@ export default function ProfileScreen() {
 
     // Success: update state + initial snapshot; reset dirty avatar flag
     setDisplayName(data.display_name ?? '');
-    setGender((data.gender as any) ?? '');
+    setGender('');
     setBirthday(data.birthday ?? '');
     setCountry(data.country ?? '');
-    setTitle(data.title ?? '');
-    setSignature(data.signature ?? '');
+    setTitle('');
+    setSignature('');
     // Keep stable storage path
     setAvatarPath(`u/${user.id}/avatar`);
     initialRef.current = {
       display_name: data.display_name ?? '',
-      gender: (data.gender as any) ?? '',
+      gender: '',
       birthday: data.birthday ?? '',
       country: data.country ?? '',
-      title: data.title ?? '',
-      signature: data.signature ?? '',
+      title: '',
+      signature: '',
     };
     avatarDirtyRef.current = false;
     setSaving(false);
