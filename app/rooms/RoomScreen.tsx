@@ -1,14 +1,17 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { View, Text, TouchableOpacity, TextInput, FlatList, Alert } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { supabase } from '../../lib/supabase';
 import { api } from '../../lib/api';
 import { useRoomRealtime } from '../../hooks/useRoomRealtime';
 import { useRoom } from '../../hooks/useRoom';
 import { HMSInstance } from '@100mslive/react-native-hms';
+import RoomVoiceBar from '../../components/RoomVoiceBar';
+import { Audio } from 'expo-av';
 
 export default function RoomScreen() {
   const { roomId } = useLocalSearchParams<{ roomId: string }>();
+  const router = useRouter();
   const { messages, hands, sendMessage, raiseHand } = useRoomRealtime(roomId!);
   const { participants, joinRoom, leaveRoom, setMicRole, raiseHand: raiseHandBackend, lowerHand } = useRoom(roomId!);
   const [joined, setJoined] = useState(false);
@@ -20,11 +23,13 @@ export default function RoomScreen() {
   // Get current user's role and info
   const meId = useMemo(() => currentUser?.id, [currentUser]);
   const my = useMemo(() => participants.find(p => p.user_id === meId), [participants, meId]);
-  const role = my?.role ?? "listener";
-  const isSpeakerish = role === "host" || role === "speaker";
+  const myRole: "host" | "speaker" | "listener" = (my?.role as any) || "listener";
 
   useEffect(() => {
     hmsRef.current = new HMSInstance();
+    
+    // Request audio permission
+    Audio.requestPermissionsAsync().catch(() => {});
     
     // Get current user
     const getUser = async () => {
@@ -64,12 +69,12 @@ export default function RoomScreen() {
     setJoined(true);
   };
 
-  const toggleMute = async () => {
+  const handleToggleMic = async () => {
     if (!hmsRef.current || !meId) return;
     try {
       const enableSpeaking = muted; // if currently muted -> enable speaking
       // Update role on server
-      await setMicRole(roomId, meId, enableSpeaking);
+      await api.setMicRole(roomId, meId, enableSpeaking);
       // Update 100ms track
       if (muted) {
         await hmsRef.current.setLocalAudioEnabled(true);
@@ -79,21 +84,33 @@ export default function RoomScreen() {
         setMuted(true);
       }
     } catch (e) {
-      console.log('[mic] toggle error', e);
+      console.log('[mic] toggle error', String((e as any)?.message || e));
     }
   };
 
-  const onRaiseHand = async () => {
+  const handleRaiseLower = async () => {
     if (!meId) return;
     try {
       const raised = hands?.some((h: any) => h.user_id === meId);
       if (raised) {
-        await lowerHand(meId);
+        await api.lowerHand(roomId, meId);
       } else {
-        await raiseHandBackend(meId);
+        await api.raiseHand(roomId, meId);
       }
     } catch (e) {
-      console.log('[hand] toggle error', e);
+      console.log('[hand] error', String((e as any)?.message || e));
+    }
+  };
+
+  const handleLeave = async () => {
+    if (!meId) return;
+    try {
+      await api.leaveRoom(roomId, meId);
+    } catch (e) {
+      console.log('[leave] backend error (ignored)', String((e as any)?.message || e));
+    } finally {
+      // navigate back after backend cleanup
+      router.back?.();
     }
   };
 
@@ -106,15 +123,7 @@ export default function RoomScreen() {
         </TouchableOpacity>
       ) : (
         <View style={{ flexDirection: 'row', gap: 8, justifyContent: 'center' }}>
-          {isSpeakerish ? (
-            <TouchableOpacity onPress={toggleMute} style={{ backgroundColor: '#111827', padding: 12, borderRadius: 10 }}>
-              <Text style={{ color: '#fff' }}>{muted ? 'تشغيل الميك' : 'إغلاق الميك'}</Text>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity onPress={onRaiseHand} style={{ backgroundColor: '#f59e0b', padding: 12, borderRadius: 10 }}>
-              <Text style={{ color: '#111827', fontWeight: '700' }}>✋ ارفع يدك</Text>
-            </TouchableOpacity>
-          )}
+          <Text style={{ color: '#666', textAlign: 'center' }}>متصل بالصوت</Text>
         </View>
       )}
 
@@ -154,6 +163,19 @@ export default function RoomScreen() {
           renderItem={({ item }) => <Text>✋ {item.user_id}</Text>}
         />
       </View>
+
+      {/* Voice controls bar - only show when joined */}
+      {joined && (
+        <View style={{ position: "absolute", left: 0, right: 0, bottom: 60 }}>
+          <RoomVoiceBar
+            role={myRole}
+            muted={muted}
+            onToggleMic={handleToggleMic}
+            onRaiseLower={handleRaiseLower}
+            onLeave={handleLeave}
+          />
+        </View>
+      )}
     </View>
   );
 }
