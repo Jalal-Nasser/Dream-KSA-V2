@@ -187,6 +187,72 @@ function buildRoomsRouter() {
   return r;
 }
 
+// Additional room endpoints (mounted at root level)
+if (!app._additionalRoomsMounted) {
+  // LEAVE: remove participant row
+  app.post("/rooms/leave", async (req, res) => {
+    try {
+      const { room_id, user_id } = req.body || {};
+      if (!isUUID(room_id) || !isUUID(user_id)) {
+        return res.status(400).json({ ok: false, message: "room_id and user_id (uuid) required" });
+      }
+      const { error } = await sb
+        .from("room_participants")
+        .delete()
+        .eq("room_id", room_id)
+        .eq("user_id", user_id);
+      if (error) return res.status(500).json({ ok: false, message: "leave failed", details: error });
+      return res.json({ ok: true, data: { room_id, user_id, left: true } });
+    } catch (e) {
+      return res.status(500).json({ ok: false, message: "unexpected error", details: e });
+    }
+  });
+
+  // HAND RAISE: insert (idempotent upsert-ish)
+  app.post("/rooms/handraise", async (req, res) => {
+    try {
+      const { room_id, user_id } = req.body || {};
+      if (!isUUID(room_id) || !isUUID(user_id)) {
+        return res.status(400).json({ ok: false, message: "room_id and user_id (uuid) required" });
+      }
+      // try insert; ignore duplicate if unique constraint exists
+      let ins = await sb.from("hand_raises").insert({
+        room_id,
+        user_id,
+        created_at: new Date().toISOString(),
+      });
+      if (ins.error && ins.error.code !== "23505") {
+        return res.status(500).json({ ok: false, message: "hand raise failed", details: ins.error });
+      }
+      return res.json({ ok: true, data: { room_id, user_id, raised: true } });
+    } catch (e) {
+      return res.status(500).json({ ok: false, message: "unexpected error", details: e });
+    }
+  });
+
+  // HAND LOWER: delete
+  app.post("/rooms/handlower", async (req, res) => {
+    try {
+      const { room_id, user_id } = req.body || {};
+      if (!isUUID(room_id) || !isUUID(user_id)) {
+        return res.status(400).json({ ok: false, message: "room_id and user_id (uuid) required" });
+      }
+      const { error } = await sb
+        .from("hand_raises")
+        .delete()
+        .eq("room_id", room_id)
+        .eq("user_id", user_id);
+      if (error) return res.status(500).json({ ok: false, message: "hand lower failed", details: error });
+      return res.json({ ok: true, data: { room_id, user_id, raised: false } });
+    } catch (e) {
+      return res.status(500).json({ ok: false, message: "unexpected error", details: e });
+    }
+  });
+
+  app._additionalRoomsMounted = true;
+  console.log("[server] Additional room endpoints mounted: /rooms/leave, /rooms/handraise, /rooms/handlower");
+}
+
 // Mount at BOTH /rooms/* and /api/rooms/* to cover proxy setups
 if (!app._roomsMounted) {
   const router = buildRoomsRouter();

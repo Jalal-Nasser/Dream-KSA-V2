@@ -187,4 +187,22 @@ export const api = {
   getParticipants(room_id: string) {
     return fetchJSON(`/rooms/${room_id}/participants`, { method: "GET" });
   },
+  leaveRoom(room_id: string, user_id: string) {
+    return fetchJSON("/rooms/leave", {
+      method: "POST",
+      body: JSON.stringify({ room_id, user_id } as JSONish),
+    });
+  },
+  raiseHand(room_id: string, user_id: string) {
+    return fetchJSON("/rooms/handraise", {
+      method: "POST",
+      body: JSON.stringify({ room_id, user_id } as JSONish),
+    });
+  },
+  lowerHand(room_id: string, user_id: string) {
+    return fetchJSON("/rooms/handlower", {
+      method: "POST",
+      body: JSON.stringify({ room_id, user_id } as JSONish),
+    });
+  },
 };

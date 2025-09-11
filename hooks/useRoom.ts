@@ -165,18 +165,12 @@ export function useRoom(roomId: string) {
 
   async function leaveRoom(userId: string) {
     try {
-      const { error } = await supabase
-        .from('room_participants')
-        .delete()
-        .eq('room_id', roomId)
-        .eq('user_id', userId)
-
-      if (error) throw error
-
-      return { error: null }
+      console.log('[leave] (backend) leaving', { roomId, userId });
+      await api.leaveRoom(roomId, userId);
+      return { error: null };
     } catch (err) {
-      console.error('Error leaving room:', err)
-      return { error: err }
+      console.log('[leave] backend error (ignored)', String((err as any)?.message || err));
+      return { error: err };
     }
   }
 
@@ -188,6 +182,28 @@ export function useRoom(roomId: string) {
     } catch (err) {
       console.error('Error setting mic role:', err)
       return { error: err }
+    }
+  }
+
+  async function raiseHand(userId: string) {
+    try {
+      console.log('[hand] (backend) raising', { roomId, userId });
+      await api.raiseHand(roomId, userId);
+      return { error: null };
+    } catch (err) {
+      console.log('[hand] raise error', String((err as any)?.message || err));
+      return { error: err };
+    }
+  }
+
+  async function lowerHand(userId: string) {
+    try {
+      console.log('[hand] (backend) lowering', { roomId, userId });
+      await api.lowerHand(roomId, userId);
+      return { error: null };
+    } catch (err) {
+      console.log('[hand] lower error', String((err as any)?.message || err));
+      return { error: err };
     }
   }
 
@@ -204,6 +220,8 @@ export function useRoom(roomId: string) {
     joinRoom,
     leaveRoom,
     setMicRole,
+    raiseHand,
+    lowerHand,
     refreshRoom: getRoom,
     refreshParticipants: getParticipants
   }
