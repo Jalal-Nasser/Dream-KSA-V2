@@ -149,24 +149,6 @@ app.post("/rooms/handlower", async function (req, res) {
   }
 });
 
-// ---------- Try to mount existing rooms router (optional) ----------
-try {
-  var roomsRouter = require("./routes/rooms");
-  app.use("/rooms", roomsRouter);
-  app.use("/api/rooms", roomsRouter);
-  console.log("[boot] rooms router mounted");
-} catch (e) {
-  console.warn("[boot] rooms router not found/failed:", String((e && e.message) || e));
-}
-try {
-  var hmsRouter = require("./routes/hms.js");
-  app.use("/hms", hmsRouter);
-  app.use("/api/hms", hmsRouter);
-  console.log("[boot] hms router mounted");
-} catch (e) {
-  console.warn("[boot] hms router not found/failed:", String((e && e.message) || e));
-}
-
 // ---------- export & standalone ----------
 module.exports = app;
 if (require.main === module) {
