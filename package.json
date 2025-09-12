@@ -111,6 +111,7 @@
     "typescript": "~5.8.3"
   },
   "private": true,
+  "engines": { "node": ">=20" },
   "expo": {
     "doctor": {
       "reactNativeDirectoryCheck": {

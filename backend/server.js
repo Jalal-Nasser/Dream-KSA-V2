@@ -209,7 +209,7 @@ app.get('/', (_req, res) => {
 // ---------- export for Passenger; listen only in local ----------
 module.exports = app;
 if (require.main === module) {
-  const port = process.env.PORT || 3000;
+  const port = process.env.PORT || 8080;
   app.listen(port, '0.0.0.0', () => {
     log(`server listening on http://0.0.0.0:${port}`);
   });
