@@ -3,7 +3,17 @@ const axios = require('axios');
 const router = express.Router();
 const { createClient } = require('@supabase/supabase-js');
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+// Supabase client (only create if env vars are available)
+let supabase = null;
+try {
+  if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_KEY) {
+    supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+  } else {
+    console.warn('WARNING: SUPABASE_URL or SUPABASE_SERVICE_KEY missing. STC Pay routes will not work properly.');
+  }
+} catch (error) {
+  console.warn('WARNING: Failed to create Supabase client:', error.message);
+}
 
 const STC_BASE_URL = process.env.STC_BASE_URL; // TODO: set from docs
 const STC_MERCHANT_ID = process.env.STC_MERCHANT_ID;
@@ -49,15 +59,19 @@ router.post('/create', async (req, res) => {
 
     // record pending payment
     const amountMinor = Math.round(Number(amount_major) * 100);
-    await supabase.from('payments').insert({
-      user_id,
-      provider: 'stcpay',
-      provider_payment_id: null,
-      amount_bigint: amountMinor,
-      currency,
-      status: 'pending',
-      metadata: { stc_create_resp: data, coins_amount, merchant_order_id, user_id, ...metadata }
-    });
+    if (supabase) {
+      await supabase.from('payments').insert({
+        user_id,
+        provider: 'stcpay',
+        provider_payment_id: null,
+        amount_bigint: amountMinor,
+        currency,
+        status: 'pending',
+        metadata: { stc_create_resp: data, coins_amount, merchant_order_id, user_id, ...metadata }
+      });
+    } else {
+      console.warn('STC Pay create: Supabase not available, payment not stored in database');
+    }
 
     return res.json({ ok: true, checkout_url, raw: data });
   } catch (err) {
@@ -81,16 +95,20 @@ router.post('/webhook', express.json({ type: 'application/json' }), async (req, 
     const success = evt?.status === 'PAID' || evt?.result === 'SUCCESS';
 
     // Find pending payment (match by provider_payment_id or merchant_order_id in metadata)
-    let { data: rows } = await supabase
-      .from('payments')
-      .select('*')
-      .or(`provider_payment_id.eq.${providerPaymentId},metadata->>merchant_order_id.eq.${evt?.order_id}`)
-      .limit(1);
-
-    let payment = rows?.[0] || null;
+    let payment = null;
+    if (supabase) {
+      let { data: rows } = await supabase
+        .from('payments')
+        .select('*')
+        .or(`provider_payment_id.eq.${providerPaymentId},metadata->>merchant_order_id.eq.${evt?.order_id}`)
+        .limit(1);
+      payment = rows?.[0] || null;
+    } else {
+      console.warn('STC Pay webhook: Supabase not available, cannot check existing payments');
+    }
 
     if (success) {
-      if (payment) {
+      if (payment && supabase) {
         await supabase.from('payments').update({
           provider_payment_id: providerPaymentId,
           status: 'succeeded',
@@ -117,7 +135,7 @@ router.post('/webhook', express.json({ type: 'application/json' }), async (req, 
       }
       return res.json({ received: true });
     } else {
-      if (payment) {
+      if (payment && supabase) {
         await supabase.from('payments').update({
           status: 'failed',
           updated_at: new Date().toISOString(),
