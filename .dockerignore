@@ -1,4 +1,12 @@
 .git
-node_modules
 **/node_modules
+admin-dashboard
+apps
+packages
+scripts
+docs
+*.log
+.DS_Store
+.expo
+.expo-shared
 
