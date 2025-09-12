@@ -1,10 +1,9 @@
-// backend/server.js
 'use strict';
 
 /**
  * Express app that works under Passenger (Plesk) and locally.
- * - No ESM-only deps (uses Node 18+ built-in fetch; no node-fetch)
- * - No body-parser (uses express.json/urlencoded)
+ * - No ESM-only deps (uses Node 18+)
+ * - Uses express.json/urlencoded, no body-parser
  * - Exports app for Passenger; listens only in local dev
  */
 
@@ -12,12 +11,10 @@ const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const { createClient } = require('@supabase/supabase-js');
-const roomsRouter = require("./routes/rooms");
 
 // ---------- helpers ----------
 const log = (...a) => console.log('[boot]', ...a);
-const v4rx =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const v4rx = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const isUuid = (s) => typeof s === 'string' && v4rx.test(s);
 
 // ---------- env ----------
@@ -55,7 +52,7 @@ app.get('/health', (_req, res) => {
   return res.json({ ok: true, ts: new Date().toISOString() });
 });
 
-// ---- Participants (no FK requirement; merge profiles manually)
+// ---- Participants (merge profiles manually)
 app.get('/rooms/:id/participants', async (req, res) => {
   try {
     if (!supabase) {
@@ -92,8 +89,7 @@ app.get('/rooms/:id/participants', async (req, res) => {
     const byId = new Map((profiles || []).map((p) => [p.id, p]));
     const merged = rows.map((r) => {
       const p = byId.get(r.user_id) || {};
-      const display =
-        p.display_name || p.username || (p.email ? p.email.split('@')[0] : 'عضو');
+      const display = p.display_name || p.username || (p.email ? p.email.split('@')[0] : 'عضو');
       return {
         user_id: r.user_id,
         role: r.role || 'listener',
@@ -137,7 +133,7 @@ app.post('/rooms/join', async (req, res) => {
   }
 });
 
-// ---- Hand raise/lower (compat with both paths your app used)
+// ---- Hand raise/lower
 async function setHand(req, res, value) {
   try {
     if (!supabase) {
@@ -164,11 +160,6 @@ async function setHand(req, res, value) {
 }
 app.post('/rooms/handraise', (req, res) => setHand(req, res, true));
 app.post('/rooms/handlower', (req, res) => setHand(req, res, false));
-// older path you tried
-app.post('/rooms/hand', async (req, res) => {
-  const { enable } = req.body || {};
-  return setHand(req, res, !!enable);
-});
 
 // ---- HMS token
 app.post('/hms/token', async (req, res) => {
@@ -214,10 +205,6 @@ app.get('/', (_req, res) => {
     ],
   });
 });
-
-// Rooms endpoints (support both root and /api prefixes)
-app.use("/rooms", roomsRouter);
-app.use("/api/rooms", roomsRouter);
 
 // ---------- export for Passenger; listen only in local ----------
 const runningInPassenger = !!process.env.PASSENGER_APP_ENV || !!process.env.PLESK_INSTANCE_ID;

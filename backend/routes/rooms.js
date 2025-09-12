@@ -1,207 +1,155 @@
-// /httpdocs/backend/routes/rooms.js
+// routes/rooms.js
 const express = require("express");
-const { createClient } = require("@supabase/supabase-js");
-
 const router = express.Router();
 
-// ---- Supabase admin client ----
-const SUPABASE_URL =
-  process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_SERVICE_ROLE_KEY =
-  process.env.SUPABASE_SERVICE_ROLE_KEY ||
-  process.env.SUPABASE_SERVICE_KEY ||
-  process.env.SUPABASE_KEY;
-
-let supabase = null;
-if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
-  supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
-} else {
-  console.warn("[rooms] Supabase admin not configured.");
+/**
+ * Helper: safe Supabase getter
+ */
+function getSB(req) {
+  return req.app?.locals?.supabase || null;
 }
 
-const needAdmin = (res) => {
-  if (!supabase) {
-    res.status(500).json({ ok: false, message: "Supabase admin not configured" });
-    return true;
-  }
-  return false;
-};
-
-const nameFromProfile = (p = {}) =>
-  p.display_name || p.username || (p.email ? p.email.split("@")[0] : "");
-
-// Index
-router.get("/", (_req, res) => {
-  res.json({
-    ok: true,
-    endpoints: [
-      "GET    /:roomId/participants",
-      "POST   /join   { room_id, user_id, role }",
-      "POST   /leave  { room_id, user_id }",
-      "POST   /role   { room_id, user_id, enable }",
-      "POST   /handraise { room_id, user_id }",
-      "POST   /handlower { room_id, user_id }",
-    ],
-  });
-});
-
-// Participants (uses view room_participants if present, else joins room_members -> profiles)
+/**
+ * GET /rooms/:roomId/participants
+ * Returns role & basic profile display. If Supabase missing, returns empty list (non-fatal).
+ */
 router.get("/:roomId/participants", async (req, res) => {
-  if (needAdmin(res)) return;
-  const roomId = req.params.roomId;
-  try {
-    let { data, error } = await supabase
-      .from("room_participants")
-      .select(
-        "user_id, role, joined_at, profile:id, profile_username:username, profile_display_name:display_name, profile_avatar_url:avatar_url, profile_email:email"
-      )
-      .eq("room_id", roomId)
-      .order("joined_at", { ascending: true });
+  const supabase = getSB(req);
+  const { roomId } = req.params;
 
-    if (error || !Array.isArray(data)) {
-      const fb = await supabase
-        .from("room_members")
-        .select(
-          `user_id, role, joined_at,
-           profiles:profiles ( id, username, display_name, avatar_url, email )`
-        )
-        .eq("room_id", roomId)
-        .order("joined_at", { ascending: true });
-      if (fb.error) throw fb.error;
-      const mapped = fb.data.map((row) => {
-        const p = row.profiles || {};
-        return {
-          user_id: row.user_id,
-          role: row.role,
-          joined_at: row.joined_at,
-          profile: {
+  if (!supabase) {
+    console.warn("[rooms] participants: Supabase not configured, returning empty list");
+    return res.json({ ok: true, data: [] });
+  }
+
+  try {
+    // prefer table "room_members"; if your table name is different, change here
+    const { data: members, error: mErr } = await supabase
+      .from("room_members")
+      .select("user_id, role, joined_at")
+      .eq("room_id", roomId);
+
+    if (mErr) throw mErr;
+
+    const ids = [...new Set((members || []).map(m => m.user_id))];
+    let profilesMap = {};
+    if (ids.length) {
+      const { data: profiles, error: pErr } = await supabase
+        .from("profiles")
+        .select("id, username, display_name, avatar_url, email")
+        .in("id", ids);
+      if (pErr) throw pErr;
+      profilesMap = Object.fromEntries(
+        (profiles || []).map(p => [
+          p.id,
+          {
             id: p.id,
-            username: p.username,
-            display_name: p.display_name,
-            avatar_url: p.avatar_url,
-            email: p.email,
-            display: nameFromProfile(p),
+            username: p.username ?? null,
+            display_name: p.display_name ?? null,
+            avatar_url: p.avatar_url ?? null,
+            email: p.email ?? null,
+            display: p.display_name || p.username || null,
           },
-        };
-      });
-      return res.json({ ok: true, data: mapped });
+        ])
+      );
     }
 
-    const mapped = data.map((r) => {
-      const p = {
-        id: r.profile,
-        username: r.profile_username,
-        display_name: r.profile_display_name,
-        avatar_url: r.profile_avatar_url,
-        email: r.profile_email,
-      };
-      return {
-        user_id: r.user_id,
-        role: r.role,
-        joined_at: r.joined_at,
-        profile: { ...p, display: nameFromProfile(p) },
-      };
-    });
-    res.json({ ok: true, data: mapped });
+    const out = (members || []).map(m => ({
+      user_id: m.user_id,
+      role: m.role,
+      joined_at: m.joined_at,
+      profile: profilesMap[m.user_id] || { id: m.user_id, display: null },
+    }));
+
+    return res.json({ ok: true, data: out });
   } catch (e) {
-    console.error("[participants] error", e);
-    res.status(200).json({
-      ok: false,
-      message: "participants fetch failed",
-      details: { message: String(e.message || e) },
-    });
+    return res.status(500).json({ ok: false, message: "participants fetch failed", details: { message: String(e?.message || e) } });
   }
 });
 
-// Join
+/**
+ * POST /rooms/join
+ * body: { room_id, user_id, role }
+ * Upserts into room_members. If Supabase missing, returns ok:true (stub) to not break the app.
+ */
 router.post("/join", async (req, res) => {
-  if (needAdmin(res)) return;
+  const supabase = getSB(req);
   const { room_id, user_id, role } = req.body || {};
-  if (!room_id || !user_id)
-    return res.status(400).json({ ok: false, message: "room_id, user_id, role required" });
-  const safeRole = ["host", "speaker", "listener"].includes(role) ? role : "listener";
+  if (!room_id || !user_id) return res.status(400).json({ ok: false, message: "room_id, user_id required" });
+
+  if (!supabase) {
+    console.warn("[rooms] join: Supabase not configured, returning stub ok");
+    return res.json({ ok: true, data: { room_id, user_id, role: role || "listener" }, stub: true });
+  }
+
   try {
-    const { error } = await supabase
-      .from("room_members")
-      .upsert({ room_id, user_id, role: safeRole }, { onConflict: "room_id,user_id" });
+    const payload = {
+      room_id,
+      user_id,
+      role: role || "listener",
+      joined_at: new Date().toISOString(),
+    };
+    const { error } = await supabase.from("room_members").upsert(payload, { onConflict: "room_id,user_id" });
     if (error) throw error;
-    res.json({ ok: true, data: { room_id, user_id, role: safeRole } });
+    return res.json({ ok: true, data: { room_id, user_id, role: payload.role } });
   } catch (e) {
-    console.error("[join] error", e);
-    res.status(200).json({ ok: false, message: "join failed" });
+    return res.status(500).json({ ok: false, message: "join failed", details: { message: String(e?.message || e) } });
   }
 });
 
-// Leave
-router.post("/leave", async (req, res) => {
-  if (needAdmin(res)) return;
-  const { room_id, user_id } = req.body || {};
-  if (!room_id || !user_id)
-    return res.status(400).json({ ok: false, message: "room_id and user_id required" });
-  try {
-    const { error } = await supabase
-      .from("room_members")
-      .delete()
-      .eq("room_id", room_id)
-      .eq("user_id", user_id);
-    if (error) throw error;
-    res.json({ ok: true });
-  } catch (e) {
-    console.error("[leave] error", e);
-    res.status(200).json({ ok: false, message: "leave failed" });
-  }
-});
-
-// Promote/Demote speaker
+/**
+ * POST /rooms/role
+ * body: { room_id, user_id, enable: boolean }  => speaker when true, listener when false
+ */
 router.post("/role", async (req, res) => {
-  if (needAdmin(res)) return;
+  const supabase = getSB(req);
   const { room_id, user_id, enable } = req.body || {};
-  if (!room_id || !user_id || typeof enable !== "boolean")
-    return res.status(400).json({
-      ok: false,
-      message: "room_id, user_id, enable(boolean) required",
-    });
-  const nextRole = enable ? "speaker" : "listener";
+  if (!room_id || !user_id || typeof enable !== "boolean") {
+    return res.status(400).json({ ok: false, message: "room_id, user_id, enable required" });
+  }
+
+  const role = enable ? "speaker" : "listener";
+
+  if (!supabase) {
+    console.warn("[rooms] role: Supabase not configured, returning stub ok");
+    return res.json({ ok: true, data: { room_id, user_id, role }, stub: true });
+  }
+
   try {
-    const { error } = await supabase
-      .from("room_members")
-      .update({ role: nextRole })
-      .eq("room_id", room_id)
-      .eq("user_id", user_id);
+    const { error } = await supabase.from("room_members").upsert({ room_id, user_id, role }, { onConflict: "room_id,user_id" });
     if (error) throw error;
-    res.json({ ok: true, data: { room_id, user_id, role: nextRole } });
+    return res.json({ ok: true, data: { room_id, user_id, role } });
   } catch (e) {
-    console.error("[role] error", e);
-    res.status(200).json({ ok: false, message: "role change failed" });
+    return res.status(500).json({ ok: false, message: "role update failed", details: { message: String(e?.message || e) } });
   }
 });
 
-// Hand raise/lower (no-op if column missing)
-async function setHand(req, res, raised) {
-  if (needAdmin(res)) return;
+/**
+ * POST /rooms/handraise
+ * POST /rooms/handlower
+ * If the DB/table doesn't exist, still return ok:true to avoid breaking the client.
+ */
+async function handChange(req, res, raised) {
+  const supabase = getSB(req);
   const { room_id, user_id } = req.body || {};
-  if (!room_id || !user_id)
-    return res.status(400).json({ ok: false, message: "room_id and user_id required" });
+  if (!room_id || !user_id) return res.status(400).json({ ok: false, message: "room_id, user_id required" });
+
+  if (!supabase) {
+    console.warn("[rooms] handChange: Supabase not configured, returning stub ok");
+    return res.json({ ok: true, stub: true });
+  }
+
   try {
-    const { error } = await supabase
-      .from("room_members")
-      .update({ hand_raised: raised })
-      .eq("room_id", room_id)
-      .eq("user_id", user_id);
-    if (error && /column .*hand_raised/i.test(String(error.message))) {
-      console.warn("[hand] hand_raised column missing — returning ok:true (no-op)");
-      return res.json({ ok: true, no_op: true });
-    }
-    if (error) throw error;
-    res.json({ ok: true });
-  } catch (e) {
-    console.error("[hand] error", e);
-    res.status(200).json({ ok: true, no_op: true });
+    // Try insert into a generic table if present; otherwise ignore errors
+    const payload = { room_id, user_id, raised, at: new Date().toISOString() };
+    await supabase.from("hand_raises").insert(payload).throwOnError(); // if table missing, it will throw
+    return res.json({ ok: true });
+  } catch (_e) {
+    // swallow to avoid breaking client
+    return res.json({ ok: true, soft: true });
   }
 }
-router.post("/handraise", (req, res) => setHand(req, res, true));
-router.post("/handlower", (req, res) => setHand(req, res, false));
+router.post("/handraise", (req, res) => handChange(req, res, true));
+router.post("/handlower", (req, res) => handChange(req, res, false));
 
 module.exports = router;

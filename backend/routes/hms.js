@@ -1,3 +1,4 @@
+// routes/hms.js
 const express = require("express");
 const jwt = require("jsonwebtoken");
 
@@ -5,7 +6,7 @@ const router = express.Router();
 
 /**
  * POST /hms/token
- * body: { room_id: string, user_id: string, name?: string, role?: string }
+ * body: { room_id: string, user_id: string, name?: string, role?: "host"|"speaker"|"listener" }
  * env: HMS_ACCESS_KEY, HMS_SECRET
  */
 router.post("/token", async (req, res) => {
@@ -27,13 +28,12 @@ router.post("/token", async (req, res) => {
       room_id,
       user_id,
       role: role || "listener",
-      // metadata: { name }
+      // metadata: { name }, // optional
     };
-
     const token = jwt.sign(payload, secret, { algorithm: "HS256", expiresIn: "1h" });
     return res.json({ ok: true, token });
   } catch (e) {
-    return res.status(500).json({ ok: false, message: "token generation failed", details: String(e.message || e) });
+    return res.status(500).json({ ok: false, message: "token generation failed", details: String(e?.message || e) });
   }
 });
 

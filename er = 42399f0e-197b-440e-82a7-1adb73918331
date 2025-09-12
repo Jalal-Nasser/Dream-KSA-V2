@@ -1,0 +1,32 @@
+[33ma8cbcb1[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mSeptember[m[33m)[m feat(backend): add rooms router and endpoints
+[33m5af97f7[m[33m ([m[1;31morigin/September[m[33m)[m fix: remove problematic router loading from server.js
+[33m373132d[m fix(backend): mount hms router to fix production crash
+[33m049762e[m fix: add root endpoint and fix healthcheck path for production deployment
+[33md3120ef[m chore(backend): dependency-safe single-file server.js (health, HMS token via HS256, hand endpoints)
+[33m6869670[m chore(backend): replace with single-file server (health + HMS token via HS256 + hand endpoints)
+[33me55fedc[m feat(backend): mount HMS token router at /hms and /api/hms; add token route
+[33me4680db[m Unblock room leave and add mic/hand controls
+[33ma6f1a4d[m Add URL-encoded parser and ensure JSON error responses
+[33m1a60b81[m Fix participants endpoint to be resilient to schema differences
+[33me1d2870[m Mount rooms endpoints at both /rooms/* and /api/rooms/* to eliminate 404s
+[33m3143d98[m Implement robust client networking with retries and backend CORS
+[33ma928e73[m feat(backend): add participants endpoints to bypass RLS recursion, update mobile app to use backend API for room participants management
+[33m8a7c90a[m feat: restore STC Pay integration and fix environment variable issues
+[33m4293fd6[m revert: remove STC Pay integration
+[33m798dabd[m feat(payments): add STC Pay integration scaffold
+[33medcfc3c[m feat(payments): update payment creation and verification process
+[33m914d185[m feat(backend): load .env via dotenv and add Twilio env debug logs - require('dotenv').config() at startup - debug logs for TWILIO_* presence - PayTabs routes confirmed enabled
+[33med996eb[m September 2025 Updates: Safe Area, OAuth Fix, Country Flags, PayTabs Integration
+[33mdae989a[m refactor: clean up server files - use single server.js
+[33mbec6647[m refactor: clean up server files - use single server.js with CommonJS
+[33m2a3b1af[m feat: add public Privacy Policy and Terms of Service pages
+[33m17b82ef[m chore: snapshot before Play beta ship
+[33m3beadc9[m[33m ([m[1;31morigin/master[m[33m)[m backend: fix API route aliases and implement proper /api/* endpoints for Railway deployment
+[33m6e33cf0[m backend: add /api/* aliases for all endpoints to work around upstream path handling; /rooms remains primary
+[33m9cefc8a[m backend: add /routes map, /api/rooms alias, and JSON 404 to diagnose routing; helps when /rooms is intercepted upstream
+[33md07489b[m feat: Add health check endpoints and update server listening configuration
+[33m27daab2[m feat: Implement RTL support for Arabic and enhance login with Facebook authentication
+[33maf2e360[m feat: Add room customization fields and indexing for theme and images
+[33m1159ebc[m feat: Implement real-time voice chat functionality using 100ms SDK
+[33me62e4e2[m Add CORS support and implement room management features
+[33m4668f29[m Clean version of Dreams KSA app
