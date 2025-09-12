@@ -158,6 +158,14 @@ try {
 } catch (e) {
   console.warn("[boot] rooms router not found/failed:", String((e && e.message) || e));
 }
+try {
+  var hmsRouter = require("./routes/hms.js");
+  app.use("/hms", hmsRouter);
+  app.use("/api/hms", hmsRouter);
+  console.log("[boot] hms router mounted");
+} catch (e) {
+  console.warn("[boot] hms router not found/failed:", String((e && e.message) || e));
+}
 
 // ---------- export & standalone ----------
 module.exports = app;
