@@ -207,11 +207,8 @@ app.get('/', (_req, res) => {
 });
 
 // ---------- export for Passenger; listen only in local ----------
-const runningInPassenger = !!process.env.PASSENGER_APP_ENV || !!process.env.PLESK_INSTANCE_ID;
-if (runningInPassenger) {
-  module.exports = app;
-  log('exported Express app for Passenger');
-} else {
+module.exports = app;
+if (require.main === module) {
   const port = process.env.PORT || 3001;
   app.listen(port, '0.0.0.0', () => {
     log(`server listening on http://0.0.0.0:${port}`);
