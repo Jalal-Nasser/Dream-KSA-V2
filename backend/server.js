@@ -1,159 +1,232 @@
-// backend/server.js — single-file backend for Plesk/Passenger
-// Node-12 safe (no optional chaining), no external deps for HMS token
-// Endpoints:
-//   GET  /health
-//   POST /hms/token        (and /api/hms/token)
-//   POST /rooms/handraise  (Supabase admin if available; otherwise 500)
-//   POST /rooms/handlower  (Supabase admin if available; otherwise 500)
-// Also tries to mount ./routes/rooms if present (won't crash if missing)
+// backend/server.js
+'use strict';
 
-const express = require("express");
-const crypto = require("crypto");
+/**
+ * Express app that works under Passenger (Plesk) and locally.
+ * - No ESM-only deps (uses Node 18+ built-in fetch; no node-fetch)
+ * - No body-parser (uses express.json/urlencoded)
+ * - Exports app for Passenger; listens only in local dev
+ */
 
+const express = require('express');
+const cors = require('cors');
+const jwt = require('jsonwebtoken');
+const { createClient } = require('@supabase/supabase-js');
+const roomsRouter = require("./routes/rooms");
+
+// ---------- helpers ----------
+const log = (...a) => console.log('[boot]', ...a);
+const v4rx =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const isUuid = (s) => typeof s === 'string' && v4rx.test(s);
+
+// ---------- env ----------
+const {
+  SUPABASE_URL,
+  SUPABASE_SERVICE_ROLE_KEY,
+  CORS_ORIGIN,
+  HMS_ACCESS_KEY,
+  HMS_SECRET,
+} = process.env;
+
+// ---------- app ----------
 const app = express();
-
-// ---------- middleware ----------
-app.use(express.json());
+app.use(cors({ origin: CORS_ORIGIN ? CORS_ORIGIN.split(',') : true }));
+app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: false }));
-app.use(function (req, res, next) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization");
-  if (req.method === "OPTIONS") return res.sendStatus(200);
-  next();
-});
 
-// ---------- health ----------
-app.get("/health", function (_req, res) {
-  res.json({ ok: true, ts: new Date().toISOString() });
-});
-
-// ---------- root endpoint for health checks ----------
-app.get("/", function (_req, res) {
-  res.json({ ok: true, ts: new Date().toISOString() });
-});
-
-// ---------- Supabase admin (optional) ----------
-var createClient;
-try {
-  // if @supabase/supabase-js is installed on the server, we'll use it
-  createClient = require("@supabase/supabase-js").createClient;
-  console.log("[boot] supabase client available");
-} catch (e) {
-  console.warn("[boot] supabase client NOT installed; hand endpoints will return 500 if called");
-}
-var SUPABASE_URL = process.env.SUPABASE_URL;
-var SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
-var supabaseAdmin =
-  createClient && SUPABASE_URL && SUPABASE_SERVICE_KEY
-    ? createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } })
-    : null;
-
-// ---------- tiny JWT (HS256) helpers (no jsonwebtoken) ----------
-function b64url(buf) {
-  return Buffer.from(buf)
-    .toString("base64")
-    .replace(/=/g, "")
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_");
-}
-function signHS256(payload, secret) {
-  var header = { alg: "HS256", typ: "JWT" };
-  var encHeader = b64url(JSON.stringify(header));
-  var encPayload = b64url(JSON.stringify(payload));
-  var data = encHeader + "." + encPayload;
-  var sig = crypto.createHmac("sha256", secret).update(data).digest("base64");
-  var encSig = sig.replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
-  return data + "." + encSig;
-}
-
-// ---------- HMS token ----------
-function buildHMSToken(opts) {
-  var accessKey = process.env.HMS_ACCESS_KEY;
-  var secret = process.env.HMS_SECRET;
-  if (!accessKey || !secret) return { error: "HMS server keys missing" };
-  var nowSec = Math.floor(Date.now() / 1000);
-  var payload = {
-    access_key: accessKey,
-    type: "app",
-    version: 2,
-    room_id: opts.room_id,
-    user_id: opts.user_id,
-    role: opts.role || "listener",
-    iat: nowSec,
-    exp: nowSec + 3600
-    // metadata could go here
-  };
-  return { token: signHS256(payload, secret) };
-}
-
-function hmsTokenHandler(req, res) {
+// ---------- supabase (admin) ----------
+let supabase = null;
+if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
   try {
-    var body = req.body || {};
-    var room_id = body.room_id;
-    var user_id = body.user_id;
-    var role = body.role;
-    if (!room_id || !user_id) {
-      return res.status(400).json({ ok: false, message: "room_id and user_id required" });
-    }
-    var result = buildHMSToken({ room_id: room_id, user_id: user_id, role: role });
-    if (result.error) return res.status(500).json({ ok: false, message: result.error });
-    return res.json({ ok: true, token: result.token });
-  } catch (e) {
-    return res.status(500).json({
-      ok: false,
-      message: "token generation failed",
-      details: String((e && e.message) || e)
+    supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false },
     });
+    log('supabase admin client initialized');
+  } catch (e) {
+    console.error('[boot] supabase init failed:', e?.message || e);
+  }
+} else {
+  console.warn('[boot] supabase admin NOT configured');
+}
+
+// ---------- routes ----------
+app.get('/health', (_req, res) => {
+  return res.json({ ok: true, ts: new Date().toISOString() });
+});
+
+// ---- Participants (no FK requirement; merge profiles manually)
+app.get('/rooms/:id/participants', async (req, res) => {
+  try {
+    if (!supabase) {
+      return res.status(500).json({ ok: false, message: 'Supabase admin not configured' });
+    }
+    const roomId = req.params.id;
+    if (!isUuid(roomId)) {
+      return res.status(400).json({ ok: false, message: 'invalid room_id' });
+    }
+
+    const { data: rows, error } = await supabase
+      .from('room_participants')
+      .select('user_id, role, joined_at, hand_raised')
+      .eq('room_id', roomId)
+      .order('joined_at', { ascending: true });
+
+    if (error) {
+      return res.status(500).json({ ok: false, message: 'participants fetch failed', details: error });
+    }
+    if (!rows || rows.length === 0) {
+      return res.json({ ok: true, data: [] });
+    }
+
+    const ids = [...new Set(rows.map((r) => r.user_id))];
+    const { data: profiles, error: pErr } = await supabase
+      .from('profiles')
+      .select('id, username, display_name, avatar_url, email')
+      .in('id', ids);
+
+    if (pErr) {
+      return res.status(500).json({ ok: false, message: 'profiles fetch failed', details: pErr });
+    }
+
+    const byId = new Map((profiles || []).map((p) => [p.id, p]));
+    const merged = rows.map((r) => {
+      const p = byId.get(r.user_id) || {};
+      const display =
+        p.display_name || p.username || (p.email ? p.email.split('@')[0] : 'عضو');
+      return {
+        user_id: r.user_id,
+        role: r.role || 'listener',
+        joined_at: r.joined_at,
+        hand_raised: !!r.hand_raised,
+        profile: { id: p.id, username: p.username, display_name: p.display_name, avatar_url: p.avatar_url, email: p.email, display },
+      };
+    });
+
+    return res.json({ ok: true, data: merged });
+  } catch (e) {
+    console.error('[participants] error', e);
+    return res.status(500).json({ ok: false, message: 'participants fatal', details: String(e?.message || e) });
+  }
+});
+
+// ---- Join
+app.post('/rooms/join', async (req, res) => {
+  try {
+    if (!supabase) {
+      return res.status(500).json({ ok: false, message: 'Supabase admin not configured' });
+    }
+    const { room_id, user_id, role } = req.body || {};
+    if (!isUuid(room_id) || !isUuid(user_id)) {
+      return res.status(400).json({ ok: false, message: 'room_id, user_id must be uuid' });
+    }
+    const payload = {
+      room_id,
+      user_id,
+      role: role || 'listener',
+      joined_at: new Date().toISOString(),
+    };
+    const { error } = await supabase.from('room_participants').upsert(payload, { onConflict: 'room_id,user_id' });
+    if (error) {
+      return res.status(500).json({ ok: false, message: 'join failed', details: error });
+    }
+    return res.json({ ok: true, data: payload });
+  } catch (e) {
+    console.error('[join] error', e);
+    return res.status(500).json({ ok: false, message: 'join fatal', details: String(e?.message || e) });
+  }
+});
+
+// ---- Hand raise/lower (compat with both paths your app used)
+async function setHand(req, res, value) {
+  try {
+    if (!supabase) {
+      return res.status(500).json({ ok: false, message: 'Supabase admin not configured' });
+    }
+    const { room_id, user_id } = req.body || {};
+    if (!isUuid(room_id) || !isUuid(user_id)) {
+      return res.status(400).json({ ok: false, message: 'room_id, user_id must be uuid' });
+    }
+    const { error } = await supabase
+      .from('room_participants')
+      .update({ hand_raised: !!value })
+      .eq('room_id', room_id)
+      .eq('user_id', user_id);
+
+    if (error) {
+      return res.status(500).json({ ok: false, message: 'hand update failed', details: error });
+    }
+    return res.json({ ok: true });
+  } catch (e) {
+    console.error('[hand] error', e);
+    return res.status(500).json({ ok: false, message: 'hand fatal', details: String(e?.message || e) });
   }
 }
-app.post("/hms/token", hmsTokenHandler);
-app.post("/api/hms/token", hmsTokenHandler);
+app.post('/rooms/handraise', (req, res) => setHand(req, res, true));
+app.post('/rooms/handlower', (req, res) => setHand(req, res, false));
+// older path you tried
+app.post('/rooms/hand', async (req, res) => {
+  const { enable } = req.body || {};
+  return setHand(req, res, !!enable);
+});
 
-// ---------- Hand raise / lower ----------
-app.post("/rooms/handraise", async function (req, res) {
+// ---- HMS token
+app.post('/hms/token', async (req, res) => {
   try {
-    var body = req.body || {};
-    var room_id = body.room_id;
-    var user_id = body.user_id;
-    if (!room_id || !user_id) return res.status(400).json({ ok: false, message: "room_id and user_id required" });
-    if (!supabaseAdmin) return res.status(500).json({ ok: false, message: "Supabase admin not configured" });
-
-    var result = await supabaseAdmin
-      .from("hand_raises")
-      .upsert({ room_id: room_id, user_id: user_id, raised_at: new Date().toISOString() }, { onConflict: "room_id,user_id" });
-    if (result && result.error) {
-      return res.status(500).json({ ok: false, message: "hand raise failed", details: result.error.message });
+    const { room_id, user_id, name, role } = req.body || {};
+    if (!isUuid(room_id) || !isUuid(user_id)) {
+      return res.status(400).json({ ok: false, message: 'room_id, user_id must be uuid' });
     }
-    return res.json({ ok: true });
+    if (!HMS_ACCESS_KEY || !HMS_SECRET) {
+      return res.status(500).json({ ok: false, message: 'HMS server keys missing' });
+    }
+
+    const payload = {
+      access_key: HMS_ACCESS_KEY,
+      type: 'app',
+      version: 2,
+      room_id,
+      user_id,
+      role: role || 'listener',
+      // metadata: { name }
+    };
+
+    const token = jwt.sign(payload, HMS_SECRET, { algorithm: 'HS256', expiresIn: '1h' });
+    return res.json({ ok: true, token });
   } catch (e) {
-    return res.status(500).json({ ok: false, message: "hand raise failed", details: String((e && e.message) || e) });
+    console.error('[hms/token] error', e);
+    return res.status(500).json({ ok: false, message: 'token generation failed', details: String(e?.message || e) });
   }
 });
 
-app.post("/rooms/handlower", async function (req, res) {
-  try {
-    var body = req.body || {};
-    var room_id = body.room_id;
-    var user_id = body.user_id;
-    if (!room_id || !user_id) return res.status(400).json({ ok: false, message: "room_id and user_id required" });
-    if (!supabaseAdmin) return res.status(500).json({ ok: false, message: "Supabase admin not configured" });
-
-    var result = await supabaseAdmin.from("hand_raises").delete().eq("room_id", room_id).eq("user_id", user_id);
-    if (result && result.error) {
-      return res.status(500).json({ ok: false, message: "hand lower failed", details: result.error.message });
-    }
-    return res.json({ ok: true });
-  } catch (e) {
-    return res.status(500).json({ ok: false, message: "hand lower failed", details: String((e && e.message) || e) });
-  }
+// ---- Index
+app.get('/', (_req, res) => {
+  res.json({
+    ok: true,
+    service: 'Dreams KSA Backend',
+    endpoints: [
+      'GET  /health',
+      'GET  /rooms/:id/participants',
+      'POST /rooms/join',
+      'POST /rooms/handraise',
+      'POST /rooms/handlower',
+      'POST /hms/token',
+    ],
+  });
 });
 
-// ---------- export & standalone ----------
-module.exports = app;
-if (require.main === module) {
-  var port = process.env.PORT || 3000;
-  app.listen(port, function () {
-    console.log("[boot] server listening on", port);
+// Rooms endpoints (support both root and /api prefixes)
+app.use("/rooms", roomsRouter);
+app.use("/api/rooms", roomsRouter);
+
+// ---------- export for Passenger; listen only in local ----------
+const runningInPassenger = !!process.env.PASSENGER_APP_ENV || !!process.env.PLESK_INSTANCE_ID;
+if (runningInPassenger) {
+  module.exports = app;
+  log('exported Express app for Passenger');
+} else {
+  const port = process.env.PORT || 3001;
+  app.listen(port, '0.0.0.0', () => {
+    log(`server listening on http://0.0.0.0:${port}`);
   });
 }
