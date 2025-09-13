@@ -61,6 +61,11 @@ app.get('/terms', (_req, res) => {
   return res.sendFile(path.join(__dirname, 'public', 'terms.html'));
 });
 
+// ---- Favicon
+app.get('/favicon.ico', (_req, res) => {
+  return res.sendFile(path.join(__dirname, 'public', 'favicon.ico'));
+});
+
 // ---- Participants (merge profiles manually)
 app.get('/rooms/:id/participants', async (req, res) => {
   try {
@@ -208,6 +213,7 @@ app.get('/', (_req, res) => {
       'GET  /health',
       'GET  /privacy',
       'GET  /terms',
+      'GET  /favicon.ico',
       'GET  /rooms/:id/participants',
       'POST /rooms/join',
       'POST /rooms/handraise',
