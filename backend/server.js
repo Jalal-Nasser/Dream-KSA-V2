@@ -11,6 +11,7 @@ const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const { createClient } = require('@supabase/supabase-js');
+const path = require('path');
 
 // ---------- helpers ----------
 const log = (...a) => console.log('[boot]', ...a);
@@ -50,6 +51,14 @@ if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
 // ---------- routes ----------
 app.get('/health', (_req, res) => {
   return res.json({ ok: true, ts: new Date().toISOString() });
+});
+
+// ---- Legal pages
+app.get('/privacy', (_req, res) => {
+  return res.sendFile(path.join(__dirname, 'public', 'privacy.html'));
+});
+app.get('/terms', (_req, res) => {
+  return res.sendFile(path.join(__dirname, 'public', 'terms.html'));
 });
 
 // ---- Participants (merge profiles manually)
@@ -197,6 +206,8 @@ app.get('/', (_req, res) => {
     service: 'Dreams KSA Backend',
     endpoints: [
       'GET  /health',
+      'GET  /privacy',
+      'GET  /terms',
       'GET  /rooms/:id/participants',
       'POST /rooms/join',
       'POST /rooms/handraise',
