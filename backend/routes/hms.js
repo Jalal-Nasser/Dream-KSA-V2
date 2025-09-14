@@ -9,6 +9,13 @@ function getSB(req) {
   return req.app?.locals?.supabase || null;
 }
 
+function resolveTokenRole(dbRole) {
+  const publishRole = (process.env.HMS_PUBLISH_ROLE || 'speaker').trim();
+  // Treat moderator as publisher too
+  if (['host','speaker','owner','moderator'].includes((dbRole || '').toLowerCase())) return publishRole;
+  return 'listener';
+}
+
 function normalizeBearer(token) {
   if (!token) return '';
   const t = token.trim();
@@ -40,7 +47,7 @@ router.get('/debug/env', (_req, res) => {
  */
 router.post("/token", async (req, res) => {
   try {
-    const { room_id, user_id, name, role } = req.body || {};
+    const { room_id, user_id, name } = req.body || {};
     if (!room_id || !user_id) {
       return res.status(400).json({ ok: false, message: "room_id and user_id required" });
     }
@@ -56,10 +63,15 @@ router.post("/token", async (req, res) => {
     // Prefer mapped 100ms room id from DB if available
     let hms_room_id = null;
     const supabase = getSB(req);
+    let dbRole = 'listener';
     if (supabase) {
       try {
-        const { data: r } = await supabase.from('rooms').select('hms_room_id').eq('id', room_id).maybeSingle();
+        const [{ data: r }, { data: rp }] = await Promise.all([
+          supabase.from('rooms').select('hms_room_id').eq('id', room_id).maybeSingle(),
+          supabase.from('room_participants').select('role').eq('room_id', room_id).eq('user_id', user_id).maybeSingle(),
+        ]);
         hms_room_id = r?.hms_room_id || null;
+        dbRole = (rp?.role || 'listener');
       } catch {}
     }
 
@@ -103,19 +115,42 @@ router.post("/token", async (req, res) => {
       }
     }
 
+    const tokenRole = resolveTokenRole(dbRole);
     const payload = {
       access_key: accessKey,
       type: "app",
       version: 2,
       room_id: hms_room_id || room_id,
       user_id,
-      role: role || "listener",
+      role: tokenRole,
       // metadata: { name }, // optional
     };
     const token = jwt.sign(payload, secret, { algorithm: "HS256", expiresIn: "1h" });
     return res.json({ ok: true, token });
   } catch (e) {
     return res.status(500).json({ ok: false, message: "token generation failed", details: String(e?.message || e) });
+  }
+});
+
+// Debug endpoint: shows how the server will populate the token for a user/room
+router.post("/debug/inspect", async (req, res) => {
+  try {
+    const { room_id, user_id } = req.body || {};
+    if (!room_id || !user_id) return res.status(400).json({ ok: false, message: "room_id and user_id required" });
+    const supabase = getSB(req);
+    let dbRole = 'listener', hms_room_id = null;
+    if (supabase) {
+      const [{ data: r }, { data: rp }] = await Promise.all([
+        supabase.from("rooms").select("hms_room_id").eq("id", room_id).maybeSingle(),
+        supabase.from("room_participants").select("role").eq("room_id", room_id).eq("user_id", user_id).maybeSingle(),
+      ]);
+      hms_room_id = r?.hms_room_id || null;
+      dbRole = (rp?.role || 'listener');
+    }
+    const tokenRole = resolveTokenRole(dbRole);
+    return res.json({ ok: true, room_id, user_id, hms_room_id, dbRole, tokenRole });
+  } catch (e) {
+    return res.status(500).json({ ok: false, message: "inspect failed", details: String(e?.message || e) });
   }
 });
 

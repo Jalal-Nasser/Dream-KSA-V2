@@ -10,6 +10,12 @@ function normalizeBearer(token) {
   return t;
 }
 
+function resolveTokenRole(dbRole) {
+  const publishRole = (process.env.HMS_PUBLISH_ROLE || 'speaker').trim();
+  if (['host','speaker','owner'].includes((dbRole || '').toLowerCase())) return publishRole;
+  return 'listener';
+}
+
 async function ensureHMSRoomForAppRoom(supabase, appRoomId) {
   // read existing
   const { data: r, error: rErr } = await supabase
@@ -61,6 +67,24 @@ async function ensureHMSRoomForAppRoom(supabase, appRoomId) {
  */
 function getSB(req) {
   return req.app?.locals?.supabase || null;
+}
+
+const PUBLISHER_ROLES = ['host','speaker','moderator','owner'];
+
+async function hasActivePublisher(supabase, roomId) {
+  // consider someone "active" if role is host/speaker and not left
+  // fall back to "no left_at set" or recent join within 4 hours
+  const { data, error } = await supabase
+    .from('room_participants')
+    .select('role,joined_at,left_at')
+    .eq('room_id', roomId);
+  if (error) throw error;
+  const fourHoursAgo = Date.now() - 4 * 60 * 60 * 1000;
+  return (data || []).some(r => 
+    (PUBLISHER_ROLES.includes(String(r.role || '').toLowerCase())) &&
+    (!r.left_at) &&
+    (new Date(r.joined_at).getTime() > fourHoursAgo)
+  );
 }
 
 /**
@@ -167,17 +191,61 @@ router.post("/join", async (req, res) => {
     // 1) ensure HMS room exists (create+store if missing)
     await ensureHMSRoomForAppRoom(supabase, room_id);
 
+    // 2) decide final role (do NOT trust client role):
+    //    - keep existing publisher role if user already has one and hasn't left
+    //    - else if no active publisher in room -> promote to 'speaker' (matches template)
+    //    - else listener
+    let finalRole = 'listener';
+    const { data: meRow } = await supabase
+      .from('room_participants')
+      .select('role,left_at')
+      .eq('room_id', room_id)
+      .eq('user_id', user_id)
+      .maybeSingle();
+    if (meRow && PUBLISHER_ROLES.includes(String(meRow.role || '').toLowerCase()) && !meRow.left_at) {
+      finalRole = meRow.role;
+    } else {
+      const someonePublishes = await hasActivePublisher(supabase, room_id);
+      finalRole = someonePublishes ? 'listener' : 'speaker';
+    }
+
     const payload = {
       room_id,
       user_id,
-      role: role || "listener",
+      role: finalRole,
       joined_at: new Date().toISOString(),
+      left_at: null,
     };
     const { error } = await supabase.from("room_participants").upsert(payload, { onConflict: "room_id,user_id" });
     if (error) throw error;
+
+    // 3) set rooms.host_id if empty
+    try {
+      await supabase.from("rooms").update({ host_id: user_id }).eq("id", room_id).is("host_id", null);
+    } catch (_) {}
+
     return res.json({ ok: true, data: { room_id, user_id, role: payload.role } });
   } catch (e) {
     return res.status(500).json({ ok: false, message: "join failed", details: { message: String(e?.message || e) } });
+  }
+});
+
+// ensure we mark left_at to keep host assignment logic sane
+router.post("/leave", async (req, res) => {
+  const supabase = getSB(req);
+  const { room_id, user_id } = req.body || {};
+  if (!room_id || !user_id) return res.status(400).json({ ok: false, message: "room_id, user_id required" });
+  if (!supabase) return res.json({ ok: true, stub: true });
+  try {
+    const { error } = await supabase
+      .from("room_participants")
+      .update({ left_at: new Date().toISOString() })
+      .eq("room_id", room_id)
+      .eq("user_id", user_id);
+    if (error) throw error;
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ ok: false, message: "leave failed", details: String(e?.message || e) });
   }
 });
 
@@ -286,36 +354,50 @@ async function handChange(req, res, raised) {
 router.post("/handraise", (req, res) => handChange(req, res, true));
 router.post("/handlower", (req, res) => handChange(req, res, false));
 
-module.exports = router;
-// ---------- DEBUG UNDER /rooms/* ----------
-router.get('/debug/ping', (_req, res) => {
-  res.json({ ok: true, msg: 'pong /rooms/debug/ping' });
-});
-
-router.get('/debug/env', (_req, res) => {
-  res.json({
-    ok: true,
-    env: {
-      has_SUPABASE_URL: !!process.env.SUPABASE_URL,
-      has_SUPABASE_SERVICE_ROLE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY || !!process.env.SUPABASE_SERVICE_KEY,
-      has_HMS_ACCESS_KEY: !!(process.env.HMS_ACCESS_KEY || process.env.HMS_APP_ID),
-      has_HMS_SECRET: !!(process.env.HMS_SECRET || process.env.HMS_APP_SECRET),
-      has_HMS_MANAGEMENT_TOKEN: !!process.env.HMS_MANAGEMENT_TOKEN,
-      has_HMS_ROOM_TEMPLATE_ID: !!process.env.HMS_ROOM_TEMPLATE_ID,
-    }
-  });
-});
-
-// Force-create the HMS room for a given app room (POST { room_id })
-router.post('/debug/ensure-hms', async (req, res) => {
-  const supabase = getSB(req);
-  const { room_id } = req.body || {};
-  if (!room_id) return res.status(400).json({ ok: false, message: 'room_id required' });
-  if (!supabase) return res.status(500).json({ ok: false, message: 'supabase admin not configured' });
+// ---- DEBUG: what token role + room will be used
+router.post('/debug/hms-inspect', async (req, res) => {
   try {
-    const id = await ensureHMSRoomForAppRoom(supabase, room_id);
-    res.json({ ok: true, hms_room_id: id });
+    const supabase = getSB(req);
+    const { room_id, user_id } = req.body || {};
+    if (!room_id || !user_id) return res.status(400).json({ ok:false, message:'room_id and user_id required' });
+    let hms_room_id = null, dbRole = 'listener';
+    if (supabase) {
+      const [{ data: r }, { data: rp }] = await Promise.all([
+        supabase.from('rooms').select('hms_room_id').eq('id', room_id).maybeSingle(),
+        supabase.from('room_participants').select('role').eq('room_id', room_id).eq('user_id', user_id).maybeSingle(),
+      ]);
+      hms_room_id = r?.hms_room_id || null;
+      dbRole = rp?.role || 'listener';
+    }
+    const tokenRole = resolveTokenRole(dbRole);
+    res.json({ ok:true, room_id, user_id, hms_room_id, dbRole, tokenRole, publishRoleEnv: process.env.HMS_PUBLISH_ROLE || 'speaker' });
   } catch (e) {
-    res.status(500).json({ ok: false, message: 'ensure failed', details: String(e?.message || e) });
+    res.status(500).json({ ok:false, message:'inspect failed', details:String(e?.message || e) });
   }
 });
+
+// ---- DEBUG: list roles available in your 100ms template (so we pick a valid publish role)
+router.get('/debug/template-roles', async (_req, res) => {
+  try {
+    const raw = process.env.HMS_MANAGEMENT_TOKEN || '';
+    const token = normalizeBearer(raw);
+    const template = process.env.HMS_ROOM_TEMPLATE_ID || '';
+    if (!token || !template) return res.status(400).json({ ok:false, message:'missing HMS_MANAGEMENT_TOKEN or HMS_ROOM_TEMPLATE_ID' });
+    const headers = { 'Authorization': `Bearer ${token}` };
+    // Try /templates/:id
+    let resp = await fetch(`https://api.100ms.live/v2/templates/${template}`, { headers });
+    if (!resp.ok) {
+      // Fallback: search by name
+      const list = await (await fetch('https://api.100ms.live/v2/templates', { headers })).json();
+      const found = (list?.data || []).find((t) => t?.id === template || t?.name === template);
+      if (!found) return res.status(404).json({ ok:false, message:'template not found', got:(list?.data || []).map(t => ({id:t.id,name:t.name})) });
+      return res.json({ ok:true, roles:Object.keys(found?.roles || {}), template:{ id:found.id, name:found.name } });
+    }
+    const tpl = await resp.json();
+    res.json({ ok:true, roles:Object.keys(tpl?.roles || {}), template:{ id:tpl?.id, name:tpl?.name } });
+  } catch (e) {
+    res.status(500).json({ ok:false, message:'template roles fetch failed', details:String(e?.message || e) });
+  }
+});
+
+module.exports = router;
