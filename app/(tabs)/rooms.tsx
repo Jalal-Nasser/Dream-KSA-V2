@@ -5,12 +5,12 @@ import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { PALETTE } from '@/lib/theme';
-import { getSupabase } from '@/lib/supabase';
-import { api } from '@/lib/api';
-import { hmsJoin, hmsIsConnected, hmsToggleLocalMute, hmsLeave } from '@/lib/hmsClient';
-import { handRaise, handLower } from '@/lib/api';
-import { subscribeParticipants, ParticipantRow, subscribeMessages, sendMessage } from '@/lib/realtime';
+import { PALETTE } from '../../lib/theme';
+import { getSupabase } from '../../lib/supabase';
+import { api } from '../../lib/api';
+import { hmsJoin, hmsIsConnected, hmsToggleLocalMute, hmsLeave } from '../../lib/hmsClient';
+import { handRaise, handLower } from '../../lib/api';
+import { subscribeParticipants, ParticipantRow, subscribeMessages, sendMessage } from '../../lib/realtime';
 
 type Room = { id: string; title: string; created_at: string };
 
