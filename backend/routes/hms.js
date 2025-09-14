@@ -8,6 +8,13 @@ function getSB(req) {
   return req.app?.locals?.supabase || null;
 }
 
+function normalizeBearer(token) {
+  if (!token) return '';
+  const t = token.trim();
+  if (t.toLowerCase().startsWith('bearer ')) return t.slice(7).trim();
+  return t;
+}
+
 /**
  * POST /hms/token
  * body: { room_id: string, user_id: string, name?: string, role?: "host"|"speaker"|"listener" }
@@ -23,7 +30,7 @@ router.post("/token", async (req, res) => {
     // - HMS_ACCESS_KEY / HMS_SECRET (Railway)
     // - HMS_APP_ID / HMS_APP_SECRET (local dev)
     const accessKey = process.env.HMS_ACCESS_KEY || process.env.HMS_APP_ID;
-    const secret = process.env.HMS_SECRET || process.env.HMS_APP_SECRET;
+    const secret    = process.env.HMS_SECRET     || process.env.HMS_APP_SECRET;
     if (!accessKey || !secret) {
       return res.status(500).json({ ok: false, message: "HMS server keys missing" });
     }
@@ -38,7 +45,7 @@ router.post("/token", async (req, res) => {
       } catch {}
     }
     if (!hms_room_id) {
-      console.warn('[hms/token] missing hms_room_id for room', room_id, '- falling back to app room id');
+      console.warn('[hms/token] missing hms_room_id for room', room_id, '— falling back, users may not co-locate');
     }
 
     const payload = {

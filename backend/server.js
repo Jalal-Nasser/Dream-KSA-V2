@@ -73,8 +73,10 @@ app.get('/favicon.ico', (_req, res) => {
 try {
   const roomsRouter = require('./routes/rooms');
   const hmsRouter = require('./routes/hms');
+  const debugRouter = require('./routes/debug');
   app.use('/rooms', roomsRouter);
   app.use('/hms', hmsRouter);
+  app.use(debugRouter);
 } catch (e) {
   console.warn('[boot] routers not mounted:', e?.message || e);
 }
