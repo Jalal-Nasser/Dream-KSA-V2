@@ -1,6 +1,7 @@
 // routes/rooms.js
 const express = require("express");
 const router = express.Router();
+const fetch = (...args) => import('node-fetch').then(({default: f}) => f(...args));
 
 /**
  * Helper: safe Supabase getter
@@ -110,6 +111,38 @@ router.post("/join", async (req, res) => {
   }
 
   try {
+    // 1) Ensure rooms.hms_room_id exists for this app room
+    let hms_room_id = null;
+    {
+      const { data: r, error: rErr } = await supabase.from('rooms').select('id,hms_room_id').eq('id', room_id).maybeSingle();
+      if (rErr) throw rErr;
+      hms_room_id = r?.hms_room_id || null;
+      if (!hms_room_id) {
+        // Create 100ms room via Management API using template id; use app room id as name for traceability
+        const mgmtToken = process.env.HMS_MANAGEMENT_TOKEN;
+        const templateId = process.env.HMS_ROOM_TEMPLATE_ID;
+        if (!mgmtToken || !templateId) {
+          console.warn('[rooms] missing HMS_MANAGEMENT_TOKEN/HMS_ROOM_TEMPLATE_ID; tokens may still be signed but users won\'t co-locate.');
+        } else {
+          const resp = await fetch('https://api.100ms.live/v2/rooms', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${mgmtToken}` },
+            body: JSON.stringify({ name: room_id, template_id: templateId })
+          });
+          if (resp.ok) {
+            const js = await resp.json();
+            hms_room_id = js?.id || null;
+            if (hms_room_id) {
+              await supabase.from('rooms').update({ hms_room_id }).eq('id', room_id);
+            }
+          } else {
+            const txt = await resp.text();
+            console.warn('[rooms] 100ms room create failed:', txt);
+          }
+        }
+      }
+    }
+
     const payload = {
       room_id,
       user_id,

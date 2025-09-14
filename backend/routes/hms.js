@@ -4,6 +4,10 @@ const jwt = require("jsonwebtoken");
 
 const router = express.Router();
 
+function getSB(req) {
+  return req.app?.locals?.supabase || null;
+}
+
 /**
  * POST /hms/token
  * body: { room_id: string, user_id: string, name?: string, role?: "host"|"speaker"|"listener" }
@@ -24,11 +28,24 @@ router.post("/token", async (req, res) => {
       return res.status(500).json({ ok: false, message: "HMS server keys missing" });
     }
 
+    // Prefer mapped 100ms room id from DB if available
+    let hms_room_id = null;
+    const supabase = getSB(req);
+    if (supabase) {
+      try {
+        const { data: r } = await supabase.from('rooms').select('hms_room_id').eq('id', room_id).maybeSingle();
+        hms_room_id = r?.hms_room_id || null;
+      } catch {}
+    }
+    if (!hms_room_id) {
+      console.warn('[hms/token] missing hms_room_id for room', room_id, '- falling back to app room id');
+    }
+
     const payload = {
       access_key: accessKey,
       type: "app",
       version: 2,
-      room_id,
+      room_id: hms_room_id || room_id,
       user_id,
       role: role || "listener",
       // metadata: { name }, // optional
