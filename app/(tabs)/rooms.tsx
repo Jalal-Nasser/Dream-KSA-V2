@@ -1,14 +1,16 @@
 import * as React from 'react';
-import { View, Text, StyleSheet, FlatList, Pressable, TextInput, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Pressable, TextInput, Alert, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { PALETTE } from '../../lib/theme';
 import { getSupabase } from '../../lib/supabase';
 import { api } from '../../lib/api';
-import { hmsJoin, hmsIsConnected, hmsToggleLocalMute } from '@/lib/hmsClient';
+import { hmsJoin, hmsIsConnected, hmsToggleLocalMute, hmsLeave } from '@/lib/hmsClient';
 import { handRaise, handLower } from '@/lib/api';
+import { subscribeParticipants, ParticipantRow, subscribeMessages, sendMessage } from '@/lib/realtime';
 
 type Room = { id: string; title: string; created_at: string };
 
@@ -47,14 +49,21 @@ export default function Rooms() {
     
     const channel = supabase
       .channel('rooms_changes')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'rooms' }, (payload) => {
-        setRooms((prev) => [payload.new as any, ...prev]);
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'rooms' }, () => {
+        // Refetch to stay consistent across columns (title/name etc.)
+        fetchRooms();
       })
       .subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
   }, [fetchRooms]);
+
+  // Refetch when tab/screen gains focus
+  useFocusEffect(React.useCallback(() => {
+    fetchRooms();
+    return () => {};
+  }, [fetchRooms]));
 
   const createRoom = async () => {
     if (!title.trim()) {
@@ -131,6 +140,14 @@ export default function Rooms() {
 
   const [localMuted, setLocalMuted] = React.useState(true);
   const [myRole, setMyRole] = React.useState<'host'|'speaker'|'listener'>('listener');
+  const [connected, setConnected] = React.useState(false);
+  const [roomId, setRoomId] = React.useState<string | null>(null);
+  const [peers, setPeers] = React.useState<any[]>([]);
+  const [participantCount, setParticipantCount] = React.useState<number>(0);
+  const participantsUnsub = React.useRef<null | (() => void)>(null);
+  const [msgs, setMsgs] = React.useState<any[]>([]);
+  const messagesUnsub = React.useRef<null | (() => void)>(null);
+  const [msgText, setMsgText] = React.useState('');
 
   const joinRoom = async (roomId: string, role: 'listener' | 'speaker' | 'host' = 'listener') => {
     try {
@@ -150,6 +167,8 @@ export default function Rooms() {
         await hmsJoin(token, name, role as any);
         setMyRole(role as any);
         setLocalMuted(role === 'listener');
+        setConnected(true);
+        setRoomId(roomId);
       }
       router.push(`/room/${roomId}`);
     } catch (e: any) {
@@ -171,6 +190,32 @@ export default function Rooms() {
     await hmsToggleLocalMute(next);
     setLocalMuted(next);
   };
+
+  // Realtime subscriptions when connected
+  React.useEffect(() => {
+    if (!connected || !roomId) return;
+    if (participantsUnsub.current) { participantsUnsub.current(); participantsUnsub.current = null; }
+    participantsUnsub.current = subscribeParticipants(roomId, (rows: ParticipantRow[]) => {
+      setParticipantCount(rows.length);
+    });
+    if (messagesUnsub.current) { messagesUnsub.current(); messagesUnsub.current = null; }
+    messagesUnsub.current = subscribeMessages(roomId, (rows: any[]) => setMsgs(rows));
+    return () => {
+      if (participantsUnsub.current) { participantsUnsub.current(); participantsUnsub.current = null; }
+      if (messagesUnsub.current) { messagesUnsub.current(); messagesUnsub.current = null; }
+    };
+  }, [connected, roomId]);
+
+  const leave = React.useCallback(async () => {
+    try { await hmsLeave(); } catch (e) {}
+    setConnected(false);
+    setPeers([]);
+    setRoomId(null);
+    if (participantsUnsub.current) { participantsUnsub.current(); participantsUnsub.current = null; }
+    if (messagesUnsub.current) { messagesUnsub.current(); messagesUnsub.current = null; }
+    setParticipantCount(0);
+    setMsgs([]);
+  }, []);
 
   return (
     <LinearGradient
@@ -215,6 +260,67 @@ export default function Rooms() {
           </View>
         )}
       />
+
+      {/* Show participant badge when connected */}
+      {connected && (
+        <>
+          {/* participant badge */}
+          <View style={{ alignItems: 'flex-end', marginBottom: 8 }}>
+            <View style={{
+              paddingVertical: 6, paddingHorizontal: 10, borderRadius: 9999,
+              backgroundColor: '#e2e8f0'
+            }}>
+              <Text style={{ fontSize: 12, fontWeight: '700', writingDirection: 'rtl' }}>
+                المتواجدون: {participantCount}
+              </Text>
+            </View>
+          </View>
+
+          {/* chat overlay */}
+          <View style={{ position: 'absolute', bottom: 70, left: 12, right: 12, maxHeight: 180 }}>
+            <View style={{ backgroundColor: 'rgba(255,255,255,0.92)', borderRadius: 12, padding: 8 }}>
+              <Text style={{ fontWeight: '700', textAlign: 'right' }}>الدردشة</Text>
+              <FlatList
+                data={msgs}
+                keyExtractor={(m:any) => m.id}
+                renderItem={({ item }) => (
+                  <Text style={{ textAlign: 'right' }}>{item.text}</Text>
+                )}
+                inverted={true}
+                contentContainerStyle={{ flexDirection: 'column-reverse' }}
+                style={{ maxHeight: 120 }}
+              />
+              <View style={{ flexDirection: 'row-reverse', alignItems: 'center', marginTop: 6 }}>
+                <TouchableOpacity onPress={() => setMsgText((t) => t + '👏')}>
+                  <Text style={{ fontSize: 18, marginHorizontal: 6 }}>👏</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => setMsgText((t) => t + '❤️')}>
+                  <Text style={{ fontSize: 18, marginHorizontal: 6 }}>❤️</Text>
+                </TouchableOpacity>
+                <View style={{ flex: 1, marginHorizontal: 8 }}>
+                  <TextInput
+                    value={msgText}
+                    onChangeText={setMsgText}
+                    placeholder="اكتب رسالة…"
+                    style={{ backgroundColor: '#fff', borderRadius: 8, padding: 8, textAlign: 'right' }}
+                  />
+                </View>
+                <TouchableOpacity
+                  onPress={async () => {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (!user || !roomId) return;
+                    await sendMessage(roomId, user.id, msgText);
+                    setMsgText('');
+                  }}
+                  style={{ paddingHorizontal: 10, paddingVertical: 8, backgroundColor: '#0ea5e9', borderRadius: 8 }}
+                >
+                  <Text style={{ color: '#fff', fontWeight: '700' }}>إرسال</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </>
+      )}
       </LinearGradient>
   );
 }
