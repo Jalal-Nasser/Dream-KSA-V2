@@ -4,11 +4,12 @@ import { Slot } from 'expo-router';
 import { LogBox, View, StyleSheet } from 'react-native';
 import React from 'react';
 import * as Linking from 'expo-linking';
-import { looksLikeAuthReturn } from '../lib/linking';
-import { completeSessionFromRedirect } from '../lib/auth/sessionFromUrl';
+import { looksLikeAuthReturn } from '@/lib/linking';
+import { completeSessionFromRedirect } from '@/lib/auth/sessionFromUrl';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getBackendBase } from '@/lib/api';
 import { NativeModules, Platform } from "react-native";
+import { Audio } from 'expo-av';
 
 // Runtime override for backend URL (no rebuild needed)
 (globalThis as any).__BACKEND_URL = "https://api.dreamsksa.online";
@@ -42,6 +43,25 @@ export default function RootLayout() {
     'Cannot connect to Metro',
     'Software caused connection abort',
   ]);
+  
+  // Configure audio session for iOS to prevent silent joins
+  React.useEffect(() => {
+    (async () => {
+      try {
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: true,
+          playsInSilentModeIOS: true,
+          staysActiveInBackground: false,
+          interruptionModeIOS: 1, // duck others
+          shouldDuckAndroid: false,
+          playThroughEarpieceAndroid: false,
+        });
+      } catch (e) {
+        console.log('[audio] setAudioMode failed', e);
+      }
+    })();
+  }, []);
+  
   React.useEffect(() => {
     (async () => {
       const initial = await Linking.getInitialURL();
