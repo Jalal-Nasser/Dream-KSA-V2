@@ -51,6 +51,7 @@ async function ensureHMSRoomForAppRoom(supabase, appRoomId) {
   const hms_room_id = js?.id || null;
   if (hms_room_id) {
     await supabase.from('rooms').update({ hms_room_id }).eq('id', appRoomId);
+    console.log('[rooms] mapped app room', appRoomId, '-> HMS room', hms_room_id);
   }
   return hms_room_id;
 }
@@ -284,3 +285,35 @@ router.post("/handraise", (req, res) => handChange(req, res, true));
 router.post("/handlower", (req, res) => handChange(req, res, false));
 
 module.exports = router;
+// ---------- DEBUG UNDER /rooms/* ----------
+router.get('/debug/ping', (_req, res) => {
+  res.json({ ok: true, msg: 'pong /rooms/debug/ping' });
+});
+
+router.get('/debug/env', (_req, res) => {
+  res.json({
+    ok: true,
+    env: {
+      has_SUPABASE_URL: !!process.env.SUPABASE_URL,
+      has_SUPABASE_SERVICE_ROLE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY || !!process.env.SUPABASE_SERVICE_KEY,
+      has_HMS_ACCESS_KEY: !!(process.env.HMS_ACCESS_KEY || process.env.HMS_APP_ID),
+      has_HMS_SECRET: !!(process.env.HMS_SECRET || process.env.HMS_APP_SECRET),
+      has_HMS_MANAGEMENT_TOKEN: !!process.env.HMS_MANAGEMENT_TOKEN,
+      has_HMS_ROOM_TEMPLATE_ID: !!process.env.HMS_ROOM_TEMPLATE_ID,
+    }
+  });
+});
+
+// Force-create the HMS room for a given app room (POST { room_id })
+router.post('/debug/ensure-hms', async (req, res) => {
+  const supabase = getSB(req);
+  const { room_id } = req.body || {};
+  if (!room_id) return res.status(400).json({ ok: false, message: 'room_id required' });
+  if (!supabase) return res.status(500).json({ ok: false, message: 'supabase admin not configured' });
+  try {
+    const id = await ensureHMSRoomForAppRoom(supabase, room_id);
+    res.json({ ok: true, hms_room_id: id });
+  } catch (e) {
+    res.status(500).json({ ok: false, message: 'ensure failed', details: String(e?.message || e) });
+  }
+});
