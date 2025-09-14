@@ -213,10 +213,19 @@ export const api = {
       body: JSON.stringify({ room_id, user_id }),
     });
   },
-  getHMSToken(room_id: string, user_id: string, name?: string) {
+  getHMSToken(room_id: string, user_id: string, name?: string, role?: "host" | "speaker" | "listener") {
     return fetchFirst(
       ["/hms/token", "/api/hms/token"],
-      { method: "POST", body: JSON.stringify({ room_id, user_id, name }) }
+      { method: "POST", body: JSON.stringify({ room_id, user_id, name, role }) }
     ).then((res: any) => res?.token ?? res);
   },
 };
+
+// Convenience helpers (top-level) for raising/lowering hands
+export async function handRaise(roomId: string, userId: string) {
+  return api.raiseHand(roomId, userId);
+}
+
+export async function handLower(roomId: string, userId: string) {
+  return api.lowerHand(roomId, userId);
+}

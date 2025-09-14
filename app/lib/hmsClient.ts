@@ -1,8 +1,5 @@
 import { Platform, PermissionsAndroid } from 'react-native';
-import {
-  HMSSDK,
-  HMSConfig,
-} from '@100mslive/react-native-hms';
+import { HMSSDK, HMSConfig } from '@100mslive/react-native-hms';
 
 let sdk: HMSSDK | null = null;
 
@@ -13,10 +10,10 @@ async function ensureSdk(): Promise<HMSSDK> {
   return sdk;
 }
 
-export async function hmsJoin(token: string, name: string, role: 'host'|'speaker'|'listener' = 'listener') {
+export async function hmsJoin(token: string, name: string, role: 'host'|'speaker'|'listener'='listener') {
   const s = await ensureSdk();
 
-  // Android mic permission if you're going to publish audio
+  // Android mic permission if going to publish
   if (Platform.OS === 'android' && role !== 'listener') {
     await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.RECORD_AUDIO);
   }
@@ -24,22 +21,11 @@ export async function hmsJoin(token: string, name: string, role: 'host'|'speaker
   const cfg = new HMSConfig({ authToken: token, userName: name });
   await s.join(cfg);
 
-  // Post-join audio setup for both platforms
-  try {
-    // Route audio to loudspeaker by default
-    // @ts-ignore - method exists in HMS SDK (AudioManager)
-    await s.setSpeakerphoneOn?.(true);
-  } catch {}
-
-  try {
-    // Start playback for remote audio tracks
-    // @ts-ignore - method exists in SDK versions; ignore if absent
-    await s.setPlaybackForAllAudio?.(true);
-  } catch {}
+  try { await (s as any).setSpeakerphoneOn?.(true); } catch {}
+  try { await (s as any).setPlaybackForAllAudio?.(true); } catch {}
 }
 
 export function hmsIsConnected(): boolean {
-  // naive check: if we have an sdk and room, assume connected
   // @ts-ignore
   return !!sdk?.room;
 }
@@ -47,8 +33,8 @@ export function hmsIsConnected(): boolean {
 export async function hmsToggleLocalMute(mute: boolean) {
   const s = await ensureSdk();
   try {
-    // @ts-ignore - method exists in SDK; ignore types if any
-    await s.setLocalAudioEnabled?.(!mute);
+    // false => publish; true => mute
+    await (s as any).setLocalAudioEnabled?.(!mute);
   } catch (e) {
     console.log('[hms] toggle local mic failed', String((e as any)?.message || e));
   }

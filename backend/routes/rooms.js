@@ -210,13 +210,18 @@ async function handChange(req, res, raised) {
   }
 
   try {
-    // Try insert into a generic table if present; otherwise ignore errors
-    const payload = { room_id, user_id, raised, at: new Date().toISOString() };
-    await supabase.from("hand_raises").insert(payload).throwOnError(); // if table missing, it will throw
-    return res.json({ ok: true });
-  } catch (_e) {
-    // swallow to avoid breaking client
-    return res.json({ ok: true, soft: true });
+    // Persist to existing mic_requests table
+    const payload = {
+      room_id,
+      user_id,
+      state: raised ? 'raised' : 'lowered',
+      at: new Date().toISOString(),
+    };
+    const { error } = await supabase.from('mic_requests').insert(payload);
+    if (error) throw error;
+    return res.json({ ok: true, data: { room_id, user_id, state: payload.state } });
+  } catch (e) {
+    return res.status(500).json({ ok: false, message: "hand request failed", details: { message: String(e?.message || e) } });
   }
 }
 router.post("/handraise", (req, res) => handChange(req, res, true));

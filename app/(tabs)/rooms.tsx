@@ -7,7 +7,8 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { PALETTE } from '../../lib/theme';
 import { getSupabase } from '../../lib/supabase';
 import { api } from '../../lib/api';
-import { hmsJoin, hmsIsConnected } from '@/lib/hmsClient';
+import { hmsJoin, hmsIsConnected, hmsToggleLocalMute } from '@/lib/hmsClient';
+import { handRaise, handLower } from '@/lib/api';
 
 type Room = { id: string; title: string; created_at: string };
 
@@ -128,7 +129,10 @@ export default function Rooms() {
     router.push(`/room/${data!.id}`);
   };
 
-  const joinRoom = async (roomId: string, role: 'listener' | 'speaker' = 'listener') => {
+  const [localMuted, setLocalMuted] = React.useState(true);
+  const [myRole, setMyRole] = React.useState<'host'|'speaker'|'listener'>('listener');
+
+  const joinRoom = async (roomId: string, role: 'listener' | 'speaker' | 'host' = 'listener') => {
     try {
       setJoiningId(roomId);
       const { data: { user } } = await supabase.auth.getUser();
@@ -140,10 +144,12 @@ export default function Rooms() {
       await api.joinRoom(roomId, user.id, role);
       // get HMS token and join immediately (avoid double-join if already connected)
       const name = user.user_metadata?.full_name || user.email?.split('@')[0] || 'ضيف';
-      const token = await api.getHMSToken(roomId, user.id, name);
+      const token = await api.getHMSToken(roomId, user.id, name, role as any);
       const already = await hmsIsConnected();
       if (!already) {
-        await hmsJoin(token, name, role);
+        await hmsJoin(token, name, role as any);
+        setMyRole(role as any);
+        setLocalMuted(role === 'listener');
       }
       router.push(`/room/${roomId}`);
     } catch (e: any) {
@@ -152,6 +158,18 @@ export default function Rooms() {
     } finally {
       setJoiningId(null);
     }
+  };
+
+  const onMicPress = async (roomId: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user || !roomId) return;
+    if (myRole === 'listener') {
+      try { await handRaise(roomId, user.id); Alert.alert('✋', 'تم طلب رفع اليد'); } catch (e:any) { Alert.alert('تعذر', e?.message || ''); }
+      return;
+    }
+    const next = !localMuted;
+    await hmsToggleLocalMute(next);
+    setLocalMuted(next);
   };
 
   return (
