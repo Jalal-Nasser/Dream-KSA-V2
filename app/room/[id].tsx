@@ -6,10 +6,10 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { supabase } from '../../lib/supabase';
 import { PALETTE } from '../../lib/theme';
 import { useRoom } from '../../hooks/useRoom';
-import { api } from "@/lib/api";
-import VoiceBar from "@/components/rooms/VoiceBar"; 
+import { api } from '../../lib/api';
+import VoiceBar from '../../components/rooms/VoiceBar';
 import { useRoomRealtime } from '../../hooks/useRoomRealtime';
-import { hmsJoin, hmsLeave, hmsToggleLocalMute, hmsIsConnected } from "@/lib/hmsClient";
+import { hmsJoin, hmsLeave, hmsToggleLocalMute, hmsIsConnected } from '../../lib/hmsClient';
 
 type Msg = { id: string; from: string; text: string; at: number };
 const uid = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`;
