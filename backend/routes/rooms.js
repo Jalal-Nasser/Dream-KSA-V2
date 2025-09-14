@@ -249,6 +249,20 @@ router.post("/leave", async (req, res) => {
   }
 });
 
+// Debug: ensure HMS room mapping exists for a given app room
+router.post('/debug/ensure-hms', async (req, res) => {
+  try {
+    const supabase = getSB(req);
+    const { room_id } = req.body || {};
+    if (!room_id) return res.status(400).json({ ok:false, message:'room_id required' });
+    if (!supabase) return res.status(500).json({ ok:false, message:'Supabase not configured' });
+    const hmsId = await ensureHMSRoomForAppRoom(supabase, room_id);
+    return res.json({ ok:true, room_id, hms_room_id:hmsId || null });
+  } catch (e) {
+    return res.status(500).json({ ok:false, message:'ensure-hms failed', details:String(e?.message || e) });
+  }
+});
+
 /**
  * POST /rooms/role
  * body: { room_id, user_id, enable: boolean }  => speaker when true, listener when false
