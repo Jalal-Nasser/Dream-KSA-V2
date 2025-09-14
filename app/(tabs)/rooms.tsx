@@ -128,10 +128,11 @@ export default function Rooms() {
     
     console.log('[createRoom] Room created successfully:', data);
     setTitle('');
-    // Ensure host membership
+    // Ensure host membership (server will decide final role)
     try {
       console.log('[createRoom] (backend) host membership', { room_id: data!.id, user_id: user.id, role: 'host' });
-      await api.joinRoom(data!.id, user.id, 'host');
+      const jr: any = await api.joinRoom(data!.id, user.id, 'host');
+      console.log('[createRoom] joined with role:', jr?.role);
     } catch (err) {
       console.log('[createRoom] host backend error:', err);
     }
@@ -157,16 +158,17 @@ export default function Rooms() {
         Alert.alert('تسجيل الدخول مطلوب');
         return;
       }
-      // backend membership
-      await api.joinRoom(roomId, user.id, role);
+      // backend membership (server decides final role)
+      const joinRes: any = await api.joinRoom(roomId, user.id, role);
+      const serverRole = (joinRes?.role as 'host'|'speaker'|'listener') || role;
       // get HMS token and join immediately (avoid double-join if already connected)
       const name = user.user_metadata?.full_name || user.email?.split('@')[0] || 'ضيف';
-      const token = await api.getHMSToken(roomId, user.id, name, role as any);
+      const token = await api.getHMSToken(roomId, user.id, name, serverRole as any);
       const already = await hmsIsConnected();
       if (!already) {
-        await hmsJoin(token, name, role as any);
-        setMyRole(role as any);
-        setLocalMuted(role === 'listener');
+        await hmsJoin(token, name, serverRole as any);
+        setMyRole(serverRole as any);
+        setLocalMuted(serverRole === 'listener');
         setConnected(true);
         setRoomId(roomId);
       }
