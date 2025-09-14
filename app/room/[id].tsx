@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, Text, StyleSheet, FlatList, TextInput, Pressable } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TextInput, Pressable, Image } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -175,6 +175,7 @@ export default function RoomChat() {
         </View>
       </View>
 
+      {/* Simple mic grid of participants */}
       <FlatList
         data={messages}
         keyExtractor={(m)=>m.id}

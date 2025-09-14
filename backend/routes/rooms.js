@@ -10,6 +10,25 @@ function getSB(req) {
 }
 
 /**
+ * Helper: get authenticated user from Supabase JWT in Authorization header
+ */
+async function getAuthUser(req) {
+  const supabase = getSB(req);
+  if (!supabase) return null;
+  const hdr = String(req.headers?.authorization || '');
+  const m = hdr.match(/^Bearer\s+(.+)$/i);
+  if (!m) return null;
+  const token = m[1];
+  try {
+    const { data, error } = await supabase.auth.getUser(token);
+    if (error) return null;
+    return data?.user || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * GET /rooms/:roomId/participants
  * Returns role & basic profile display. If Supabase missing, returns empty list (non-fatal).
  */
@@ -23,9 +42,9 @@ router.get("/:roomId/participants", async (req, res) => {
   }
 
   try {
-    // prefer table "room_members"; if your table name is different, change here
+    // table name aligned with app usage
     const { data: members, error: mErr } = await supabase
-      .from("room_members")
+      .from("room_participants")
       .select("user_id, role, joined_at")
       .eq("room_id", roomId);
 
@@ -77,6 +96,14 @@ router.post("/join", async (req, res) => {
   const { room_id, user_id, role } = req.body || {};
   if (!room_id || !user_id) return res.status(400).json({ ok: false, message: "room_id, user_id required" });
 
+  // Validate identity if Authorization header present
+  try {
+    const au = await getAuthUser(req);
+    if (au && au.id !== user_id) {
+      return res.status(401).json({ ok: false, message: "user_id mismatch" });
+    }
+  } catch {}
+
   if (!supabase) {
     console.warn("[rooms] join: Supabase not configured, returning stub ok");
     return res.json({ ok: true, data: { room_id, user_id, role: role || "listener" }, stub: true });
@@ -89,7 +116,7 @@ router.post("/join", async (req, res) => {
       role: role || "listener",
       joined_at: new Date().toISOString(),
     };
-    const { error } = await supabase.from("room_members").upsert(payload, { onConflict: "room_id,user_id" });
+    const { error } = await supabase.from("room_participants").upsert(payload, { onConflict: "room_id,user_id" });
     if (error) throw error;
     return res.json({ ok: true, data: { room_id, user_id, role: payload.role } });
   } catch (e) {
@@ -110,17 +137,60 @@ router.post("/role", async (req, res) => {
 
   const role = enable ? "speaker" : "listener";
 
+  // Validate identity if Authorization header present
+  try {
+    const au = await getAuthUser(req);
+    if (au && au.id !== user_id) {
+      return res.status(401).json({ ok: false, message: "user_id mismatch" });
+    }
+  } catch {}
+
   if (!supabase) {
     console.warn("[rooms] role: Supabase not configured, returning stub ok");
     return res.json({ ok: true, data: { room_id, user_id, role }, stub: true });
   }
 
   try {
-    const { error } = await supabase.from("room_members").upsert({ room_id, user_id, role }, { onConflict: "room_id,user_id" });
+    const { error } = await supabase.from("room_participants").upsert({ room_id, user_id, role }, { onConflict: "room_id,user_id" });
     if (error) throw error;
     return res.json({ ok: true, data: { room_id, user_id, role } });
   } catch (e) {
     return res.status(500).json({ ok: false, message: "role update failed", details: { message: String(e?.message || e) } });
+  }
+});
+
+/**
+ * POST /rooms/leave
+ * body: { room_id, user_id }
+ */
+router.post("/leave", async (req, res) => {
+  const supabase = getSB(req);
+  const { room_id, user_id } = req.body || {};
+  if (!room_id || !user_id) return res.status(400).json({ ok: false, message: "room_id, user_id required" });
+
+  // Validate identity if Authorization header present
+  try {
+    const au = await getAuthUser(req);
+    if (au && au.id !== user_id) {
+      return res.status(401).json({ ok: false, message: "user_id mismatch" });
+    }
+  } catch {}
+
+  if (!supabase) {
+    console.warn("[rooms] leave: Supabase not configured, returning stub ok");
+    return res.json({ ok: true, stub: true });
+  }
+
+  try {
+    const { error } = await supabase
+      .from("room_participants")
+      .delete()
+      .eq("room_id", room_id)
+      .eq("user_id", user_id);
+    if (error) throw error;
+    return res.json({ ok: true });
+  } catch (e) {
+    return res.status(500).json({ ok: false, message: "leave failed", details: { message: String(e?.message || e) } });
   }
 });
 

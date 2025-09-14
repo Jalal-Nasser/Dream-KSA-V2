@@ -9,7 +9,6 @@
 
 const express = require('express');
 const cors = require('cors');
-const jwt = require('jsonwebtoken');
 const { createClient } = require('@supabase/supabase-js');
 const path = require('path');
 
@@ -47,6 +46,8 @@ if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
 } else {
   console.warn('[boot] supabase admin NOT configured');
 }
+// expose supabase to routers
+app.locals.supabase = supabase;
 
 // ---------- routes ----------
 app.get('/health', (_req, res) => {
@@ -66,143 +67,15 @@ app.get('/favicon.ico', (_req, res) => {
   return res.sendFile(path.join(__dirname, 'public', 'favicon.ico'));
 });
 
-// ---- Participants (merge profiles manually)
-app.get('/rooms/:id/participants', async (req, res) => {
-  try {
-    if (!supabase) {
-      return res.status(500).json({ ok: false, message: 'Supabase admin not configured' });
-    }
-    const roomId = req.params.id;
-    if (!isUuid(roomId)) {
-      return res.status(400).json({ ok: false, message: 'invalid room_id' });
-    }
-
-    const { data: rows, error } = await supabase
-      .from('room_participants')
-      .select('user_id, role, joined_at, hand_raised')
-      .eq('room_id', roomId)
-      .order('joined_at', { ascending: true });
-
-    if (error) {
-      return res.status(500).json({ ok: false, message: 'participants fetch failed', details: error });
-    }
-    if (!rows || rows.length === 0) {
-      return res.json({ ok: true, data: [] });
-    }
-
-    const ids = [...new Set(rows.map((r) => r.user_id))];
-    const { data: profiles, error: pErr } = await supabase
-      .from('profiles')
-      .select('id, username, display_name, avatar_url, email')
-      .in('id', ids);
-
-    if (pErr) {
-      return res.status(500).json({ ok: false, message: 'profiles fetch failed', details: pErr });
-    }
-
-    const byId = new Map((profiles || []).map((p) => [p.id, p]));
-    const merged = rows.map((r) => {
-      const p = byId.get(r.user_id) || {};
-      const display = p.display_name || p.username || (p.email ? p.email.split('@')[0] : 'عضو');
-      return {
-        user_id: r.user_id,
-        role: r.role || 'listener',
-        joined_at: r.joined_at,
-        hand_raised: !!r.hand_raised,
-        profile: { id: p.id, username: p.username, display_name: p.display_name, avatar_url: p.avatar_url, email: p.email, display },
-      };
-    });
-
-    return res.json({ ok: true, data: merged });
-  } catch (e) {
-    console.error('[participants] error', e);
-    return res.status(500).json({ ok: false, message: 'participants fatal', details: String(e?.message || e) });
-  }
-});
-
-// ---- Join
-app.post('/rooms/join', async (req, res) => {
-  try {
-    if (!supabase) {
-      return res.status(500).json({ ok: false, message: 'Supabase admin not configured' });
-    }
-    const { room_id, user_id, role } = req.body || {};
-    if (!isUuid(room_id) || !isUuid(user_id)) {
-      return res.status(400).json({ ok: false, message: 'room_id, user_id must be uuid' });
-    }
-    const payload = {
-      room_id,
-      user_id,
-      role: role || 'listener',
-      joined_at: new Date().toISOString(),
-    };
-    const { error } = await supabase.from('room_participants').upsert(payload, { onConflict: 'room_id,user_id' });
-    if (error) {
-      return res.status(500).json({ ok: false, message: 'join failed', details: error });
-    }
-    return res.json({ ok: true, data: payload });
-  } catch (e) {
-    console.error('[join] error', e);
-    return res.status(500).json({ ok: false, message: 'join fatal', details: String(e?.message || e) });
-  }
-});
-
-// ---- Hand raise/lower
-async function setHand(req, res, value) {
-  try {
-    if (!supabase) {
-      return res.status(500).json({ ok: false, message: 'Supabase admin not configured' });
-    }
-    const { room_id, user_id } = req.body || {};
-    if (!isUuid(room_id) || !isUuid(user_id)) {
-      return res.status(400).json({ ok: false, message: 'room_id, user_id must be uuid' });
-    }
-    const { error } = await supabase
-      .from('room_participants')
-      .update({ hand_raised: !!value })
-      .eq('room_id', room_id)
-      .eq('user_id', user_id);
-
-    if (error) {
-      return res.status(500).json({ ok: false, message: 'hand update failed', details: error });
-    }
-    return res.json({ ok: true });
-  } catch (e) {
-    console.error('[hand] error', e);
-    return res.status(500).json({ ok: false, message: 'hand fatal', details: String(e?.message || e) });
-  }
+// ---- Mount feature routers
+try {
+  const roomsRouter = require('./routes/rooms');
+  const hmsRouter = require('./routes/hms');
+  app.use('/rooms', roomsRouter);
+  app.use('/hms', hmsRouter);
+} catch (e) {
+  console.warn('[boot] routers not mounted:', e?.message || e);
 }
-app.post('/rooms/handraise', (req, res) => setHand(req, res, true));
-app.post('/rooms/handlower', (req, res) => setHand(req, res, false));
-
-// ---- HMS token
-app.post('/hms/token', async (req, res) => {
-  try {
-    const { room_id, user_id, name, role } = req.body || {};
-    if (!isUuid(room_id) || !isUuid(user_id)) {
-      return res.status(400).json({ ok: false, message: 'room_id, user_id must be uuid' });
-    }
-    if (!HMS_ACCESS_KEY || !HMS_SECRET) {
-      return res.status(500).json({ ok: false, message: 'HMS server keys missing' });
-    }
-
-    const payload = {
-      access_key: HMS_ACCESS_KEY,
-      type: 'app',
-      version: 2,
-      room_id,
-      user_id,
-      role: role || 'listener',
-      // metadata: { name }
-    };
-
-    const token = jwt.sign(payload, HMS_SECRET, { algorithm: 'HS256', expiresIn: '1h' });
-    return res.json({ ok: true, token });
-  } catch (e) {
-    console.error('[hms/token] error', e);
-    return res.status(500).json({ ok: false, message: 'token generation failed', details: String(e?.message || e) });
-  }
-});
 
 // ---- Index
 app.get('/', (_req, res) => {
@@ -214,8 +87,10 @@ app.get('/', (_req, res) => {
       'GET  /privacy',
       'GET  /terms',
       'GET  /favicon.ico',
-      'GET  /rooms/:id/participants',
+      'GET  /rooms/:roomId/participants',
       'POST /rooms/join',
+      'POST /rooms/leave',
+      'POST /rooms/role',
       'POST /rooms/handraise',
       'POST /rooms/handlower',
       'POST /hms/token',

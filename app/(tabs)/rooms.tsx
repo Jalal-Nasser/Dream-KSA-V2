@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, Text, StyleSheet, FlatList, Pressable, TextInput } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Pressable, TextInput, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -7,6 +7,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { PALETTE } from '../../lib/theme';
 import { getSupabase } from '../../lib/supabase';
 import { api } from '../../lib/api';
+import { hmsJoin, hmsIsConnected } from '../../lib/hmsClient';
 
 type Room = { id: string; title: string; created_at: string };
 
@@ -16,6 +17,7 @@ export default function Rooms() {
   const [rooms, setRooms] = React.useState<Room[]>([]);
   const [title, setTitle] = React.useState('');
   const [loading, setLoading] = React.useState(false);
+  const [joiningId, setJoiningId] = React.useState<string | null>(null);
 
   const fetchRooms = React.useCallback(async () => {
     const { data, error } = await supabase
@@ -126,6 +128,32 @@ export default function Rooms() {
     router.push(`/room/${data!.id}`);
   };
 
+  const joinRoom = async (roomId: string, role: 'listener' | 'speaker' = 'listener') => {
+    try {
+      setJoiningId(roomId);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        Alert.alert('تسجيل الدخول مطلوب');
+        return;
+      }
+      // backend membership
+      await api.joinRoom(roomId, user.id, role);
+      // get HMS token and join immediately (avoid double-join if already connected)
+      const name = user.user_metadata?.full_name || user.email?.split('@')[0] || 'ضيف';
+      const token = await api.getHMSToken(roomId, user.id, name);
+      const already = await hmsIsConnected();
+      if (!already) {
+        await hmsJoin(token, name);
+      }
+      router.push(`/room/${roomId}`);
+    } catch (e: any) {
+      console.log('[rooms] join error', e?.message || String(e));
+      Alert.alert('خطأ في الانضمام', e?.message || '');
+    } finally {
+      setJoiningId(null);
+    }
+  };
+
   return (
     <LinearGradient
       colors={['#FBE7EF', '#F2CAD6', '#F8D7DA', '#FBE7EF']}
@@ -153,11 +181,20 @@ export default function Rooms() {
         keyExtractor={(r) => r.id}
         ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
         renderItem={({ item }) => (
-          <Pressable onPress={() => router.push(`/room/${item.id}`)} style={styles.roomRow}>
+          <View style={styles.roomRow}>
             <MaterialCommunityIcons name="account-voice" size={20} color={PALETTE.primaryDark} />
             <Text style={styles.roomTitle} numberOfLines={1}>{item.title}</Text>
-            <Ionicons name="chevron-back" size={18} color="#B4B8BF" />
-    </Pressable>
+            <View style={{ flexDirection: 'row-reverse', gap: 8 }}>
+              <Pressable onPress={() => joinRoom(item.id, 'listener')} style={styles.joinBtn}>
+                <Ionicons name="enter-outline" size={16} color="#fff" />
+                <Text style={styles.joinTxt}>{joiningId === item.id ? '...' : 'انضم'}</Text>
+              </Pressable>
+              <Pressable onPress={() => router.push(`/room/${item.id}`)} style={styles.goBtn}>
+                <Ionicons name="chevron-back" size={16} color={PALETTE.primaryDark} />
+                <Text style={styles.goTxt}>فتح</Text>
+              </Pressable>
+            </View>
+          </View>
         )}
       />
       </LinearGradient>
@@ -198,7 +235,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff', 
     borderRadius: 16, 
     padding: 12, 
-    flexDirection: 'row', 
+    flexDirection: 'row-reverse', 
     alignItems: 'center', 
     gap: 10,
     shadowColor: '#800F2F',
@@ -208,4 +245,8 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   roomTitle: { flex: 1, textAlign: 'right', fontWeight: '800' },
+  joinBtn: { backgroundColor: PALETTE.primary, borderRadius: 10, paddingVertical: 8, paddingHorizontal: 10, flexDirection:'row-reverse', alignItems:'center', gap:6 },
+  joinTxt: { color:'#fff', fontWeight:'800' },
+  goBtn: { backgroundColor: '#fff0f3', borderRadius: 10, paddingVertical: 8, paddingHorizontal: 10, flexDirection:'row-reverse', alignItems:'center', gap:6, borderWidth:1, borderColor:'#ffd5e0' },
+  goTxt: { color: PALETTE.primaryDark, fontWeight:'800' },
 });
