@@ -15,8 +15,11 @@ router.post("/token", async (req, res) => {
     if (!room_id || !user_id) {
       return res.status(400).json({ ok: false, message: "room_id and user_id required" });
     }
-    const accessKey = process.env.HMS_ACCESS_KEY;
-    const secret = process.env.HMS_SECRET;
+    // Support both naming conventions (Railway vs local):
+    // - HMS_ACCESS_KEY / HMS_SECRET (Railway)
+    // - HMS_APP_ID / HMS_APP_SECRET (local dev)
+    const accessKey = process.env.HMS_ACCESS_KEY || process.env.HMS_APP_ID;
+    const secret = process.env.HMS_SECRET || process.env.HMS_APP_SECRET;
     if (!accessKey || !secret) {
       return res.status(500).json({ ok: false, message: "HMS server keys missing" });
     }
