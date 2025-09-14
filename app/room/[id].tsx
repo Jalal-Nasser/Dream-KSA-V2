@@ -8,7 +8,7 @@ import { PALETTE } from '../../lib/theme';
 import { useRoom } from '../../hooks/useRoom';
 import { api } from "@/lib/api";
 import VoiceBar from "@/components/rooms/VoiceBar"; 
-import { useRoomRealtime } from '@/hooks/useRoomRealtime';
+import { useRoomRealtime } from '../../hooks/useRoomRealtime';
 import { hmsJoin, hmsLeave, hmsToggleLocalMute, hmsIsConnected } from "@/lib/hmsClient";
 
 type Msg = { id: string; from: string; text: string; at: number };
@@ -49,7 +49,9 @@ export default function RoomChat() {
       try {
         setJoining(true);
         const name = my?.profile?.display || my?.profile?.username || "مستخدم";
-        const token = await api.getHMSToken(roomId, myId, name);
+        // Ensure backend membership so participants list reflects instantly
+        try { await api.joinRoom(roomId, myId, myRole); } catch {}
+        const token = await api.getHMSToken(roomId, myId, name, myRole as any);
         if (cancelled) return;
         await hmsJoin(token, name, myRole);
         setMuted(false);
@@ -150,6 +152,8 @@ export default function RoomChat() {
   }
     
   // --- UI tweaks ---
+  const [showEmojis, setShowEmojis] = React.useState(false);
+  const EMOJIS = ["😀","😂","😍","🙏","🔥","👍","🎉","❤️","✨","😮","😅","😎","🙌","💬","🎧"]; 
   const Chip = ({text, danger}:{text:string; danger?:boolean}) => (
     <View style={{
       position:"absolute", top: 6, alignSelf: "center",
@@ -175,11 +179,24 @@ export default function RoomChat() {
         </View>
       </View>
 
-      {/* Simple mic grid of participants */}
+      {/* Participants grid */}
+      <View style={{ paddingHorizontal:12, paddingBottom:8 }}>
+        <Text style={{ textAlign:'right', fontWeight:'800', marginBottom:6 }}>المتواجدون ({participants.length})</Text>
+        <View style={{ flexDirection:'row-reverse', flexWrap:'wrap', gap:8 }}>
+          {(participants || []).map((p:any) => (
+            <View key={`${p.user_id}`} style={{ backgroundColor:'#fff', borderRadius:12, paddingHorizontal:10, paddingVertical:6, flexDirection:'row-reverse', alignItems:'center', gap:6 }}>
+              <Text style={{ fontSize:12 }}>{p.role === 'host' || p.role==='owner' ? '👑' : p.role==='speaker' ? '🎙️' : '👂'}</Text>
+              <Text style={{ fontWeight:'700' }}>{p?.profile?.display || p?.profile?.username || p.user_id.slice(0,6)}</Text>
+            </View>
+          ))}
+        </View>
+      </View>
+
+      {/* Chat messages */}
       <FlatList
         data={messages}
         keyExtractor={(m)=>m.id}
-        contentContainerStyle={{ padding:12, gap:8 }}
+        contentContainerStyle={{ padding:12, gap:8, paddingBottom: showEmojis ? 140 : 100 }}
         renderItem={({item}) => (
           <View style={[styles.bubble, { alignSelf: item.from === 'أنا' ? 'flex-end' : 'flex-start' }]}>
             <Text style={styles.from}>{item.from}</Text>
@@ -188,7 +205,21 @@ export default function RoomChat() {
         )}
       />
 
+      {/* Emoji row */}
+      {showEmojis && (
+        <View style={{ backgroundColor:'#fff', paddingVertical:8, paddingHorizontal:12, borderTopWidth:1, borderColor:'#eee' }}>
+          <View style={{ flexDirection:'row-reverse', flexWrap:'wrap', gap:10 }}>
+            {EMOJIS.map((e) => (
+              <Pressable key={e} onPress={() => setText((t)=>t + e)} style={{ paddingHorizontal:8, paddingVertical:6, backgroundColor:'#f3f4f6', borderRadius:8 }}>
+                <Text style={{ fontSize:18 }}>{e}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+      )}
+
       <View style={styles.inputRow}>
+        <Pressable onPress={() => setShowEmojis((v)=>!v)} style={[styles.sendBtn,{ backgroundColor:'#6b7280' }]}><Ionicons name="happy-outline" size={16} color="#fff"/></Pressable>
         <Pressable onPress={send} style={styles.sendBtn}><Ionicons name="send" size={16} color="#fff"/></Pressable>
         <TextInput
           style={styles.input}
