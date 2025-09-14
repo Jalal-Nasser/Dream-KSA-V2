@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { View, Text, Pressable, StyleSheet, Platform, Modal, ImageBackground, Image, TextInput, KeyboardAvoidingView, Alert, Animated, Easing } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -18,6 +19,7 @@ const BG_URI = require('../assets/images/login-bg.jpg');
 
 export default function Login() {
   const supabase = getSupabase();
+  const insets = useSafeAreaInsets();
   const [showTips, setShowTips] = React.useState(false);
   const [isSignUp, setIsSignUp] = React.useState(false);
   const [email, setEmail] = React.useState('');
@@ -330,7 +332,11 @@ export default function Login() {
   };
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: '#000' }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+    <KeyboardAvoidingView
+      style={{ flex: 1, backgroundColor: '#000' }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
+    >
       <ImageBackground
         source={BG_URI}
         style={StyleSheet.absoluteFill}
@@ -784,6 +790,7 @@ export default function Login() {
       </Animated.View>
 
       {/* Transparent/White Login Box */}
+      <View style={{ flex: 1, justifyContent: 'flex-end', paddingBottom: Math.max(12, insets.bottom) }}>
       <Animated.View 
         style={[
           styles.loginContainer,
@@ -931,6 +938,7 @@ export default function Login() {
           </Pressable>
         </Animated.View>
       </Animated.View>
+      </View>
 
       {/* Tips → Confirm → Phone */}
       <Modal visible={showTips} transparent animationType="fade" onRequestClose={()=>setShowTips(false)}>
