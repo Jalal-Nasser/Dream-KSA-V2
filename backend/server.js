@@ -82,6 +82,44 @@ try {
   console.warn('[boot] routers not mounted:', e?.message || e);
 }
 
+// ----- INLINE DEBUG ROUTES (always mounted) -----
+app.get('/debug/ping', (_req, res) => {
+  res.json({ ok: true, msg: 'pong', mounted: true });
+});
+
+app.get('/debug/env', (_req, res) => {
+  res.json({
+    ok: true,
+    env: {
+      has_SUPABASE_URL: !!process.env.SUPABASE_URL,
+      has_SUPABASE_SERVICE_ROLE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY || !!process.env.SUPABASE_SERVICE_KEY,
+      has_HMS_ACCESS_KEY: !!(process.env.HMS_ACCESS_KEY || process.env.HMS_APP_ID),
+      has_HMS_SECRET: !!(process.env.HMS_SECRET || process.env.HMS_APP_SECRET),
+      has_HMS_MANAGEMENT_TOKEN: !!process.env.HMS_MANAGEMENT_TOKEN,
+      has_HMS_ROOM_TEMPLATE_ID: !!process.env.HMS_ROOM_TEMPLATE_ID,
+    },
+  });
+});
+
+app.get('/debug/hms-room/:roomId', async (req, res) => {
+  const roomId = req.params.roomId;
+  if (!roomId) return res.status(400).json({ ok: false, message: 'roomId required' });
+  if (!app.locals?.supabase) {
+    return res.json({ ok: true, room_id: roomId, hms_room_id: null, note: 'no supabase admin' });
+  }
+  try {
+    const { data, error } = await app.locals.supabase
+      .from('rooms')
+      .select('hms_room_id')
+      .eq('id', roomId)
+      .maybeSingle();
+    if (error) return res.status(500).json({ ok: false, message: String(error.message || error) });
+    res.json({ ok: true, room_id: roomId, hms_room_id: data?.hms_room_id || null });
+  } catch (e) {
+    res.status(500).json({ ok: false, message: String(e?.message || e) });
+  }
+});
+
 // ---- Index
 app.get('/', (_req, res) => {
   res.json({
