@@ -21,6 +21,7 @@ const isUuid = (s) => typeof s === 'string' && v4rx.test(s);
 const {
   SUPABASE_URL,
   SUPABASE_SERVICE_ROLE_KEY,
+  SUPABASE_SERVICE_KEY, // local env may use this name
   CORS_ORIGIN,
   HMS_ACCESS_KEY,
   HMS_SECRET,
@@ -34,9 +35,10 @@ app.use(express.urlencoded({ extended: false }));
 
 // ---------- supabase (admin) ----------
 let supabase = null;
-if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
+const SB_SERVICE = SUPABASE_SERVICE_ROLE_KEY || SUPABASE_SERVICE_KEY;
+if (SUPABASE_URL && SB_SERVICE) {
   try {
-    supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+    supabase = createClient(SUPABASE_URL, SB_SERVICE, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
     log('supabase admin client initialized');
