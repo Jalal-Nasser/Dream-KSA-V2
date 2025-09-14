@@ -1,4 +1,8 @@
-import 'dotenv/config';
+// Load dotenv only when available (EAS cloud builds set envs directly and may not install devDependencies)
+try {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  require('dotenv/config');
+} catch {}
 import type { ExpoConfig } from '@expo/config';
 
 const read = (k: string) => {
