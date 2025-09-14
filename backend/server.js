@@ -77,6 +77,7 @@ try {
   app.use('/rooms', roomsRouter);
   app.use('/hms', hmsRouter);
   app.use(debugRouter);
+  console.log('[boot] mounted /debug routes');
 } catch (e) {
   console.warn('[boot] routers not mounted:', e?.message || e);
 }
