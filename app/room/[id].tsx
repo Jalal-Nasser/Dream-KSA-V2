@@ -9,7 +9,7 @@ import { useRoom } from '../../hooks/useRoom';
 import { api } from "@/lib/api";
 import VoiceBar from "@/components/rooms/VoiceBar"; 
 import { useRoomRealtime } from '@/hooks/useRoomRealtime';
-import { hmsJoin, hmsLeave, hmsSetLocalAudioEnabled, hmsIsConnected } from "@/lib/hmsClient";
+import { hmsJoin, hmsLeave, hmsToggleLocalMute, hmsIsConnected } from "@/lib/hmsClient";
 
 type Msg = { id: string; from: string; text: string; at: number };
 const uid = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`;
@@ -51,7 +51,7 @@ export default function RoomChat() {
         const name = my?.profile?.display || my?.profile?.username || "مستخدم";
         const token = await api.getHMSToken(roomId, myId, name);
         if (cancelled) return;
-        await hmsJoin(token, name);
+        await hmsJoin(token, name, myRole);
         setMuted(false);
         setConnected(await hmsIsConnected());
         console.log("[hms] join OK");
@@ -118,7 +118,7 @@ export default function RoomChat() {
     if (!myId || !roomId) return;
     try {
       const nextMuted = !muted;
-      await hmsSetLocalAudioEnabled(!nextMuted);
+      await hmsToggleLocalMute(nextMuted);
       setMuted(nextMuted);
       await api.setMicRole(roomId, myId, !nextMuted);
     } catch (e: any) {

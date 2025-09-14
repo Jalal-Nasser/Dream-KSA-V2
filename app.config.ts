@@ -70,7 +70,8 @@ const config: ExpoConfig = {
     buildNumber: '1.0.0',
     icon: './assets/images/icon.png',
     infoPlist: {
-      ITSAppUsesNonExemptEncryption: false
+      ITSAppUsesNonExemptEncryption: false,
+      NSMicrophoneUsageDescription: "نستخدم الميكروفون للمحادثات الصوتية."
     },
     associatedDomains: ['dream-ksa://auth-callback']
   },

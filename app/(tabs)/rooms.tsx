@@ -7,7 +7,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { PALETTE } from '../../lib/theme';
 import { getSupabase } from '../../lib/supabase';
 import { api } from '../../lib/api';
-import { hmsJoin, hmsIsConnected } from '../../lib/hmsClient';
+import { hmsJoin, hmsIsConnected } from '@/lib/hmsClient';
 
 type Room = { id: string; title: string; created_at: string };
 
@@ -143,7 +143,7 @@ export default function Rooms() {
       const token = await api.getHMSToken(roomId, user.id, name);
       const already = await hmsIsConnected();
       if (!already) {
-        await hmsJoin(token, name);
+        await hmsJoin(token, name, role);
       }
       router.push(`/room/${roomId}`);
     } catch (e: any) {
