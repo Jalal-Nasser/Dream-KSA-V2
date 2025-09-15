@@ -133,6 +133,15 @@ export default function ChatPanel({ visible, onClose, roomId, meUserId = 'me', b
           ))}
         </View>
 
+        {/* Emoji Row */}
+        <View style={styles.emojiRow}>
+          {['😀', '😂', '❤️', '👍', '👏', '🎉', '🔥', '💯'].map((emoji) => (
+            <Pressable key={emoji} onPress={() => setText(prev => prev + emoji)} style={styles.emojiBtn}>
+              <Text style={styles.emojiText}>{emoji}</Text>
+            </Pressable>
+          ))}
+        </View>
+
         {/* Message Input - Binmo Style */}
         <View style={styles.inputRow}>
           <TextInput
@@ -168,6 +177,9 @@ const styles = StyleSheet.create({
   giftBtn: { backgroundColor: '#FAFAFA', borderRadius: 10, paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: '#eee', alignItems: 'center' },
   giftTxt: { fontSize: 18 },
   giftPrice: { fontSize: 11, color: '#777', textAlign: 'center', marginTop: 2 },
+  emojiRow: { flexDirection: 'row', paddingHorizontal: 10, paddingVertical: 4, gap: 8 },
+  emojiBtn: { padding: 8, backgroundColor: '#f8f9fa', borderRadius: 8 },
+  emojiText: { fontSize: 18 },
   inputRow: { flexDirection: 'row', alignItems: 'center', padding: 10, gap: 8 },
   input: { flex: 1, backgroundColor: '#F7F7F7', borderRadius: 12, paddingVertical: 8, paddingHorizontal: 12, fontSize: 14, borderWidth: 1, borderColor: '#eee' },
   sendBtn: { backgroundColor: '#EA4C89', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12 },

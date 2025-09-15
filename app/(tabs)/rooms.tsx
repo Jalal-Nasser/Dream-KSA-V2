@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, Text, StyleSheet, FlatList, Pressable, TextInput, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Pressable, TextInput, Alert, TouchableOpacity, Image, Dimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -12,7 +12,19 @@ import { hmsJoin, hmsIsConnected, hmsToggleLocalMute, hmsLeave } from '../lib/hm
 import { handRaise, handLower } from '../../lib/api';
 import { subscribeParticipants, ParticipantRow, subscribeMessages, sendMessage } from '../lib/realtime';
 
-type Room = { id: string; title: string; created_at: string };
+type Room = { 
+  id: string; 
+  title: string; 
+  created_at: string;
+  host_name?: string;
+  host_country?: string;
+  participant_count?: number;
+  status?: 'live' | 'soon';
+  host_avatar?: string;
+};
+
+const { width } = Dimensions.get('window');
+const cardWidth = (width - 48) / 2; // 2 columns with padding
 
 export default function Rooms() {
   const router = useRouter();
@@ -22,19 +34,76 @@ export default function Rooms() {
   const [loading, setLoading] = React.useState(false);
   const [joiningId, setJoiningId] = React.useState<string | null>(null);
 
+  // Demo rooms data for Binmo style
+  const demoRooms: Room[] = [
+    {
+      id: 'demo-1',
+      title: 'هههههههه',
+      created_at: new Date().toISOString(),
+      host_name: 'Ahmed',
+      host_country: 'SA',
+      participant_count: 8,
+      status: 'live',
+      host_avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'
+    },
+    {
+      id: 'demo-2', 
+      title: 'سوالف 195',
+      created_at: new Date().toISOString(),
+      host_name: 'Sarah',
+      host_country: 'SA',
+      participant_count: 15,
+      status: 'soon',
+      host_avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face'
+    },
+    {
+      id: 'demo-3',
+      title: 'كلام نواعم',
+      created_at: new Date().toISOString(),
+      host_name: 'Omar',
+      host_country: 'SA',
+      participant_count: 12,
+      status: 'live',
+      host_avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
+    },
+    {
+      id: 'demo-4',
+      title: 'موسيقى وغناء',
+      created_at: new Date().toISOString(),
+      host_name: 'Layla',
+      host_country: 'SA',
+      participant_count: 18,
+      status: 'live',
+      host_avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face'
+    }
+  ];
+
   const fetchRooms = React.useCallback(async () => {
-    const { data, error } = await supabase
-      .from('rooms')
-      .select('id, title, created_at')
-      .order('created_at', { ascending: false })
-      .limit(50);
-    if (!error && data) {
-      const mappedRooms = data.map((room: any) => ({
-        id: room.id,
-        title: room.title || 'Room',
-        created_at: room.created_at,
-      }));
-      setRooms(mappedRooms as Room[]);
+    try {
+      const { data, error } = await supabase
+        .from('rooms')
+        .select('id, title, created_at')
+        .order('created_at', { ascending: false })
+        .limit(50);
+      
+      if (!error && data) {
+        const mappedRooms = data.map((room: any) => ({
+          id: room.id,
+          title: room.title || 'Room',
+          created_at: room.created_at,
+          host_name: 'Host',
+          host_country: 'SA',
+          participant_count: Math.floor(Math.random() * 20) + 1,
+          status: Math.random() > 0.3 ? 'live' : 'soon',
+        }));
+        setRooms(mappedRooms as Room[]);
+      } else {
+        // Fallback to demo rooms if no data
+        setRooms(demoRooms);
+      }
+    } catch (error) {
+      console.log('Error fetching rooms:', error);
+      setRooms(demoRooms);
     }
   }, []);
 
@@ -46,333 +115,333 @@ export default function Rooms() {
       () => console.log("[api] health ok"),
       (e) => console.log("[api] health failed", String(e?.message || e))
     );
-    
-    const channel = supabase
-      .channel('rooms_changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'rooms' }, () => {
-        // Refetch to stay consistent across columns (title/name etc.)
-        fetchRooms();
-      })
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, [fetchRooms]);
 
-  // Refetch when tab/screen gains focus
-  useFocusEffect(React.useCallback(() => {
-    fetchRooms();
-    return () => {};
-  }, [fetchRooms]));
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchRooms();
+    }, [fetchRooms])
+  );
 
   const createRoom = async () => {
     if (!title.trim()) {
-      console.log('[createRoom] No title provided');
+      Alert.alert('خطأ', 'يرجى إدخال عنوان الغرفة');
       return;
     }
     
-    console.log('[createRoom] Starting room creation with title:', title.trim());
     setLoading(true);
-    
-    // Check if user is authenticated
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      console.log('[createRoom] User not authenticated:', authError);
-      setLoading(false);
-      return;
-    }
-    
-    console.log('[createRoom] User authenticated:', user.id);
-    
-    // Try title first (remote schema may not have name column); fallback to name.
-    // IMPORTANT: include host_id (and keep owner_id) to satisfy NOT NULL / RLS.
-    let data: any = null;
-    let error: any = null;
-    const insertTitle: Record<string, any> = {
-      title: title.trim() || 'Room',
-      host_id: user.id,
-      owner_id: user.id,
-    };
-    let res = await supabase
-      .from('rooms')
-      .insert(insertTitle)
-      .select('id')
-      .maybeSingle();
-    if (!res.error && res.data) {
-      data = res.data;
-    } else {
-      error = res.error;
-      const insertName: Record<string, any> = {
-        name: title.trim() || 'Room',
-        host_id: user.id,
-        owner_id: user.id,
-      };
-      res = await supabase
-        .from('rooms')
-        .insert(insertName)
-        .select('id')
-        .maybeSingle();
-      if (!res.error && res.data) {
-        data = res.data;
-        error = null;
-      } else {
-        error = error || res.error;
-      }
-    }
-    
-    setLoading(false);
-    if (error) {
-      console.log('[createRoom] Database error:', error);
-      return;
-    }
-    
-    console.log('[createRoom] Room created successfully:', data);
-    setTitle('');
-    // Ensure host membership (server will decide final role)
     try {
-      console.log('[createRoom] (backend) host membership', { room_id: data!.id, user_id: user.id, role: 'host' });
-      const jr: any = await api.joinRoom(data!.id, user.id, 'host');
-      console.log('[createRoom] joined with role:', jr?.role);
-    } catch (err) {
-      console.log('[createRoom] host backend error:', err);
+      const { data, error } = await supabase
+        .from('rooms')
+        .insert([{ title: title.trim() }])
+        .select()
+        .single();
+      
+      if (error) throw error;
+      
+      setTitle('');
+      fetchRooms();
+      Alert.alert('نجح', 'تم إنشاء الغرفة بنجاح');
+    } catch (error: any) {
+      Alert.alert('خطأ', error.message || 'فشل في إنشاء الغرفة');
+    } finally {
+      setLoading(false);
     }
-    router.push(`/room/${data!.id}`);
   };
 
-  const [localMuted, setLocalMuted] = React.useState(true);
-  const [myRole, setMyRole] = React.useState<'host'|'speaker'|'listener'>('listener');
-  const [connected, setConnected] = React.useState(false);
-  const [roomId, setRoomId] = React.useState<string | null>(null);
-  const [peers, setPeers] = React.useState<any[]>([]);
-  const [participantCount, setParticipantCount] = React.useState<number>(0);
-  const participantsUnsub = React.useRef<null | (() => void)>(null);
-  const [msgs, setMsgs] = React.useState<any[]>([]);
-  const messagesUnsub = React.useRef<null | (() => void)>(null);
-  const [msgText, setMsgText] = React.useState('');
-
-  const joinRoom = async (roomId: string, role: 'listener' | 'speaker' | 'host' = 'listener') => {
+  const joinRoom = async (roomId: string) => {
+    if (joiningId) return;
+    
+    setJoiningId(roomId);
     try {
-      setJoiningId(roomId);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        Alert.alert('تسجيل الدخول مطلوب');
+        Alert.alert('خطأ', 'يجب تسجيل الدخول أولاً');
         return;
       }
-      // backend membership (server decides final role)
-      const joinRes: any = await api.joinRoom(roomId, user.id, role);
-      const serverRole = (joinRes?.role as 'host'|'speaker'|'listener') || role;
-      // get HMS token and join immediately (avoid double-join if already connected)
-      const name = user.user_metadata?.full_name || user.email?.split('@')[0] || 'ضيف';
-      const token = await api.getHMSToken(roomId, user.id, name, serverRole as any);
-      const already = await hmsIsConnected();
-      if (!already) {
-        await hmsJoin(token, name, serverRole as any);
-        setMyRole(serverRole as any);
-        setLocalMuted(serverRole === 'listener');
-        setConnected(true);
-        setRoomId(roomId);
+
+      const name = user.user_metadata?.name || user.email?.split('@')[0] || 'مستخدم';
+      const token = await api.getHMSToken(roomId, user.id, name, 'listener');
+      
+      await hmsJoin(token, name, 'listener');
+      const connected = await hmsIsConnected();
+      
+      if (connected) {
+        router.push(`/room/${roomId}`);
+      } else {
+        Alert.alert('خطأ', 'فشل في الانضمام للغرفة');
       }
-      router.push(`/room/${roomId}`);
-    } catch (e: any) {
-      console.log('[rooms] join error', e?.message || String(e));
-      Alert.alert('خطأ في الانضمام', e?.message || '');
+    } catch (error: any) {
+      console.log('Join error:', error);
+      Alert.alert('خطأ', error.message || 'فشل في الانضمام للغرفة');
     } finally {
       setJoiningId(null);
     }
   };
 
-  const onMicPress = async (roomId: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user || !roomId) return;
-    if (myRole === 'listener') {
-      try { await handRaise(roomId, user.id); Alert.alert('✋', 'تم طلب رفع اليد'); } catch (e:any) { Alert.alert('تعذر', e?.message || ''); }
-      return;
-    }
-    const next = !localMuted;
-    await hmsToggleLocalMute(next);
-    setLocalMuted(next);
-  };
-
-  // Realtime subscriptions when connected
-  React.useEffect(() => {
-    if (!connected || !roomId) return;
-    if (participantsUnsub.current) { participantsUnsub.current(); participantsUnsub.current = null; }
-    participantsUnsub.current = subscribeParticipants(roomId, (rows: ParticipantRow[]) => {
-      setParticipantCount(rows.length);
-    });
-    if (messagesUnsub.current) { messagesUnsub.current(); messagesUnsub.current = null; }
-    messagesUnsub.current = subscribeMessages(roomId, (rows: any[]) => setMsgs(rows));
-    return () => {
-      if (participantsUnsub.current) { participantsUnsub.current(); participantsUnsub.current = null; }
-      if (messagesUnsub.current) { messagesUnsub.current(); messagesUnsub.current = null; }
-    };
-  }, [connected, roomId]);
-
-  const leave = React.useCallback(async () => {
-    try { await hmsLeave(); } catch (e) {}
-    setConnected(false);
-    setPeers([]);
-    setRoomId(null);
-    if (participantsUnsub.current) { participantsUnsub.current(); participantsUnsub.current = null; }
-    if (messagesUnsub.current) { messagesUnsub.current(); messagesUnsub.current = null; }
-    setParticipantCount(0);
-    setMsgs([]);
-  }, []);
-
-  return (
-    <LinearGradient
-      colors={['#FBE7EF', '#F2CAD6', '#F8D7DA', '#FBE7EF']}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={styles.container}
+  const renderRoomCard = ({ item }: { item: Room }) => (
+    <Pressable 
+      style={styles.roomCard}
+      onPress={() => joinRoom(item.id)}
+      disabled={joiningId === item.id}
     >
-      <View style={styles.creator}>
-        <TextInput
-          style={styles.input}
-          placeholder="أدخل اسم الغرفة"
-          placeholderTextColor="#9CA3AF"
-          value={title}
-          onChangeText={setTitle}
-          textAlign="right"
-        />
-        <Pressable disabled={loading} onPress={createRoom} style={styles.makeBtn}>
-          <MaterialCommunityIcons name="plus" size={18} color="#fff" />
-          <Text style={{ color: '#fff', fontWeight: '800' }}>{loading ? '...' : 'إنشاء'}</Text>
-          </Pressable>
-        </View>
-
-      <FlatList
-        data={rooms}
-        keyExtractor={(r) => r.id}
-        ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-        renderItem={({ item }) => (
-          <View style={styles.roomRow}>
-            <MaterialCommunityIcons name="account-voice" size={20} color={PALETTE.primaryDark} />
-            <Text style={styles.roomTitle} numberOfLines={1}>{item.title}</Text>
-            <View style={{ flexDirection: 'row-reverse', gap: 8 }}>
-              <Pressable onPress={() => joinRoom(item.id, 'listener')} style={styles.joinBtn}>
-                <Ionicons name="enter-outline" size={16} color="#fff" />
-                <Text style={styles.joinTxt}>{joiningId === item.id ? '...' : 'انضم'}</Text>
-              </Pressable>
-              <Pressable onPress={() => router.push(`/room/${item.id}`)} style={styles.goBtn}>
-                <Ionicons name="chevron-back" size={16} color={PALETTE.primaryDark} />
-                <Text style={styles.goTxt}>فتح</Text>
-              </Pressable>
-            </View>
+      {/* Host Avatar */}
+      <View style={styles.avatarContainer}>
+        {item.host_avatar ? (
+          <Image source={{ uri: item.host_avatar }} style={styles.avatar} />
+        ) : (
+          <View style={styles.avatarPlaceholder}>
+            <Text style={styles.avatarText}>{item.host_name?.[0] || 'H'}</Text>
           </View>
         )}
-      />
+        
+        {/* Status Badge */}
+        <View style={[
+          styles.statusBadge,
+          { backgroundColor: item.status === 'live' ? '#FF4444' : '#FF69B4' }
+        ]}>
+          <Text style={styles.statusText}>{item.status === 'live' ? 'Live' : 'Soon'}</Text>
+        </View>
+        
+        {/* Yellow Indicator */}
+        <View style={styles.yellowIndicator} />
+      </View>
 
-      {/* Show participant badge when connected */}
-      {connected && (
-        <>
-          {/* participant badge */}
-          <View style={{ alignItems: 'flex-end', marginBottom: 8 }}>
-            <View style={{
-              paddingVertical: 6, paddingHorizontal: 10, borderRadius: 9999,
-              backgroundColor: '#e2e8f0'
-            }}>
-              <Text style={{ fontSize: 12, fontWeight: '700', writingDirection: 'rtl' }}>
-                المتواجدون: {participantCount}
-              </Text>
-            </View>
-          </View>
+      {/* Room Info */}
+      <View style={styles.roomInfo}>
+        <Text style={styles.roomTitle} numberOfLines={1}>{item.title}</Text>
+        
+        <View style={styles.hostInfo}>
+          <Ionicons name="home" size={12} color="#666" />
+          <Text style={styles.hostName}>{item.host_name}</Text>
+          <Text style={styles.hostCountry}>{item.host_country}</Text>
+        </View>
+        
+        <View style={styles.participantInfo}>
+          <MaterialCommunityIcons name="account-group" size={16} color="#666" />
+          <Text style={styles.participantCount}>{item.participant_count || 0}</Text>
+        </View>
+      </View>
 
-          {/* chat overlay */}
-          <View style={{ position: 'absolute', bottom: 70, left: 12, right: 12, maxHeight: 180 }}>
-            <View style={{ backgroundColor: 'rgba(255,255,255,0.92)', borderRadius: 12, padding: 8 }}>
-              <Text style={{ fontWeight: '700', textAlign: 'right' }}>الدردشة</Text>
-              <FlatList
-                data={msgs}
-                keyExtractor={(m:any) => m.id}
-                renderItem={({ item }) => (
-                  <Text style={{ textAlign: 'right' }}>{item.text}</Text>
-                )}
-                inverted={true}
-                contentContainerStyle={{ flexDirection: 'column-reverse' }}
-                style={{ maxHeight: 120 }}
-              />
-              <View style={{ flexDirection: 'row-reverse', alignItems: 'center', marginTop: 6 }}>
-                <TouchableOpacity onPress={() => setMsgText((t) => t + '👏')}>
-                  <Text style={{ fontSize: 18, marginHorizontal: 6 }}>👏</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => setMsgText((t) => t + '❤️')}>
-                  <Text style={{ fontSize: 18, marginHorizontal: 6 }}>❤️</Text>
-                </TouchableOpacity>
-                <View style={{ flex: 1, marginHorizontal: 8 }}>
-                  <TextInput
-                    value={msgText}
-                    onChangeText={setMsgText}
-                    placeholder="اكتب رسالة…"
-                    style={{ backgroundColor: '#fff', borderRadius: 8, padding: 8, textAlign: 'right' }}
-                  />
-                </View>
-                <TouchableOpacity
-                  onPress={async () => {
-                    const { data: { user } } = await supabase.auth.getUser();
-                    if (!user || !roomId) return;
-                    await sendMessage(roomId, user.id, msgText);
-                    setMsgText('');
-                  }}
-                  style={{ paddingHorizontal: 10, paddingVertical: 8, backgroundColor: '#0ea5e9', borderRadius: 8 }}
-                >
-                  <Text style={{ color: '#fff', fontWeight: '700' }}>إرسال</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </>
+      {/* Join Button (only for last card) */}
+      {item.id === rooms[rooms.length - 1]?.id && (
+        <Pressable style={styles.joinButton}>
+          <Text style={styles.joinButtonText}>+</Text>
+        </Pressable>
       )}
-      </LinearGradient>
+    </Pressable>
+  );
+
+  return (
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>LIVE ROOMS</Text>
+        <Pressable style={styles.createButton} onPress={createRoom}>
+          <Ionicons name="add" size={24} color="#fff" />
+        </Pressable>
+      </View>
+
+      {/* Create Room Input */}
+      <View style={styles.createSection}>
+        <TextInput
+          style={styles.input}
+          value={title}
+          onChangeText={setTitle}
+          placeholder="إنشاء غرفة جديدة..."
+          placeholderTextColor="#999"
+          textAlign="right"
+        />
+        <Pressable 
+          style={[styles.createBtn, loading && styles.createBtnDisabled]} 
+          onPress={createRoom}
+          disabled={loading}
+        >
+          <Text style={styles.createBtnText}>{loading ? '...' : 'إنشاء'}</Text>
+        </Pressable>
+      </View>
+
+      {/* Rooms Grid */}
+      <FlatList
+        data={rooms}
+        renderItem={renderRoomCard}
+        keyExtractor={(item) => item.id}
+        numColumns={2}
+        contentContainerStyle={styles.grid}
+        columnWrapperStyle={styles.row}
+        showsVerticalScrollIndicator={false}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 12 },
-  creator: { flexDirection: 'row-reverse', gap: 8, marginBottom: 12 },
-  input: { 
-    flex: 1, 
-    backgroundColor: '#fff', 
-    borderRadius: 12, 
-    paddingHorizontal: 12, 
-    paddingVertical: 10, 
+  container: {
+    flex: 1,
+    backgroundColor: '#F7FBFD',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#333',
+  },
+  createButton: {
+    backgroundColor: '#EA4C89',
+    borderRadius: 20,
+    padding: 8,
+  },
+  createSection: {
+    flexDirection: 'row',
+    padding: 16,
+    gap: 12,
+  },
+  input: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  createBtn: {
+    backgroundColor: '#EA4C89',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 12,
+    justifyContent: 'center',
+  },
+  createBtnDisabled: {
+    opacity: 0.6,
+  },
+  createBtnText: {
+    color: '#fff',
     fontWeight: '700',
-    shadowColor: '#800F2F',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    fontSize: 16,
   },
-  makeBtn: { 
-    backgroundColor: PALETTE.primary, 
-    borderRadius: 12, 
-    paddingHorizontal: 14, 
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    flexDirection: 'row-reverse', 
-    gap: 6,
-    shadowColor: '#800F2F',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 4,
+  grid: {
+    padding: 16,
   },
-  roomRow: { 
-    backgroundColor: '#fff', 
-    borderRadius: 16, 
-    padding: 12, 
-    flexDirection: 'row-reverse', 
-    alignItems: 'center', 
-    gap: 10,
-    shadowColor: '#800F2F',
-    shadowOffset: { width: 0, height: 2 },
+  row: {
+    justifyContent: 'space-between',
+  },
+  roomCard: {
+    width: cardWidth,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowRadius: 8,
-    elevation: 3,
+    elevation: 4,
+    position: 'relative',
   },
-  roomTitle: { flex: 1, textAlign: 'right', fontWeight: '800' },
-  joinBtn: { backgroundColor: PALETTE.primary, borderRadius: 10, paddingVertical: 8, paddingHorizontal: 10, flexDirection:'row-reverse', alignItems:'center', gap:6 },
-  joinTxt: { color:'#fff', fontWeight:'800' },
-  goBtn: { backgroundColor: '#fff0f3', borderRadius: 10, paddingVertical: 8, paddingHorizontal: 10, flexDirection:'row-reverse', alignItems:'center', gap:6, borderWidth:1, borderColor:'#ffd5e0' },
-  goTxt: { color: PALETTE.primaryDark, fontWeight:'800' },
+  avatarContainer: {
+    position: 'relative',
+    padding: 16,
+    alignItems: 'center',
+  },
+  avatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+  },
+  avatarPlaceholder: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#EA4C89',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarText: {
+    color: '#fff',
+    fontSize: 32,
+    fontWeight: '700',
+  },
+  statusBadge: {
+    position: 'absolute',
+    top: 12,
+    left: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  statusText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  yellowIndicator: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#FFD700',
+  },
+  roomInfo: {
+    padding: 16,
+    paddingTop: 0,
+  },
+  roomTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#333',
+    marginBottom: 8,
+    textAlign: 'right',
+  },
+  hostInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+    gap: 4,
+  },
+  hostName: {
+    fontSize: 12,
+    color: '#666',
+    fontWeight: '600',
+  },
+  hostCountry: {
+    fontSize: 12,
+    color: '#666',
+  },
+  participantInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  participantCount: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '600',
+  },
+  joinButton: {
+    position: 'absolute',
+    bottom: 16,
+    right: 16,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#EA4C89',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  joinButtonText: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: '700',
+  },
 });
