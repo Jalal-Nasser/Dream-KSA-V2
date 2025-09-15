@@ -212,10 +212,7 @@ export default function Rooms() {
   );
 
   return (
-    <LinearGradient
-      colors={['#FFF9FC', '#FFFFFF']}
-      style={styles.container}
-    >
+    <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <Pressable onLongPress={handleDebugToken}>
@@ -255,13 +252,14 @@ export default function Rooms() {
         columnWrapperStyle={styles.row}
         showsVerticalScrollIndicator={false}
       />
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#f8f9fa',
   },
   header: {
     flexDirection: 'row',

@@ -45,7 +45,7 @@ export default function RoomCard({ room, onPress, joining = false, rtl = I18nMan
   return (
     <Animated.View style={{ transform: [{ scale: scaleValue }] }}>
       <Pressable
-        style={[styles.card, { flexDirection: rtl ? 'row-reverse' : 'row' }]}
+        style={styles.card}
         onPress={handlePress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
@@ -76,19 +76,19 @@ export default function RoomCard({ room, onPress, joining = false, rtl = I18nMan
         </View>
 
         {/* Room Info */}
-        <View style={[styles.roomInfo, { alignItems: rtl ? 'flex-end' : 'flex-start' }]}>
-          <Text style={[styles.roomTitle, { textAlign: rtl ? 'right' : 'left' }]} numberOfLines={1}>
+        <View style={styles.roomInfo}>
+          <Text style={styles.roomTitle} numberOfLines={1}>
             {room.title}
           </Text>
           
-          <View style={[styles.hostInfo, { flexDirection: rtl ? 'row-reverse' : 'row' }]}>
-            <MaterialCommunityIcons name="home" size={12} color="#6E5B66" />
+          <View style={styles.hostInfo}>
+            <MaterialCommunityIcons name="home" size={12} color="#666" />
             <Text style={styles.hostName}>{room.host_name}</Text>
             <Text style={styles.hostCountry}>{room.host_country}</Text>
           </View>
           
-          <View style={[styles.participantInfo, { flexDirection: rtl ? 'row-reverse' : 'row' }]}>
-            <MaterialCommunityIcons name="account-group" size={16} color="#6E5B66" />
+          <View style={styles.participantInfo}>
+            <MaterialCommunityIcons name="account-group" size={16} color="#666" />
             <Text style={styles.participantCount}>{room.participant_count || 0}</Text>
           </View>
         </View>
@@ -110,53 +110,49 @@ export default function RoomCard({ room, onPress, joining = false, rtl = I18nMan
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#FFF4F8',
+    backgroundColor: '#fff',
     borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#F3D6E4',
-    shadowColor: '#E7BFD1',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.18,
-    shadowRadius: 8,
-    elevation: 2,
     marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
     overflow: 'hidden',
     position: 'relative',
-    minHeight: 120,
+    minHeight: 140,
   },
   avatarContainer: {
     position: 'relative',
-    padding: 16,
+    padding: 20,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: '#f8f9fa',
   },
   avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    borderWidth: 2,
-    borderColor: '#fff',
+    width: 100,
+    height: 100,
+    borderRadius: 50,
   },
   avatarPlaceholder: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     backgroundColor: '#EA4C89',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#fff',
   },
   avatarText: {
     color: '#fff',
-    fontSize: 32,
+    fontSize: 40,
     fontWeight: '700',
   },
   statusBadge: {
     position: 'absolute',
-    top: 12,
-    left: 12,
-    borderRadius: 12,
+    top: 16,
+    right: 16,
+    backgroundColor: '#FF4444',
+    borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 4,
     zIndex: 5,
@@ -167,56 +163,58 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   yellowIndicator: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
     backgroundColor: '#FFD700',
     position: 'absolute',
-    top: 12,
-    right: 12,
+    top: 16,
+    left: 16,
     zIndex: 5,
   },
   roomInfo: {
-    flex: 1,
     padding: 16,
-    justifyContent: 'center',
+    alignItems: 'center',
   },
   roomTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '700',
-    color: '#3A2A33',
+    color: '#333',
     marginBottom: 8,
+    textAlign: 'center',
   },
   hostInfo: {
+    flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 8,
     gap: 4,
   },
   hostName: {
-    fontSize: 14,
-    color: '#6E5B66',
-    fontWeight: '600',
+    fontSize: 12,
+    color: '#666',
+    fontWeight: '500',
   },
   hostCountry: {
-    fontSize: 14,
-    color: '#6E5B66',
+    fontSize: 12,
+    color: '#666',
   },
   participantInfo: {
+    flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
   },
   participantCount: {
-    fontSize: 16,
-    color: '#6E5B66',
-    fontWeight: '600',
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '500',
   },
   joinButton: {
     position: 'absolute',
-    bottom: 8,
-    right: 8,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    bottom: 12,
+    right: 12,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: '#EA4C89',
     justifyContent: 'center',
     alignItems: 'center',
@@ -224,7 +222,7 @@ const styles = StyleSheet.create({
   },
   joinButtonText: {
     color: '#fff',
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: '700',
   },
 });
