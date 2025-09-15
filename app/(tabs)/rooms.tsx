@@ -2,7 +2,6 @@ import * as React from 'react';
 import { View, Text, StyleSheet, FlatList, Pressable, TextInput, Alert, Dimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
-import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getSupabase, getSessionToken } from '../../lib/supabase';
 import { api } from '../../lib/api';
@@ -212,10 +211,7 @@ export default function Rooms() {
   );
 
   return (
-    <LinearGradient
-      colors={['#FDF2F7', '#F8E8F0', '#F5F0F2']}
-      style={styles.container}
-    >
+    <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <Pressable onLongPress={handleDebugToken}>
@@ -255,7 +251,7 @@ export default function Rooms() {
         contentContainerStyle={styles.grid}
         showsVerticalScrollIndicator={false}
       />
-    </LinearGradient>
+    </View>
   );
 }
 
@@ -263,6 +259,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     direction: 'rtl',
+    backgroundColor: '#FFFFFF',
   },
   header: {
     flexDirection: 'row',
@@ -271,13 +268,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
     backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E8D5E0',
-    shadowColor: '#E7BFD1',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
   },
   headerTitle: {
     fontSize: 20,
@@ -294,9 +284,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row-reverse',
     padding: 16,
     gap: 12,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0E6EA',
+    backgroundColor: '#FFFFFF',
   },
   input: {
     flex: 1,
