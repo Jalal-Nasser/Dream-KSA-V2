@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { View, Text, StyleSheet, FlatList, TextInput, Pressable, Image } from 'react-native';
-import ChatPanel from '../components/ChatPanel';
+import ChatPane from '../../src/components/chat/ChatPane';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -227,13 +227,15 @@ export default function RoomChat() {
         />
       </View>
 
-      {/* Chat Panel */}
-      <ChatPanel
-        visible={showChat}
-        onClose={() => setShowChat(false)}
-        roomId={String(roomId)}
-        meUserId={(myId as any) || (authUser?.id as any) || 'me'}
-      />
+      {/* Real Supabase Chat Panel */}
+      {showChat && (
+        <View style={{
+          position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.03)', zIndex: 100
+        }}>
+          <ChatPane roomId={String(roomId)} onClose={() => setShowChat(false)} />
+        </View>
+      )}
     </View>
   );
 }
