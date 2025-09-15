@@ -110,24 +110,26 @@ export default function RoomCard({ room, onPress, joining = false, rtl = I18nMan
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FFF8F9',
     borderRadius: 16,
     marginBottom: 16,
-    shadowColor: '#000',
+    shadowColor: '#E8D5E0',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 3,
     overflow: 'hidden',
     position: 'relative',
     minHeight: 140,
+    borderWidth: 1,
+    borderColor: '#F0E6EA',
   },
   avatarContainer: {
     position: 'relative',
     padding: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#FDF2F7',
   },
   avatar: {
     width: 100,
@@ -175,11 +177,12 @@ const styles = StyleSheet.create({
   roomInfo: {
     padding: 16,
     alignItems: 'center',
+    backgroundColor: '#fff',
   },
   roomTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#333',
+    color: '#2D1B2E',
     marginBottom: 8,
     textAlign: 'center',
   },
@@ -191,12 +194,12 @@ const styles = StyleSheet.create({
   },
   hostName: {
     fontSize: 12,
-    color: '#666',
+    color: '#8B6B7D',
     fontWeight: '500',
   },
   hostCountry: {
     fontSize: 12,
-    color: '#666',
+    color: '#8B6B7D',
   },
   participantInfo: {
     flexDirection: 'row',
@@ -205,7 +208,7 @@ const styles = StyleSheet.create({
   },
   participantCount: {
     fontSize: 14,
-    color: '#666',
+    color: '#8B6B7D',
     fontWeight: '500',
   },
   joinButton: {
