@@ -89,7 +89,7 @@ export default function RoomCard({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#FFF8F9',
+    backgroundColor: '#FFFFFF',
     borderColor: '#F3D6E4',
     borderWidth: 1,
     borderRadius: 16,
@@ -97,9 +97,9 @@ const styles = StyleSheet.create({
     minHeight: 140,
     shadowColor: '#E7BFD1',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.3,
     shadowRadius: 12,
-    elevation: 4,
+    elevation: 5,
     position: 'relative',
     // Add subtle inner shadow effect
     borderTopWidth: 1,

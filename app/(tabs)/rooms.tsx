@@ -2,6 +2,7 @@ import * as React from 'react';
 import { View, Text, StyleSheet, FlatList, Pressable, TextInput, Alert, Dimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getSupabase, getSessionToken } from '../../lib/supabase';
 import { api } from '../../lib/api';
@@ -211,7 +212,10 @@ export default function Rooms() {
   );
 
   return (
-    <View style={styles.container}>
+    <LinearGradient
+      colors={['#FDF2F7', '#F8E8F0', '#F5F0F2']}
+      style={styles.container}
+    >
       {/* Header */}
       <View style={styles.header}>
         <Pressable onLongPress={handleDebugToken}>
@@ -251,7 +255,7 @@ export default function Rooms() {
         contentContainerStyle={styles.grid}
         showsVerticalScrollIndicator={false}
       />
-    </View>
+    </LinearGradient>
   );
 }
 
@@ -259,7 +263,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     direction: 'rtl',
-    backgroundColor: '#F5F0F2',
   },
   header: {
     flexDirection: 'row',
