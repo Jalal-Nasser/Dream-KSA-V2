@@ -44,7 +44,7 @@ export default function RoomCard({
     }
   };
 
-  const letter = avatarLetter || title?.trim()?.[0] ?? 'م';
+  const letter = avatarLetter || (title?.trim()?.[0] ?? 'م');
 
   return (
     <Animated.View style={{ transform: [{ scale: scaleValue }] }}>
