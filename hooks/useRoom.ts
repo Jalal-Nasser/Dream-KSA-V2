@@ -89,7 +89,8 @@ export function useRoom(roomId: string) {
   async function getParticipants() {
     try {
       console.log('[participants] (backend) fetching', roomId)
-      const rows = await api.getParticipants(roomId)
+      const response = await api.getParticipants(roomId)
+      const rows = response?.data || response || []
       // normalize to UI model
       const participants = (rows as any[]).map(r => {
         const p = r?.profile || {}

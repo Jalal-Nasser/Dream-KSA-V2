@@ -205,7 +205,7 @@ export default function PaymentsScreen() {
       <View style={styles.packageHeader}>
         <Text style={styles.packageName}>{pkg.name}</Text>
         <View style={styles.coinContainer}>
-          <MaterialCommunityIcons name="coin" size={24} color="#FFD700" />
+          <MaterialCommunityIcons name="currency-usd" size={24} color="#FFD700" />
           <Text style={styles.coinAmount}>{pkg.coins}</Text>
         </View>
       </View>
@@ -253,7 +253,7 @@ export default function PaymentsScreen() {
               <Text style={styles.coinsTitle}>رصيدك الحالي</Text>
             </View>
             <View style={styles.coinsAmount}>
-              <MaterialCommunityIcons name="coin" size={40} color="#FFD700" />
+              <MaterialCommunityIcons name="currency-usd" size={40} color="#FFD700" />
               <Text style={styles.coinsValue}>{userCoins}</Text>
               <Text style={styles.coinsLabel}>عملة ذهبية</Text>
             </View>

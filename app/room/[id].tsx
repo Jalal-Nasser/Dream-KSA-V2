@@ -152,116 +152,106 @@ export default function RoomChat() {
     try { await hmsLeave(); } catch {}
     router.back?.();
   }
-    
-  // --- UI tweaks ---
-  const [showEmojis, setShowEmojis] = React.useState(false);
-  const EMOJIS = ["😀","😂","😍","🙏","🔥","👍","🎉","❤️","✨","😮","😅","😎","🙌","💬","🎧"]; 
-  const Chip = ({text, danger}:{text:string; danger?:boolean}) => (
-    <View style={{
-      position:"absolute", top: 6, alignSelf: "center",
-      backgroundColor: danger ? "rgba(185,28,28,0.90)" : "rgba(0,0,0,0.45)",
-      paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12
-    }}>
-      <Text style={{ color:"#fff", fontSize:12 }}>{text}</Text>
-    </View>
-  );
 
   return (
-    <LinearGradient
-      colors={['#FBE7EF', '#F2CAD6', '#F8D7DA', '#FBE7EF']}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={{ flex: 1 }}
-    >
-      <View style={styles.header}>
-        <Pressable onPress={onLeave}><Ionicons name="chevron-forward" size={22} color={PALETTE.primaryDark} /></Pressable>
-        <Text style={styles.title}>{room?.name || 'غرفة دردشة'}</Text>
-        <View style={{ minWidth:22, alignItems:'flex-end' }}>
-          <Text style={styles.badge}>{participants.length}</Text>
+    <View style={{ flex: 1, backgroundColor: '#F7FBFD' }}>
+      {/* Binmo-style Header */}
+      <View style={styles.binmoHeader}>
+        <Pressable onPress={onLeave} style={styles.backBtn}>
+          <Ionicons name="chevron-back" size={24} color="#333" />
+        </Pressable>
+        <View style={styles.headerCenter}>
+          <Text style={styles.roomTitle}>{room?.name || 'غرفة دردشة'}</Text>
+          <View style={styles.participantBadge}>
+            <Text style={styles.participantCount}>{participants.length}</Text>
+          </View>
+        </View>
+        <View style={styles.headerRight}>
+          <Text style={styles.participantLabel}>المتواجدون ({participants.length})</Text>
         </View>
       </View>
 
-      {/* Participants grid */}
-      <View style={{ paddingHorizontal:12, paddingBottom:8 }}>
-        <Text style={{ textAlign:'right', fontWeight:'800', marginBottom:6 }}>المتواجدون ({participants.length})</Text>
-        <View style={{ flexDirection:'row-reverse', flexWrap:'wrap', gap:8 }}>
-          {(participants || []).map((p:any) => (
-            <View key={`${p.user_id}`} style={{ backgroundColor:'#fff', borderRadius:12, paddingHorizontal:10, paddingVertical:6, flexDirection:'row-reverse', alignItems:'center', gap:6 }}>
-              <Text style={{ fontSize:12 }}>{p.role === 'host' || p.role==='owner' ? '👑' : p.role==='speaker' ? '🎙️' : '👂'}</Text>
-              <Text style={{ fontWeight:'700' }}>{p?.profile?.display || p?.profile?.username || p.user_id.slice(0,6)}</Text>
+      {/* Participants Row - Binmo Style */}
+      <View style={styles.participantsSection}>
+        <View style={styles.participantsRow}>
+          {(participants || []).map((p:any, index) => (
+            <View key={`${p.user_id}`} style={styles.participantTag}>
+              <Text style={styles.participantId}>{p.user_id.slice(0,6)}</Text>
+              <Text style={styles.participantIcon}>
+                {p.role === 'host' || p.role==='owner' ? '👑' : p.role==='speaker' ? '🎙️' : '👂'}
+              </Text>
             </View>
           ))}
         </View>
       </View>
 
-      {/* Chat messages */}
-      <FlatList
-        data={messages}
-        keyExtractor={(m)=>m.id}
-        contentContainerStyle={{ padding:12, gap:8, paddingBottom: showEmojis ? 140 : 100 }}
-        renderItem={({item}) => (
-          <View style={[styles.bubble, { alignSelf: item.from === 'أنا' ? 'flex-end' : 'flex-start' }]}>
-            <Text style={styles.from}>{item.from}</Text>
-            <Text style={styles.txt}>{item.text}</Text>
-          </View>
-        )}
-      />
-
-      {/* Emoji row */}
-      {showEmojis && (
-        <View style={{ backgroundColor:'#fff', paddingVertical:8, paddingHorizontal:12, borderTopWidth:1, borderColor:'#eee' }}>
-          <View style={{ flexDirection:'row-reverse', flexWrap:'wrap', gap:10 }}>
-            {EMOJIS.map((e) => (
-              <Pressable key={e} onPress={() => setText((t)=>t + e)} style={{ paddingHorizontal:8, paddingVertical:6, backgroundColor:'#f3f4f6', borderRadius:8 }}>
-                <Text style={{ fontSize:18 }}>{e}</Text>
-              </Pressable>
-            ))}
-          </View>
-        </View>
-      )}
-
-      <View style={styles.inputRow}>
-        <Pressable onPress={() => setShowEmojis((v)=>!v)} style={[styles.sendBtn,{ backgroundColor:'#6b7280' }]}><Ionicons name="happy-outline" size={16} color="#fff"/></Pressable>
-        <Pressable onPress={send} style={styles.sendBtn}><Ionicons name="send" size={16} color="#fff"/></Pressable>
-        <TextInput
-          style={styles.input}
-          value={text}
-          onChangeText={setText}
-          placeholder="اكتب رسالة…"
-          placeholderTextColor="#9CA3AF"
-          textAlign="right"
-        />
+      {/* Main Chat Area - Empty like Binmo */}
+      <View style={styles.chatArea}>
+        {/* Empty space like in the Binmo image */}
       </View>
-      
-      {/* status chip removed intentionally; logs only */}
 
+      {/* Binmo-style Bottom Panel */}
+      <View style={styles.bottomPanel}>
+        <View style={styles.panelHeader}>
+          <Text style={styles.chatLabel}>Chat</Text>
+          <Pressable onPress={() => setShowChat(false)} style={styles.closeBtn}>
+            <Text style={styles.closeIcon}>✕</Text>
+          </Pressable>
+        </View>
 
-      {/* Floating chat button (absolute, above bottom toolbar) */}
+        {/* Gift Buttons Row */}
+        <View style={styles.giftsRow}>
+          <Pressable style={styles.giftBtn}>
+            <Text style={styles.giftIcon}>🌹</Text>
+            <Text style={styles.giftPrice}>50</Text>
+          </Pressable>
+          <Pressable style={styles.giftBtn}>
+            <Text style={styles.giftIcon}>❤️</Text>
+            <Text style={styles.giftPrice}>100</Text>
+          </Pressable>
+          <Pressable style={styles.giftBtn}>
+            <Text style={styles.giftIcon}>🏎️</Text>
+            <Text style={styles.giftPrice}>500</Text>
+          </Pressable>
+          <Pressable style={styles.giftBtn}>
+            <Text style={styles.giftIcon}>🛥️</Text>
+            <Text style={styles.giftPrice}>2000</Text>
+          </Pressable>
+        </View>
+
+        {/* Message Input */}
+        <View style={styles.messageInputRow}>
+          <TextInput
+            style={styles.messageInput}
+            value={text}
+            onChangeText={setText}
+            placeholder="Type a message..."
+            placeholderTextColor="#888"
+            textAlign="left"
+          />
+          <Pressable onPress={send} style={styles.sendButton}>
+            <Text style={styles.sendText}>Send</Text>
+          </Pressable>
+        </View>
+      </View>
+
+      {/* Floating buttons */}
       <Pressable
         onPress={() => setShowChat(true)}
-        style={{
-          position: 'absolute', bottom: 86,
-          right: 14, backgroundColor: '#ffffffee', paddingHorizontal: 16, paddingVertical: 10,
-          borderRadius: 999, shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 12, elevation: 6,
-        }}>
+        style={styles.floatingChatBtn}>
         <Text style={{ fontSize: 16 }}>💬</Text>
       </Pressable>
-
-      {/* Demo-only: a small Discover button to open Binmo-like page */}
+      
       {process.env.EXPO_PUBLIC_DEMO_MODE && (
         <Pressable
           onPress={() => router.push('/demo/explore')}
-          style={{
-            position: 'absolute', bottom: 86,
-            left: 14, backgroundColor: '#ffffffee', paddingHorizontal: 16, paddingVertical: 10,
-            borderRadius: 999, shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 12, elevation: 6,
-          }}>
+          style={styles.floatingHomeBtn}>
           <Text style={{ fontSize: 16 }}>🏠</Text>
         </Pressable>
       )}
 
-      {/* Voice bar above chat input (adjust bottom offset to your chat height) */}
-      <View style={{ position: "absolute", left: 0, right: 0, bottom: 0, zIndex: 5 }}>
+      {/* Voice Controls */}
+      <View style={styles.voiceControls}>
         <VoiceBar
           role={myRole}
           muted={muted}
@@ -272,25 +262,205 @@ export default function RoomChat() {
         />
       </View>
 
-      {/* In-room Chat Panel using demo backend (no server dependency) */}
+      {/* Chat Panel */}
       <ChatPanel
         visible={showChat}
         onClose={() => setShowChat(false)}
         roomId={String(roomId)}
         meUserId={(myId as any) || (authUser?.id as any) || 'me'}
       />
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  header:{ flexDirection:'row-reverse', alignItems:'center', justifyContent:'space-between', paddingHorizontal:12, paddingVertical:10, backgroundColor:'#fff' },
-  title:{ fontWeight:'900', color:PALETTE.primaryDark },
-  badge:{ backgroundColor:PALETTE.primary, color:'#fff', fontWeight:'800', paddingHorizontal:8, borderRadius:999 },
-  bubble:{ backgroundColor:'#fff', borderRadius:12, padding:10, maxWidth:'86%' },
-  from:{ fontSize:11, color:'#6B7280', textAlign:'right' },
-  txt:{ fontSize:15, fontWeight:'600', textAlign:'right' },
-  inputRow:{ flexDirection:'row-reverse', alignItems:'center', gap:8, padding:12, backgroundColor:'#fff' },
-  input:{ flex:1, backgroundColor:PALETTE.soft2, borderRadius:12, paddingHorizontal:12, paddingVertical:10, fontWeight:'700' },
-  sendBtn:{ backgroundColor:PALETTE.primary, borderRadius:12, padding:10, justifyContent:'center', alignItems:'center' },
+  binmoHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  backBtn: {
+    padding: 8,
+  },
+  headerCenter: {
+    flex: 1,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  roomTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#333',
+    marginRight: 8,
+  },
+  participantBadge: {
+    backgroundColor: '#EA4C89',
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  participantCount: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 12,
+  },
+  headerRight: {
+    alignItems: 'flex-end',
+  },
+  participantLabel: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '600',
+  },
+  participantsSection: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#fff',
+  },
+  participantsRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  participantTag: {
+    backgroundColor: '#f8f9fa',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+  },
+  participantId: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#495057',
+  },
+  participantIcon: {
+    fontSize: 12,
+  },
+  chatArea: {
+    flex: 1,
+    backgroundColor: '#F7FBFD',
+  },
+  bottomPanel: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingTop: 8,
+    paddingBottom: 8,
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 20,
+  },
+  panelHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    marginBottom: 4,
+  },
+  chatLabel: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#222',
+  },
+  closeBtn: {
+    padding: 6,
+  },
+  closeIcon: {
+    fontSize: 18,
+    color: '#999',
+  },
+  giftsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingTop: 4,
+    gap: 8,
+  },
+  giftBtn: {
+    backgroundColor: '#FAFAFA',
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: '#eee',
+    alignItems: 'center',
+  },
+  giftIcon: {
+    fontSize: 18,
+  },
+  giftPrice: {
+    fontSize: 11,
+    color: '#777',
+    textAlign: 'center',
+    marginTop: 2,
+  },
+  messageInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    gap: 8,
+  },
+  messageInput: {
+    flex: 1,
+    backgroundColor: '#F7F7F7',
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    fontSize: 14,
+    borderWidth: 1,
+    borderColor: '#eee',
+  },
+  sendButton: {
+    backgroundColor: '#EA4C89',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 12,
+  },
+  sendText: {
+    color: '#fff',
+    fontWeight: '700',
+  },
+  floatingChatBtn: {
+    position: 'absolute',
+    bottom: 86,
+    right: 14,
+    backgroundColor: '#ffffffee',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 999,
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  floatingHomeBtn: {
+    position: 'absolute',
+    bottom: 86,
+    left: 14,
+    backgroundColor: '#ffffffee',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 999,
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  voiceControls: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 5,
+  },
 });
