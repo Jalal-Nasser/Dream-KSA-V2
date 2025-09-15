@@ -229,3 +229,51 @@ export async function handRaise(roomId: string, userId: string) {
 export async function handLower(roomId: string, userId: string) {
   return api.lowerHand(roomId, userId);
 }
+
+// New authenticated API functions
+export async function apiJoinRoom(roomId: string, role: 'speaker'|'listener'='listener') {
+  const { getAccess } = await import('../src/lib/auth');
+  const { token, userId } = await getAccess();
+  
+  const res = await fetch(`${getBackendBase()}/rooms/join`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ room_id: roomId, user_id: userId, role }),
+  });
+  
+  let json: any = null;
+  try { json = await res.json(); } catch {}
+  
+  if (!res.ok || !json?.ok) {
+    const msg = json?.message ?? res.statusText ?? 'join failed';
+    const details = json?.details ? ` — ${JSON.stringify(json.details)}` : '';
+    throw new Error(`join: ${msg}${details}`);
+  }
+  
+  return json.data;
+}
+
+export async function apiToken(roomId: string, role: 'speaker'|'listener'='listener') {
+  const { getAccess } = await import('../src/lib/auth');
+  const { token, userId } = await getAccess();
+  
+  const res = await fetch(`${getBackendBase()}/hms/token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ room_id: roomId, user_id: userId, role }),
+  });
+  
+  let json: any = null;
+  try { json = await res.json(); } catch {}
+  
+  if (!res.ok || !json?.ok) {
+    const msg = json?.message ?? res.statusText ?? 'token failed';
+    const details = json?.details ? ` — ${JSON.stringify(json.details)}` : '';
+    throw new Error(`token: ${msg}${details}`);
+  }
+  
+  return json.token;
+}

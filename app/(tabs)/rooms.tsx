@@ -12,6 +12,7 @@ import { hmsJoin, hmsIsConnected, hmsToggleLocalMute, hmsLeave } from '../lib/hm
 import { handRaise, handLower } from '../../lib/api';
 import { subscribeParticipants, ParticipantRow, subscribeMessages, sendMessage } from '../lib/realtime';
 import * as Clipboard from 'expo-clipboard';
+import RoomCard from '../../src/components/RoomCard';
 
 type Room = { 
   id: string; 
@@ -180,7 +181,11 @@ export default function Rooms() {
       }
 
       const name = user.user_metadata?.name || user.email?.split('@')[0] || 'مستخدم';
-      const token = await api.getHMSToken(roomId, user.id, name, 'listener');
+      
+      // Use new authenticated API functions
+      const { apiJoinRoom, apiToken } = await import('../../lib/api');
+      await apiJoinRoom(roomId, 'listener');
+      const token = await apiToken(roomId, 'listener');
       
       await hmsJoin(token, name, 'listener');
       const connected = await hmsIsConnected();
@@ -191,7 +196,7 @@ export default function Rooms() {
         Alert.alert('خطأ', 'فشل في الانضمام للغرفة');
       }
     } catch (error: any) {
-      console.log('Join error:', error);
+      console.warn('[join] failed', error.message);
       Alert.alert('خطأ', error.message || 'فشل في الانضمام للغرفة');
     } finally {
       setJoiningId(null);
@@ -199,63 +204,18 @@ export default function Rooms() {
   };
 
   const renderRoomCard = ({ item }: { item: Room }) => (
-    <Pressable 
-      style={styles.roomCard}
-      onPress={() => joinRoom(item.id)}
-      disabled={joiningId === item.id}
-    >
-      {/* Host Avatar */}
-      <View style={styles.avatarContainer}>
-        {item.host_avatar ? (
-          <Image source={{ uri: item.host_avatar }} style={styles.avatar} />
-        ) : (
-          <View style={styles.avatarPlaceholder}>
-            <Text style={styles.avatarText}>{item.host_name?.[0] || 'م'}</Text>
-          </View>
-        )}
-        
-        {/* Status Badge */}
-        <View style={[
-          styles.statusBadge,
-          { backgroundColor: item.status === 'live' ? '#FF4444' : '#FF69B4' }
-        ]}>
-          <Text style={styles.statusText}>{item.status === 'live' ? 'مباشر' : 'قريباً'}</Text>
-        </View>
-        
-        {/* Yellow Indicator */}
-        <View style={styles.yellowIndicator} />
-      </View>
-
-      {/* Room Info */}
-      <View style={styles.roomInfo}>
-        <Text style={styles.roomTitle} numberOfLines={1}>{item.title}</Text>
-        
-        <View style={styles.hostInfo}>
-          <Ionicons name="home" size={12} color="#666" />
-          <Text style={styles.hostName}>{item.host_name}</Text>
-          <Text style={styles.hostCountry}>{item.host_country}</Text>
-        </View>
-        
-        <View style={styles.participantInfo}>
-          <MaterialCommunityIcons name="account-group" size={16} color="#666" />
-          <Text style={styles.participantCount}>{item.participant_count || 0}</Text>
-        </View>
-      </View>
-
-      {/* Join Button (only for "soon" rooms) */}
-      {item.status === 'soon' && (
-        <Pressable 
-          style={styles.joinButton}
-          onPress={() => joinRoom(item.id)}
-        >
-          <Text style={styles.joinButtonText}>+</Text>
-        </Pressable>
-      )}
-    </Pressable>
+    <RoomCard
+      room={item}
+      onPress={joinRoom}
+      joining={joiningId === item.id}
+    />
   );
 
   return (
-    <View style={styles.container}>
+    <LinearGradient
+      colors={['#FFF9FC', '#FFFFFF']}
+      style={styles.container}
+    >
       {/* Header */}
       <View style={styles.header}>
         <Pressable onLongPress={handleDebugToken}>
@@ -295,14 +255,13 @@ export default function Rooms() {
         columnWrapperStyle={styles.row}
         showsVerticalScrollIndicator={false}
       />
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F7FBFD',
   },
   header: {
     flexDirection: 'row',
@@ -362,114 +321,5 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row-reverse',
     justifyContent: 'space-between',
-  },
-  roomCard: {
-    width: cardWidth,
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-    position: 'relative',
-  },
-  avatarContainer: {
-    position: 'relative',
-    padding: 16,
-    alignItems: 'center',
-  },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-  },
-  avatarPlaceholder: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#EA4C89',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarText: {
-    color: '#fff',
-    fontSize: 32,
-    fontWeight: '700',
-  },
-  statusBadge: {
-    position: 'absolute',
-    top: 12,
-    left: 12,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  statusText: {
-    color: '#fff',
-    fontSize: 10,
-    fontWeight: '700',
-  },
-  yellowIndicator: {
-    position: 'absolute',
-    top: 12,
-    right: 12,
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: '#FFD700',
-  },
-  roomInfo: {
-    padding: 16,
-    paddingTop: 0,
-  },
-  roomTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#333',
-    marginBottom: 8,
-    textAlign: 'right',
-  },
-  hostInfo: {
-    flexDirection: 'row-reverse',
-    alignItems: 'center',
-    marginBottom: 8,
-    gap: 4,
-  },
-  hostName: {
-    fontSize: 12,
-    color: '#666',
-    fontWeight: '600',
-  },
-  hostCountry: {
-    fontSize: 12,
-    color: '#666',
-  },
-  participantInfo: {
-    flexDirection: 'row-reverse',
-    alignItems: 'center',
-    gap: 4,
-  },
-  participantCount: {
-    fontSize: 14,
-    color: '#666',
-    fontWeight: '600',
-  },
-  joinButton: {
-    position: 'absolute',
-    bottom: 8,
-    right: 8,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#EA4C89',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 10,
-  },
-  joinButtonText: {
-    color: '#fff',
-    fontSize: 24,
-    fontWeight: '700',
   },
 });
