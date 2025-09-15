@@ -113,10 +113,10 @@ export default function ChatPane({ roomId, onClose }: Props) {
 }
 
 const styles = StyleSheet.create({
-  wrap: { flex: 1, backgroundColor: '#FFF9FC', direction: 'rtl' as const },
+  wrap: { flex: 1, backgroundColor: '#F8E8F0', direction: 'rtl' as const },
   header: { 
     paddingHorizontal: 16, paddingVertical: 12, 
-    backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#F0E3EB',
+    backgroundColor: '#F5D1E0', borderBottomWidth: 1, borderBottomColor: '#E8B5C7',
     alignItems: 'center'
   },
   headerTitle: { fontSize: 18, fontWeight: '700', color: '#2f2136', flex: 1, textAlign: 'center' },
@@ -126,8 +126,8 @@ const styles = StyleSheet.create({
   composerWrap: {
     position: 'absolute', bottom: 0, left: 0, right: 0,
     padding: 10, gap: 8,
-    backgroundColor: '#FFFFFF',
-    borderTopWidth: 1, borderTopColor: '#F0E3EB'
+    backgroundColor: '#F5D1E0',
+    borderTopWidth: 1, borderTopColor: '#E8B5C7'
   },
   input: {
     flex: 1, minHeight: 44, maxHeight: 120,
