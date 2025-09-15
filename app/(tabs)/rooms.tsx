@@ -213,7 +213,7 @@ export default function Rooms() {
 
   return (
     <LinearGradient
-      colors={['#FBE7EF', '#F2CAD6', '#F8D7DA', '#FBE7EF']}
+      colors={['#F5D1E0', '#E8B5C7', '#F0C4D1', '#F5D1E0']}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={styles.container}
