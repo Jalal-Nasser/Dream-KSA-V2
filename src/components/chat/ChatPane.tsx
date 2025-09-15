@@ -86,11 +86,19 @@ export default function ChatPane({ roomId, onClose }: Props) {
       }
     }
     
-    const unsubscribe = initializeChat()
-    return () => unsubscribe.then(unsub => unsub())
+    let cleanup: (() => void) | null = null
+    initializeChat().then(unsubscribe => {
+      cleanup = unsubscribe
+    })
+    
+    return () => {
+      if (cleanup) {
+        cleanup()
+      }
+    }
   }, [roomId])
 
-  const mine = (m: ChatMessage) => userId && m.user_id === userId
+  const mine = (m: ChatMessage) => Boolean(userId && m.user_id === userId)
 
   const renderItem = ({ item }: { item: ChatMessage }) => {
     const displayName = mine(item) ? undefined : (item.author_name || getName(item.user_id))

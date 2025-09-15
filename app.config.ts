@@ -84,12 +84,12 @@ const config: ExpoConfig = {
     backendUrl: process.env.EXPO_PUBLIC_BACKEND_URL ?? "",
     eas: { projectId: '85a5b204-84e8-49fa-b88a-31b072ff798b' }
   },
-  updates: { 
-    url: 'https://u.expo.dev/85a5b204-84e8-49fa-b88a-31b072ff798b',
-    runtimeVersion: {
-      policy: 'appVersion'
-    }
-  },
+  // updates: { 
+  //   url: 'https://u.expo.dev/85a5b204-84e8-49fa-b88a-31b072ff798b',
+  //   runtimeVersion: {
+  //     policy: 'appVersion'
+  //   }
+  // },
 };
 
 export default config;

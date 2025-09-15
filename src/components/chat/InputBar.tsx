@@ -60,7 +60,6 @@ export default function InputBar({ value, onChangeText, onSend, disabled = false
           placeholderTextColor="#999"
           multiline
           textAlign="right"
-          writingDirection="rtl"
           maxLength={500}
         />
 
