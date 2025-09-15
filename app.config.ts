@@ -85,7 +85,10 @@ const config: ExpoConfig = {
     eas: { projectId: '85a5b204-84e8-49fa-b88a-31b072ff798b' }
   },
   updates: { 
-    url: 'https://u.expo.dev/85a5b204-84e8-49fa-b88a-31b072ff798b' 
+    url: 'https://u.expo.dev/85a5b204-84e8-49fa-b88a-31b072ff798b',
+    runtimeVersion: {
+      policy: 'appVersion'
+    }
   },
 };
 
