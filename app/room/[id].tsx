@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { View, Text, StyleSheet, FlatList, TextInput, Pressable, Image } from 'react-native';
+import ChatPanel from '../components/ChatPanel';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -32,6 +33,7 @@ export default function RoomChat() {
   const [muted, setMuted] = React.useState(true);
   const [connected, setConnected] = React.useState(false);
   const [handRaised, setHandRaised] = React.useState(false);
+  const [showChat, setShowChat] = React.useState(false);
   
   React.useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setAuthUser(data?.user));
@@ -234,6 +236,17 @@ export default function RoomChat() {
       {/* status chip removed intentionally; logs only */}
 
 
+      {/* Floating chat button (absolute, above bottom toolbar) */}
+      <Pressable
+        onPress={() => setShowChat(true)}
+        style={{
+          position: 'absolute', bottom: 86,
+          right: 14, backgroundColor: '#ffffffee', paddingHorizontal: 16, paddingVertical: 10,
+          borderRadius: 999, shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 12, elevation: 6,
+        }}>
+        <Text style={{ fontSize: 16 }}>💬</Text>
+      </Pressable>
+
       {/* Voice bar above chat input (adjust bottom offset to your chat height) */}
       <View style={{ position: "absolute", left: 0, right: 0, bottom: 0, zIndex: 5 }}>
         <VoiceBar
@@ -245,6 +258,14 @@ export default function RoomChat() {
           onLeave={onLeave}
         />
       </View>
+
+      {/* In-room Chat Panel using demo backend (no server dependency) */}
+      <ChatPanel
+        visible={showChat}
+        onClose={() => setShowChat(false)}
+        roomId={String(roomId)}
+        meUserId={(myId as any) || (authUser?.id as any) || 'me'}
+      />
     </LinearGradient>
   );
 }
