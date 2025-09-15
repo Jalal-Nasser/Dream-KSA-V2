@@ -185,55 +185,20 @@ export default function RoomChat() {
         </View>
       </View>
 
-      {/* Main Chat Area - Empty like Binmo */}
+      {/* Main Chat Area - Show messages like Binmo */}
       <View style={styles.chatArea}>
-        {/* Empty space like in the Binmo image */}
+        {messages.length > 0 && (
+          <View style={styles.messageContainer}>
+            {messages.slice(-5).map((msg, index) => (
+              <View key={msg.id} style={[styles.messageBubble, { alignSelf: 'flex-end' }]}>
+                <Text style={styles.messageText}>{msg.text}</Text>
+              </View>
+            ))}
+          </View>
+        )}
       </View>
 
-      {/* Binmo-style Bottom Panel */}
-      <View style={styles.bottomPanel}>
-        <View style={styles.panelHeader}>
-          <Text style={styles.chatLabel}>Chat</Text>
-          <Pressable onPress={() => setShowChat(false)} style={styles.closeBtn}>
-            <Text style={styles.closeIcon}>✕</Text>
-          </Pressable>
-        </View>
-
-        {/* Gift Buttons Row */}
-        <View style={styles.giftsRow}>
-          <Pressable style={styles.giftBtn}>
-            <Text style={styles.giftIcon}>🌹</Text>
-            <Text style={styles.giftPrice}>50</Text>
-          </Pressable>
-          <Pressable style={styles.giftBtn}>
-            <Text style={styles.giftIcon}>❤️</Text>
-            <Text style={styles.giftPrice}>100</Text>
-          </Pressable>
-          <Pressable style={styles.giftBtn}>
-            <Text style={styles.giftIcon}>🏎️</Text>
-            <Text style={styles.giftPrice}>500</Text>
-          </Pressable>
-          <Pressable style={styles.giftBtn}>
-            <Text style={styles.giftIcon}>🛥️</Text>
-            <Text style={styles.giftPrice}>2000</Text>
-          </Pressable>
-        </View>
-
-        {/* Message Input */}
-        <View style={styles.messageInputRow}>
-          <TextInput
-            style={styles.messageInput}
-            value={text}
-            onChangeText={setText}
-            placeholder="Type a message..."
-            placeholderTextColor="#888"
-            textAlign="left"
-          />
-          <Pressable onPress={send} style={styles.sendButton}>
-            <Text style={styles.sendText}>Send</Text>
-          </Pressable>
-        </View>
-      </View>
+      {/* Empty main area - chat only shows in panel */}
 
       {/* Floating buttons */}
       <Pressable
@@ -462,5 +427,21 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     zIndex: 5,
+  },
+  messageContainer: {
+    padding: 16,
+    alignItems: 'flex-end',
+  },
+  messageBubble: {
+    backgroundColor: '#FFF9D6',
+    borderRadius: 14,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginVertical: 2,
+    maxWidth: '80%',
+  },
+  messageText: {
+    fontSize: 14,
+    color: '#6A5A00',
   },
 });
