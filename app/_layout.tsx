@@ -10,6 +10,8 @@ import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-cont
 import { getBackendBase } from '@/lib/api';
 import { NativeModules, Platform } from "react-native";
 import { Audio } from 'expo-av';
+// Demo Mode: install fetch shim early (no-op when disabled)
+import '../lib/demoFetch';
 
 // Runtime override for backend URL (no rebuild needed)
 (globalThis as any).__BACKEND_URL = "https://api.dreamsksa.online";
