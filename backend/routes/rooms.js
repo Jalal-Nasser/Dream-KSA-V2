@@ -12,7 +12,8 @@ function normalizeBearer(token) {
 
 function resolveTokenRole(dbRole) {
   const publishRole = (process.env.HMS_PUBLISH_ROLE || 'speaker').trim();
-  if (['host','speaker','owner'].includes((dbRole || '').toLowerCase())) return publishRole;
+  if ((process.env.HMS_PUBLISH_ALL || '').toLowerCase() === 'true') return publishRole;
+  if (['host','speaker','owner','moderator'].includes((dbRole || '').toLowerCase())) return publishRole;
   return 'listener';
 }
 
