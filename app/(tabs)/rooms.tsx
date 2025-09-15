@@ -38,43 +38,43 @@ export default function Rooms() {
   const demoRooms: Room[] = [
     {
       id: 'demo-1',
-      title: 'الوداع',
+      title: 'ون كافيه',
       created_at: new Date().toISOString(),
-      host_name: 'أحمد',
+      host_name: 'مضيف',
       host_country: 'السعودية',
-      participant_count: 2,
+      participant_count: 20,
       status: 'live',
-      host_avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'
+      host_avatar: null // Will show "م" placeholder
     },
     {
       id: 'demo-2', 
-      title: 'ون كافيه',
+      title: 'الوداع',
       created_at: new Date().toISOString(),
-      host_name: 'سارة',
+      host_name: 'مضيف',
       host_country: 'السعودية',
-      participant_count: 5,
+      participant_count: 6,
       status: 'live',
-      host_avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face'
+      host_avatar: null // Will show "م" placeholder
     },
     {
       id: 'demo-3',
-      title: 'عهد الأصدقاء',
+      title: 'اليوم',
       created_at: new Date().toISOString(),
-      host_name: 'عمر',
+      host_name: 'مضيف',
       host_country: 'السعودية',
-      participant_count: 9,
-      status: 'live',
-      host_avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
+      participant_count: 1,
+      status: 'soon',
+      host_avatar: null // Will show "م" placeholder
     },
     {
       id: 'demo-4',
-      title: 'اليوم',
+      title: 'عهد الأصدقاء',
       created_at: new Date().toISOString(),
-      host_name: 'ليلى',
+      host_name: 'مضيف',
       host_country: 'السعودية',
-      participant_count: 10,
+      participant_count: 1,
       status: 'soon',
-      host_avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face'
+      host_avatar: null // Will show "م" placeholder
     }
   ];
 
@@ -191,7 +191,7 @@ export default function Rooms() {
           <Image source={{ uri: item.host_avatar }} style={styles.avatar} />
         ) : (
           <View style={styles.avatarPlaceholder}>
-            <Text style={styles.avatarText}>{item.host_name?.[0] || 'H'}</Text>
+            <Text style={styles.avatarText}>{item.host_name?.[0] || 'م'}</Text>
           </View>
         )}
         
@@ -223,9 +223,12 @@ export default function Rooms() {
         </View>
       </View>
 
-      {/* Join Button (only for last card) */}
-      {item.id === rooms[rooms.length - 1]?.id && (
-        <Pressable style={styles.joinButton}>
+      {/* Join Button (only for "soon" rooms) */}
+      {item.status === 'soon' && (
+        <Pressable 
+          style={styles.joinButton}
+          onPress={() => joinRoom(item.id)}
+        >
           <Text style={styles.joinButtonText}>+</Text>
         </Pressable>
       )}
@@ -433,14 +436,15 @@ const styles = StyleSheet.create({
   },
   joinButton: {
     position: 'absolute',
-    bottom: 16,
-    right: 16,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    bottom: 8,
+    right: 8,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: '#EA4C89',
     justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 10,
   },
   joinButtonText: {
     color: '#fff',
