@@ -9,11 +9,15 @@ async function ensureSdk(): Promise<HMSSDK> {
     sdk = await HMSSDK.build();
   }
   if (!listenersBound && sdk) {
-    // minimal safety: rebuild peers on both peer & track updates
+    // Debug logs to observe peer/track updates
     try {
-      // no-op handlers (parent screens attach their own too)
-      (sdk as any).addEventListener?.(HMSUpdateListenerActions.ON_PEER_UPDATE, () => {});
-      (sdk as any).addEventListener?.(HMSUpdateListenerActions.ON_TRACK_UPDATE, () => {});
+      (sdk as any).addEventListener?.(HMSUpdateListenerActions.ON_PEER_UPDATE, (e: any) => {
+        console.log('[hms] PEER', e?.type, e?.peer?.name, e?.peer?.role?.name);
+      });
+      (sdk as any).addEventListener?.(HMSUpdateListenerActions.ON_TRACK_UPDATE, (e: any) => {
+        const k = e?.track?.type || e?.track?.source;
+        console.log('[hms] TRACK', e?.type, k, 'mute=', e?.track?.isMute, 'peer=', e?.peer?.role?.name);
+      });
     } catch {}
     listenersBound = true;
   }
