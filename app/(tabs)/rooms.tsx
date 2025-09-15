@@ -1,15 +1,11 @@
 import * as React from 'react';
-import { View, Text, StyleSheet, FlatList, Pressable, TextInput, Alert, TouchableOpacity, Image, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Pressable, TextInput, Alert, Dimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { PALETTE } from '../../lib/theme';
 import { getSupabase, getSessionToken } from '../../lib/supabase';
 import { api } from '../../lib/api';
-import { hmsJoin, hmsIsConnected, hmsToggleLocalMute, hmsLeave } from '../lib/hmsClient';
-import { handRaise, handLower } from '../../lib/api';
-import { subscribeParticipants, ParticipantRow, subscribeMessages, sendMessage } from '../lib/realtime';
+import { hmsJoin, hmsIsConnected } from '../lib/hmsClient';
 import * as Clipboard from 'expo-clipboard';
 import RoomCard from '../../src/components/RoomCard';
 
@@ -25,7 +21,7 @@ type Room = {
 };
 
 const { width } = Dimensions.get('window');
-const cardWidth = (width - 48) / 2; // 2 columns with padding
+const CARD_WIDTH = (width - 12 * 2 - 12) / 2; // 2 columns with padding
 
 export default function Rooms() {
   const router = useRouter();
@@ -53,7 +49,7 @@ export default function Rooms() {
     }
   }, []);
 
-  // Demo rooms data for Binmo style
+  // Demo rooms data
   const demoRooms: Room[] = [
     {
       id: 'demo-1',
@@ -63,7 +59,7 @@ export default function Rooms() {
       host_country: 'السعودية',
       participant_count: 20,
       status: 'live',
-      host_avatar: null // Will show "م" placeholder
+      host_avatar: null
     },
     {
       id: 'demo-2', 
@@ -73,7 +69,7 @@ export default function Rooms() {
       host_country: 'السعودية',
       participant_count: 6,
       status: 'live',
-      host_avatar: null // Will show "م" placeholder
+      host_avatar: null
     },
     {
       id: 'demo-3',
@@ -83,7 +79,7 @@ export default function Rooms() {
       host_country: 'السعودية',
       participant_count: 1,
       status: 'soon',
-      host_avatar: null // Will show "م" placeholder
+      host_avatar: null
     },
     {
       id: 'demo-4',
@@ -93,7 +89,7 @@ export default function Rooms() {
       host_country: 'السعودية',
       participant_count: 1,
       status: 'soon',
-      host_avatar: null // Will show "م" placeholder
+      host_avatar: null
     }
   ];
 
@@ -117,7 +113,6 @@ export default function Rooms() {
         }));
         setRooms(mappedRooms as Room[]);
       } else {
-        // Fallback to demo rooms if no data
         setRooms(demoRooms);
       }
     } catch (error) {
@@ -202,12 +197,17 @@ export default function Rooms() {
     }
   };
 
-  const renderRoomCard = ({ item }: { item: Room }) => (
-    <RoomCard
-      room={item}
-      onPress={joinRoom}
-      joining={joiningId === item.id}
-    />
+  const renderRoomItem = ({ item }: { item: Room }) => (
+    <View style={{ width: CARD_WIDTH, marginBottom: 12 }}>
+      <RoomCard
+        title={item.title}
+        country={item.host_country || 'السعودية'}
+        audienceCount={item.participant_count || 0}
+        isLive={item.status === 'live'}
+        onPress={() => joinRoom(item.id)}
+        avatarLetter={item.title?.trim()?.[0] ?? 'م'}
+      />
+    </View>
   );
 
   return (
@@ -244,11 +244,11 @@ export default function Rooms() {
       {/* Rooms Grid */}
       <FlatList
         data={rooms}
-        renderItem={renderRoomCard}
+        renderItem={renderRoomItem}
         keyExtractor={(item) => item.id}
         numColumns={2}
-        contentContainerStyle={styles.grid}
         columnWrapperStyle={styles.row}
+        contentContainerStyle={styles.grid}
         showsVerticalScrollIndicator={false}
       />
     </View>
@@ -258,7 +258,8 @@ export default function Rooms() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F0F2',
+    direction: 'rtl',
+    backgroundColor: '#FFF9FC',
   },
   header: {
     flexDirection: 'row',
@@ -316,10 +317,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   grid: {
-    padding: 16,
+    paddingHorizontal: 12,
+    paddingTop: 8,
+    paddingBottom: 24,
   },
   row: {
-    flexDirection: 'row-reverse',
     justifyContent: 'space-between',
+    gap: 12,
   },
 });
