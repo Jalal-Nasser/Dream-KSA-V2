@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, TextInput, Pressable, FlatList, I18nManager, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
+import { supabase } from '../../lib/supabase';
+import { DEMO_MODE } from '../lib/demoMode';
 
 type Props = {
   visible: boolean;
@@ -9,7 +11,7 @@ type Props = {
   backendBase?: string;
 };
 
-type Msg = { id: string; room_id: string; user_id: string | null; text: string; ts: number };
+type Msg = { id: string; room_id?: string; user_id?: string | null; text?: string; ts?: number; from?: string; at?: number };
 
 const AR = I18nManager.isRTL;
 
@@ -26,31 +28,70 @@ export default function ChatPanel({ visible, onClose, roomId, meUserId = 'me', b
   const [text, setText] = useState('');
   const [balance, setBalance] = useState<number | null>(null);
   const timerRef = useRef<any>(null);
+  const chanRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   useEffect(() => {
     if (!visible) return;
-    const tick = async () => {
-      try {
-        const res = await fetch(`${base}/rooms/${encodeURIComponent(roomId)}/messages`);
-        const j = await res.json();
-        if (j?.ok && Array.isArray(j.messages)) setMsgs(j.messages);
-      } catch {}
-    };
-    tick();
-    timerRef.current = setInterval(tick, 2000);
-    return () => { if (timerRef.current) clearInterval(timerRef.current as any); };
-  }, [visible, roomId, base]);
+
+    if (DEMO_MODE) {
+      const tick = async () => {
+        try {
+          const res = await fetch(`${base}/rooms/${encodeURIComponent(roomId)}/messages`);
+          const j = await res.json();
+          if (j?.ok && Array.isArray(j.messages)) setMsgs(j.messages);
+        } catch {}
+      };
+      tick();
+      timerRef.current = setInterval(tick, 2000);
+      return () => { if (timerRef.current) clearInterval(timerRef.current as any); };
+    } else {
+      // Supabase Realtime channel-based chat
+      const channel = supabase.channel(`room:${roomId}`, { config: { broadcast: { self: true }, presence: { key: (meUserId || 'me') as string } } });
+      chanRef.current = channel as any;
+      channel.on('broadcast', { event: 'message' }, (payload: any) => {
+        const p = payload?.payload || payload;
+        const m: Msg = { id: p?.id, text: p?.text, from: p?.from, at: p?.at };
+        setMsgs((prev) => [...prev, m].slice(-200));
+      });
+      channel.subscribe();
+      // optional: initial pull from DB if available
+      (async () => {
+        try {
+          const { data } = await supabase
+            .from('messages')
+            .select('id,room_id,user_id,content,created_at')
+            .eq('room_id', roomId)
+            .order('created_at', { ascending: true })
+            .limit(100);
+          const mapped: Msg[] = (data || []).map((r: any) => ({ id: r.id, room_id: r.room_id, user_id: r.user_id, text: r.content, ts: new Date(r.created_at).getTime() }));
+          if (mapped.length) setMsgs(mapped);
+        } catch {}
+      })();
+      return () => {
+        if (chanRef.current) supabase.removeChannel(chanRef.current as any);
+        chanRef.current = null;
+      };
+    }
+  }, [visible, roomId, base, meUserId]);
 
   const send = async () => {
     const v = String(text || '').trim();
     if (!v) return;
     setText('');
     try {
-      await fetch(`${base}/rooms/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ room_id: roomId, user_id: meUserId, text: v }),
-      });
+      if (DEMO_MODE) {
+        await fetch(`${base}/rooms/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ room_id: roomId, user_id: meUserId, text: v }),
+        });
+      } else {
+        // Broadcast to channel for realtime
+        const msg = { id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`, from: (AR ? 'أنا' : 'Me'), text: v, at: Date.now() };
+        try { await chanRef.current?.send({ type: 'broadcast', event: 'message', payload: msg }); } catch {}
+        // Persist best-effort
+        try { await supabase.from('messages').insert({ room_id: roomId, user_id: meUserId, content: v }); } catch {}
+      }
     } catch {}
   };
 
