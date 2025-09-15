@@ -6,11 +6,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { PALETTE } from '../../lib/theme';
-import { getSupabase } from '../../lib/supabase';
+import { getSupabase, getSessionToken } from '../../lib/supabase';
 import { api } from '../../lib/api';
 import { hmsJoin, hmsIsConnected, hmsToggleLocalMute, hmsLeave } from '../lib/hmsClient';
 import { handRaise, handLower } from '../../lib/api';
 import { subscribeParticipants, ParticipantRow, subscribeMessages, sendMessage } from '../lib/realtime';
+import * as Clipboard from 'expo-clipboard';
 
 type Room = { 
   id: string; 
@@ -20,7 +21,7 @@ type Room = {
   host_country?: string;
   participant_count?: number;
   status?: 'live' | 'soon';
-  host_avatar?: string;
+  host_avatar?: string | null;
 };
 
 const { width } = Dimensions.get('window');
@@ -33,6 +34,24 @@ export default function Rooms() {
   const [title, setTitle] = React.useState('');
   const [loading, setLoading] = React.useState(false);
   const [joiningId, setJoiningId] = React.useState<string | null>(null);
+
+  // TODO: Remove before release - DEBUG ONLY
+  const handleDebugToken = React.useCallback(async () => {
+    if (!__DEV__) return;
+    try {
+      const token = await getSessionToken();
+      if (token) {
+        console.log('[auth] token', token.slice(0, 24) + '…');
+        await Clipboard.setStringAsync(token);
+        Alert.alert('Debug', 'Token copied to clipboard');
+      } else {
+        Alert.alert('Debug', 'Not signed in');
+      }
+    } catch (e) {
+      console.log('[auth] debug token error:', e);
+      Alert.alert('Debug', 'Error getting token');
+    }
+  }, []);
 
   // Demo rooms data for Binmo style
   const demoRooms: Room[] = [
@@ -239,7 +258,9 @@ export default function Rooms() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>الغرف المباشرة</Text>
+        <Pressable onLongPress={handleDebugToken}>
+          <Text style={styles.headerTitle}>الغرف المباشرة</Text>
+        </Pressable>
         <Pressable style={styles.createButton} onPress={createRoom}>
           <Ionicons name="add" size={24} color="#fff" />
         </Pressable>

@@ -12,6 +12,8 @@ import { NativeModules, Platform } from "react-native";
 import { Audio } from 'expo-av';
 // Demo Mode: install fetch shim early (no-op when disabled)
 import './lib/demoFetch';
+// TODO: Remove before release - DEBUG ONLY
+import { getSessionToken } from '@/lib/supabase';
 
 // Runtime override for backend URL (no rebuild needed)
 (globalThis as any).__BACKEND_URL = "https://api.dreamsksa.online";
@@ -28,6 +30,19 @@ try {
   const hasHMS = !!(NativeModules as any)?.HMSManager;
   console.log("[hms] native module present:", Platform.OS, hasHMS);
 } catch {}
+
+// TODO: Remove before release - DEBUG ONLY
+if (__DEV__) {
+  // Log token at app start (dev only)
+  setTimeout(async () => {
+    try {
+      const token = await getSessionToken();
+      console.log('[auth] token (dev)', token ? token.slice(0, 24) + '…' : 'none');
+    } catch (e) {
+      console.log('[auth] token (dev) error:', e);
+    }
+  }, 1000); // Delay to ensure auth is initialized
+}
 
 /**
  * SafeLayout
