@@ -19,6 +19,15 @@
     "paths": {
       "@/*": [
         "src/*"
+      ],
+      "@components/*": [
+        "src/components/*"
+      ],
+      "@lib/*": [
+        "src/lib/*"
+      ],
+      "@screens/*": [
+        "src/screens/*"
       ]
     }
   },
@@ -32,6 +41,13 @@
     "ios",
     ".expo",
     "dist",
-    "build"
+    "build",
+    "supabase/functions/**/*",
+    "**/*.bak",
+    "**/recovery/**",
+    "**/tmp_backup/**",
+    "**/app_quarantine/**",
+    "**/app_backup.disabled/**",
+    "**/app.current_backup.**"
   ]
 }
