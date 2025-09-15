@@ -37,6 +37,6 @@ const styles = StyleSheet.create({
     borderColor: '#E6E1E8',
   },
   name: { color: '#7a6883', fontSize: 12, marginBottom: 4 },
-  text: { color: '#2f2136', fontSize: 15, lineHeight: 22 },
+  text: { color: '#2f2136', fontSize: 15, lineHeight: 22, textAlign: 'right' },
   time: { color: '#8f7d93', fontSize: 11, marginTop: 4, textAlign: 'left' },
 })

@@ -1,9 +1,10 @@
 // src/components/chat/ChatPane.tsx
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  View, Text, FlatList, KeyboardAvoidingView, Platform, TextInput, Pressable, StyleSheet, I18nManager
+  View, Text, FlatList, KeyboardAvoidingView, Platform, StyleSheet, I18nManager
 } from 'react-native'
 import MessageBubble from './MessageBubble'
+import InputBar from './InputBar'
 import { fetchRecentMessages, subscribeMessages, sendMessage, getSessionUser, type Message } from '../../lib/chat'
 import { getSupabase } from '../../../lib/supabase'
 
@@ -16,6 +17,7 @@ export default function ChatPane({ roomId, onClose }: Props) {
   const [messages, setMessages] = useState<Message[]>([])
   const [text, setText] = useState('')
   const [userId, setUserId] = useState<string | null>(null)
+  const [sending, setSending] = useState(false)
   const listRef = useRef<FlatList>(null)
 
   useEffect(() => {
@@ -24,11 +26,22 @@ export default function ChatPane({ roomId, onClose }: Props) {
     ;(async () => {
       const initial = await fetchRecentMessages(roomId)
       setMessages(initial)
-      // subscribe
-      cancel = subscribeMessages(roomId, (m) => {
-        setMessages(prev => [...prev, m])
-        requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated: true }))
-      })
+      // subscribe to realtime changes
+      const supabase = getSupabase();
+      const channel = supabase
+        .channel(`room:${roomId}:messages`)
+        .on('postgres_changes',
+            { event: '*', schema: 'public', table: 'messages', filter: `room_id=eq.${roomId}` },
+            (payload) => {
+              if (payload.eventType === 'INSERT') {
+                const newMessage = payload.new as Message;
+                setMessages(prev => [...prev, newMessage]);
+                requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated: true }));
+              }
+            })
+        .subscribe();
+      
+      cancel = () => supabase.removeChannel(channel);
     })()
     return () => cancel()
   }, [roomId])
@@ -63,14 +76,30 @@ export default function ChatPane({ roomId, onClose }: Props) {
   )
 
   const onSend = async () => {
+    if (!text.trim() || sending) return;
+    
+    setSending(true);
     try {
-      const t = text
-      setText('')
-      await sendMessage(roomId, t)
-      requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated: true }))
+      const messageText = text.trim();
+      setText(''); // Clear input immediately
+      
+      // Send to Supabase
+      const supabase = getSupabase();
+      const { error } = await supabase.from('messages').insert({
+        room_id: roomId,
+        content: messageText,
+      });
+      
+      if (error) throw error;
+      
+      // Scroll to bottom after sending
+      requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated: true }));
     } catch (e: any) {
-      setText((prev) => prev || '') // keep input
-      console.warn('[chat] send failed', e?.message || e)
+      console.warn('[chat] send failed', e?.message || e);
+      // Restore text on error
+      setText(text);
+    } finally {
+      setSending(false);
     }
   }
 
@@ -94,19 +123,13 @@ export default function ChatPane({ roomId, onClose }: Props) {
         contentContainerStyle={styles.listContent}
         onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
       />
-      <View style={[styles.composerWrap, { flexDirection: dir }]}>
-        <TextInput
-          style={styles.input}
-          placeholder="اكتب رسالة…"
-          placeholderTextColor="#bfa9c6"
+      <View style={styles.composerWrap}>
+        <InputBar
           value={text}
           onChangeText={setText}
-          multiline
-          textAlign={I18nManager.isRTL ? 'right' : 'left'}
+          onSend={onSend}
+          disabled={sending}
         />
-        <Pressable style={styles.sendBtn} onPress={onSend}>
-          <Text style={styles.sendTxt}>إرسال</Text>
-        </Pressable>
       </View>
     </KeyboardAvoidingView>
   )
@@ -125,18 +148,8 @@ const styles = StyleSheet.create({
   listContent: { paddingHorizontal: 12, paddingTop: 10, paddingBottom: 90 },
   composerWrap: {
     position: 'absolute', bottom: 0, left: 0, right: 0,
-    padding: 10, gap: 8,
+    padding: 10,
     backgroundColor: '#F5D1E0',
     borderTopWidth: 1, borderTopColor: '#E8B5C7'
   },
-  input: {
-    flex: 1, minHeight: 44, maxHeight: 120,
-    backgroundColor: '#FFF', borderWidth: 1, borderColor: '#F0D6E3',
-    borderRadius: 14, paddingHorizontal: 12, paddingVertical: 10, color: '#2f2136',
-  },
-  sendBtn: {
-    paddingHorizontal: 16, height: 44, borderRadius: 14,
-    backgroundColor: '#EB3B85', alignItems: 'center', justifyContent: 'center'
-  },
-  sendTxt: { color: '#fff', fontWeight: '700' },
 })
