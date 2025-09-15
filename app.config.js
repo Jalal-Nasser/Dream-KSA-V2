@@ -53,6 +53,16 @@ module.exports = {
 
   orientation: 'portrait',
   platforms: ['ios', 'android'],
+  plugins: [
+    [
+      '@100mslive/react-native-hms',
+      {
+        bluetoothPermission: 'Bluetooth is used for audio routing.',
+        cameraPermission: 'Camera access (if video is enabled).',
+        microphonePermission: 'Voice chat needs microphone access.'
+      }
+    ]
+  ],
   extra: {
     EXPO_PUBLIC_SUPABASE_URL,
     EXPO_PUBLIC_SUPABASE_ANON_KEY,
