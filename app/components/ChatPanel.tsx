@@ -119,7 +119,7 @@ export default function ChatPanel({ visible, onClose, roomId, meUserId = 'me', b
       <View style={styles.sheet}>
         {/* Binmo-style Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>Chat</Text>
+          <Text style={styles.title}>الدردشة</Text>
           <Pressable onPress={onClose} hitSlop={10}><Text style={styles.close}>✕</Text></Pressable>
         </View>
 
@@ -147,13 +147,13 @@ export default function ChatPanel({ visible, onClose, roomId, meUserId = 'me', b
           <TextInput
             value={text}
             onChangeText={setText}
-            placeholder="Type a message..."
+            placeholder="اكتب رسالة..."
             placeholderTextColor="#888"
             style={styles.input}
-            textAlign="left"
+            textAlign="right"
           />
           <Pressable onPress={send} style={styles.sendBtn}>
-            <Text style={styles.sendTxt}>Send</Text>
+            <Text style={styles.sendTxt}>إرسال</Text>
           </Pressable>
         </View>
       </View>
@@ -170,17 +170,17 @@ const styles = StyleSheet.create({
     shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 20, elevation: 20,
     maxHeight: '60%',
   },
-  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, marginBottom: 4 },
-  title: { flex: 1, fontSize: 16, fontWeight: '600', color: '#222', textAlign: 'left' },
+  header: { flexDirection: 'row-reverse', alignItems: 'center', paddingHorizontal: 12, marginBottom: 4 },
+  title: { flex: 1, fontSize: 16, fontWeight: '600', color: '#222', textAlign: 'right' },
   close: { fontSize: 18, color: '#999', padding: 6 },
-  giftsRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingTop: 4, gap: 8 },
+  giftsRow: { flexDirection: 'row-reverse', alignItems: 'center', paddingHorizontal: 10, paddingTop: 4, gap: 8 },
   giftBtn: { backgroundColor: '#FAFAFA', borderRadius: 10, paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: '#eee', alignItems: 'center' },
   giftTxt: { fontSize: 18 },
   giftPrice: { fontSize: 11, color: '#777', textAlign: 'center', marginTop: 2 },
-  emojiRow: { flexDirection: 'row', paddingHorizontal: 10, paddingVertical: 4, gap: 8 },
+  emojiRow: { flexDirection: 'row-reverse', paddingHorizontal: 10, paddingVertical: 4, gap: 8 },
   emojiBtn: { padding: 8, backgroundColor: '#f8f9fa', borderRadius: 8 },
   emojiText: { fontSize: 18 },
-  inputRow: { flexDirection: 'row', alignItems: 'center', padding: 10, gap: 8 },
+  inputRow: { flexDirection: 'row-reverse', alignItems: 'center', padding: 10, gap: 8 },
   input: { flex: 1, backgroundColor: '#F7F7F7', borderRadius: 12, paddingVertical: 8, paddingHorizontal: 12, fontSize: 14, borderWidth: 1, borderColor: '#eee' },
   sendBtn: { backgroundColor: '#EA4C89', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12 },
   sendTxt: { color: '#fff', fontWeight: '700' },

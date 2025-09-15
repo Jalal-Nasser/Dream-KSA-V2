@@ -38,42 +38,42 @@ export default function Rooms() {
   const demoRooms: Room[] = [
     {
       id: 'demo-1',
-      title: 'هههههههه',
+      title: 'الوداع',
       created_at: new Date().toISOString(),
-      host_name: 'Ahmed',
-      host_country: 'SA',
-      participant_count: 8,
+      host_name: 'أحمد',
+      host_country: 'السعودية',
+      participant_count: 2,
       status: 'live',
       host_avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'
     },
     {
       id: 'demo-2', 
-      title: 'سوالف 195',
+      title: 'ون كافيه',
       created_at: new Date().toISOString(),
-      host_name: 'Sarah',
-      host_country: 'SA',
-      participant_count: 15,
-      status: 'soon',
+      host_name: 'سارة',
+      host_country: 'السعودية',
+      participant_count: 5,
+      status: 'live',
       host_avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face'
     },
     {
       id: 'demo-3',
-      title: 'كلام نواعم',
+      title: 'عهد الأصدقاء',
       created_at: new Date().toISOString(),
-      host_name: 'Omar',
-      host_country: 'SA',
-      participant_count: 12,
+      host_name: 'عمر',
+      host_country: 'السعودية',
+      participant_count: 9,
       status: 'live',
       host_avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
     },
     {
       id: 'demo-4',
-      title: 'موسيقى وغناء',
+      title: 'اليوم',
       created_at: new Date().toISOString(),
-      host_name: 'Layla',
-      host_country: 'SA',
-      participant_count: 18,
-      status: 'live',
+      host_name: 'ليلى',
+      host_country: 'السعودية',
+      participant_count: 10,
+      status: 'soon',
       host_avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face'
     }
   ];
@@ -89,10 +89,10 @@ export default function Rooms() {
       if (!error && data) {
         const mappedRooms = data.map((room: any) => ({
           id: room.id,
-          title: room.title || 'Room',
+          title: room.title || 'غرفة',
           created_at: room.created_at,
-          host_name: 'Host',
-          host_country: 'SA',
+          host_name: 'مضيف',
+          host_country: 'السعودية',
           participant_count: Math.floor(Math.random() * 20) + 1,
           status: Math.random() > 0.3 ? 'live' : 'soon',
         }));
@@ -200,7 +200,7 @@ export default function Rooms() {
           styles.statusBadge,
           { backgroundColor: item.status === 'live' ? '#FF4444' : '#FF69B4' }
         ]}>
-          <Text style={styles.statusText}>{item.status === 'live' ? 'Live' : 'Soon'}</Text>
+          <Text style={styles.statusText}>{item.status === 'live' ? 'مباشر' : 'قريباً'}</Text>
         </View>
         
         {/* Yellow Indicator */}
@@ -236,7 +236,7 @@ export default function Rooms() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>LIVE ROOMS</Text>
+        <Text style={styles.headerTitle}>الغرف المباشرة</Text>
         <Pressable style={styles.createButton} onPress={createRoom}>
           <Ionicons name="add" size={24} color="#fff" />
         </Pressable>
@@ -294,6 +294,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '800',
     color: '#333',
+    textAlign: 'right',
   },
   createButton: {
     backgroundColor: '#EA4C89',
@@ -301,7 +302,7 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   createSection: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     padding: 16,
     gap: 12,
   },
@@ -314,6 +315,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     borderWidth: 1,
     borderColor: '#ddd',
+    textAlign: 'right',
   },
   createBtn: {
     backgroundColor: '#EA4C89',
@@ -334,6 +336,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   row: {
+    flexDirection: 'row-reverse',
     justifyContent: 'space-between',
   },
   roomCard: {
@@ -404,7 +407,7 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   hostInfo: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     alignItems: 'center',
     marginBottom: 8,
     gap: 4,
@@ -419,7 +422,7 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   participantInfo: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     alignItems: 'center',
     gap: 4,
   },
