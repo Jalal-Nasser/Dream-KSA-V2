@@ -1,4 +1,5 @@
 import { Platform, PermissionsAndroid } from 'react-native';
+import { Audio } from 'expo-av';
 import { HMSSDK, HMSConfig, HMSUpdateListenerActions } from '@100mslive/react-native-hms';
 
 let sdk: HMSSDK | null = null;
@@ -24,20 +25,57 @@ async function ensureSdk(): Promise<HMSSDK> {
   return sdk!;
 }
 
+async function ensureMicPermission() {
+  try {
+    if (Platform.OS === 'ios') {
+      const cur = await Audio.getPermissionsAsync();
+      if (!cur.granted) {
+        const req = await Audio.requestPermissionsAsync();
+        console.log('[hms] mic permission (iOS) result', req);
+      } else {
+        console.log('[hms] mic permission (iOS) already granted');
+      }
+    } else if (Platform.OS === 'android') {
+      const has = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.RECORD_AUDIO);
+      if (!has) {
+        const res = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.RECORD_AUDIO);
+        console.log('[hms] mic permission (Android) result', res);
+      } else {
+        console.log('[hms] mic permission (Android) already granted');
+      }
+    }
+  } catch (e) {
+    console.log('[hms] mic permission check failed', e);
+  }
+}
+
 export async function hmsJoin(token: string, name: string, role: 'host'|'speaker'|'listener'='listener') {
   const s = await ensureSdk();
 
-  if (Platform.OS === 'android' && role !== 'listener') {
-    await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.RECORD_AUDIO);
+  // iOS audio session so we can record + play in silent mode
+  try {
+    await Audio.setAudioModeAsync({
+      allowsRecordingIOS: true,
+      playsInSilentModeIOS: true,
+      interruptionModeIOS: 1,
+      staysActiveInBackground: false,
+      shouldDuckAndroid: false,
+      playThroughEarpieceAndroid: false,
+    });
+  } catch (e) {
+    console.log('[hms] setAudioMode failed', e);
   }
+
+  await ensureMicPermission();
+
   const cfg = new HMSConfig({ authToken: token, userName: name });
   await s.join(cfg);
 
-  // Route audio + enable playback + TURN MIC ON regardless of provided role
-  try { await (s as any).setSpeakerphoneOn?.(true); } catch {}
-  try { await (s as any).setPlaybackForAllAudio?.(true); } catch {}
-  try { await (s as any).setLocalAudioEnabled?.(true); } catch {}
-  console.log('[hms] post-join: speakerphone on, playback on, mic enabled');
+  // Always enable speaker + playback + mic after join
+  try { await (s as any).setSpeakerphoneOn?.(true); } catch (e) { console.log('[hms] setSpeakerphoneOn failed', e); }
+  try { await (s as any).setPlaybackForAllAudio?.(true); } catch (e) { console.log('[hms] setPlaybackForAllAudio failed', e); }
+  try { await (s as any).setLocalAudioEnabled?.(true); } catch (e) { console.log('[hms] enable local audio failed', e); }
+  console.log('[hms] post-join: speakerphone on, playback on, mic enable attempted');
 }
 
 export function hmsIsConnected(): boolean {
