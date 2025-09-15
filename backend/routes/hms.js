@@ -116,7 +116,14 @@ router.post("/token", async (req, res) => {
       }
     }
 
-    const tokenRole = resolveTokenRole(dbRole);
+    let tokenRole = resolveTokenRole(dbRole);
+    // --- FORCE OVERRIDE for a single room (debug without touching app) ---
+    const FORCE_ROOM = (process.env.HMS_FORCE_ROOM_ID || '').trim();
+    const FORCE_ROLE = (process.env.HMS_FORCE_ROLE || '').trim(); // e.g. "speaker"
+    if (FORCE_ROOM && FORCE_ROLE && room_id === FORCE_ROOM) {
+      tokenRole = FORCE_ROLE;
+    }
+    // ---------------------------------------------------------------------
     const payload = {
       access_key: accessKey,
       type: "app",
