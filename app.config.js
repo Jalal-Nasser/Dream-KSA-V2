@@ -38,14 +38,15 @@ module.exports = {
         data: [{ scheme: 'dream-ksa' }],
       },
     ],
-    permissions: [],
+    permissions: ['RECORD_AUDIO', 'MODIFY_AUDIO_SETTINGS', 'BLUETOOTH'],
   },
   ios: {
     bundleIdentifier: 'com.dreamska.app',
     buildNumber: '1.0.0',
     icon: './assets/images/icon.png',
     infoPlist: {
-      ITSAppUsesNonExemptEncryption: false
+      ITSAppUsesNonExemptEncryption: false,
+      NSMicrophoneUsageDescription: 'Voice chat needs microphone access.'
     },
     associatedDomains: ['dream-ksa://auth-callback']
   },
