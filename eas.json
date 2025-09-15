@@ -28,6 +28,10 @@
       "android": { 
         "buildType": "app-bundle",
         "gradleCommand": ":app:bundleRelease"
+      },
+      "env": {
+        "EXPO_KOTLIN_VERSION": "2.0.21", 
+        "EXPO_KSP_VERSION": "2.0.21-1.0.25"
       }
     }
   },
