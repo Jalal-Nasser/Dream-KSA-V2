@@ -89,18 +89,21 @@ export default function RoomCard({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FFF8F9',
     borderColor: '#F3D6E4',
     borderWidth: 1,
     borderRadius: 16,
     padding: 12,
     minHeight: 140,
     shadowColor: '#E7BFD1',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.18,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 4,
     position: 'relative',
+    // Add subtle inner shadow effect
+    borderTopWidth: 1,
+    borderTopColor: '#FFFFFF',
   },
   liveChip: {
     position: 'absolute',
@@ -138,14 +141,14 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   title: {
-    color: '#3A2A33',
+    color: '#2D1B2E',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
     textAlign: 'center',
     marginBottom: 4,
   },
   country: {
-    color: '#6E5B66',
+    color: '#8B6B7D',
     fontSize: 12,
     textAlign: 'center',
     marginBottom: 8,
@@ -154,8 +157,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   audienceText: {
-    color: '#6E5B66',
+    color: '#8B6B7D',
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: '600',
   },
 });

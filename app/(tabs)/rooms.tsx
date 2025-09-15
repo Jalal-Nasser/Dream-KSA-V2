@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     direction: 'rtl',
-    backgroundColor: '#FFF9FC',
+    backgroundColor: '#F5F0F2',
   },
   header: {
     flexDirection: 'row',
@@ -267,9 +267,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 16,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#F0E6EA',
+    borderBottomColor: '#E8D5E0',
+    shadowColor: '#E7BFD1',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   headerTitle: {
     fontSize: 20,
