@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, TextInput, Pressable, FlatList, I18nManager, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
-import { DEMO_MODE } from '../lib/demoMode';
+import { DEMO_MODE } from '../../src/app-lib/demoMode';
 import { getSupabase } from '../../lib/supabase';
 
 type Props = {

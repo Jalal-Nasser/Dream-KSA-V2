@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import CherryHeader from '../../components/CherryHeader';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
@@ -44,7 +45,18 @@ export default function SettingsScreen() {
   const version = React.useMemo(() => getVersionLabel(), []);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    try {
+      // Clear Supabase session locally (fast logout)
+      // scope:'local' ensures only this device session is removed
+      await supabase.auth.signOut({ scope: 'local' } as any);
+    } catch {}
+    try {
+      // Extra safety: remove cached Supabase auth tokens (keys start with 'sb-')
+      const keys = await AsyncStorage.getAllKeys();
+      const sbKeys = keys.filter((k) => k.startsWith('sb-'));
+      if (sbKeys.length) await AsyncStorage.multiRemove(sbKeys);
+    } catch {}
+    // Navigate to login
     router.replace('/login');
   };
 

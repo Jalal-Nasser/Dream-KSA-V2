@@ -11,7 +11,7 @@ import { getBackendBase } from '@/lib/api';
 import { NativeModules, Platform } from "react-native";
 import { Audio } from 'expo-av';
 // Demo Mode: install fetch shim early (no-op when disabled)
-import './lib/demoFetch';
+import '../src/app-lib/demoFetch';
 // TODO: Remove before release - DEBUG ONLY
 import { getSessionToken } from '@/lib/supabase';
 

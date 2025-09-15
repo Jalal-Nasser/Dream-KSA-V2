@@ -6,7 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getSupabase, getSessionToken } from '../../lib/supabase';
 import { api } from '../../lib/api';
-import { hmsJoin, hmsIsConnected } from '../lib/hmsClient';
+import { hmsJoin, hmsIsConnected } from '../../src/app-lib/hmsClient';
 import * as Clipboard from 'expo-clipboard';
 import RoomCard from '../../src/components/RoomCard';
 
@@ -188,11 +188,13 @@ export default function Rooms() {
       if (connected) {
         router.push(`/room/${roomId}`);
       } else {
-        Alert.alert('خطأ', 'فشل في الانضمام للغرفة');
+        // If voice fails, still navigate but with openChat=1
+        router.push(`/room/${roomId}?openChat=1`);
       }
     } catch (error: any) {
       console.warn('[join] failed', error.message);
-      Alert.alert('خطأ', error.message || 'فشل في الانضمام للغرفة');
+      // If join fails completely, still navigate with openChat=1 for text-only mode
+      router.push(`/room/${roomId}?openChat=1`);
     } finally {
       setJoiningId(null);
     }
