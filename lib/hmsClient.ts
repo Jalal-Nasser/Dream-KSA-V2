@@ -1,57 +1,49 @@
 import { Platform, PermissionsAndroid } from 'react-native';
-import {
-  HMSSDK,
-  HMSConfig,
-} from '@100mslive/react-native-hms';
+import { HMSSDK, HMSConfig, HMSUpdateListenerActions } from '@100mslive/react-native-hms';
 
 let sdk: HMSSDK | null = null;
+let listenersBound = false;
 
 async function ensureSdk(): Promise<HMSSDK> {
   if (!sdk) {
     sdk = await HMSSDK.build();
   }
-  return sdk;
+  if (!listenersBound && sdk) {
+    // minimal safety: rebuild peers on both peer & track updates
+    try {
+      // no-op handlers (parent screens attach their own too)
+      (sdk as any).addEventListener?.(HMSUpdateListenerActions.ON_PEER_UPDATE, () => {});
+      (sdk as any).addEventListener?.(HMSUpdateListenerActions.ON_TRACK_UPDATE, () => {});
+    } catch {}
+    listenersBound = true;
+  }
+  return sdk!;
 }
 
-export async function hmsJoin(token: string, name: string, role: 'host'|'speaker'|'listener' = 'listener') {
+export async function hmsJoin(token: string, name: string, role: 'host'|'speaker'|'listener'='listener') {
   const s = await ensureSdk();
 
-  // Android mic permission if you're going to publish audio
   if (Platform.OS === 'android' && role !== 'listener') {
     await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.RECORD_AUDIO);
   }
-
   const cfg = new HMSConfig({ authToken: token, userName: name });
   await s.join(cfg);
 
-  // Post-join audio setup for both platforms
-  try {
-    // Route audio to loudspeaker by default
-    // @ts-ignore - method exists in HMS SDK (AudioManager)
-    await s.setSpeakerphoneOn?.(true);
-  } catch {}
-
-  try {
-    // Start playback for remote audio tracks
-    // @ts-ignore - method exists in SDK versions; ignore if absent
-    await s.setPlaybackForAllAudio?.(true);
-  } catch {}
+  // Route audio + enable playback + TURN MIC ON regardless of provided role
+  try { await (s as any).setSpeakerphoneOn?.(true); } catch {}
+  try { await (s as any).setPlaybackForAllAudio?.(true); } catch {}
+  try { await (s as any).setLocalAudioEnabled?.(true); } catch {}
+  console.log('[hms] post-join: speakerphone on, playback on, mic enabled');
 }
 
 export function hmsIsConnected(): boolean {
-  // naive check: if we have an sdk and room, assume connected
   // @ts-ignore
   return !!sdk?.room;
 }
 
 export async function hmsToggleLocalMute(mute: boolean) {
   const s = await ensureSdk();
-  try {
-    // @ts-ignore - method exists in SDK; ignore types if any
-    await s.setLocalAudioEnabled?.(!mute);
-  } catch (e) {
-    console.log('[hms] toggle local mic failed', String((e as any)?.message || e));
-  }
+  try { await (s as any).setLocalAudioEnabled?.(!mute); } catch (e) { console.log('[hms] toggle mic failed', String(e)); }
 }
 
 export async function hmsLeave() {

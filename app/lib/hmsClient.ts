@@ -29,12 +29,11 @@ export async function hmsJoin(token: string, name: string, role: 'host'|'speaker
   const cfg = new HMSConfig({ authToken: token, userName: name });
   await s.join(cfg);
 
-  // route to loudspeaker + enable playback; ignore if not supported on current SDK
+  // Route audio + enable playback + TURN MIC ON regardless of provided role
   try { await (s as any).setSpeakerphoneOn?.(true); } catch {}
   try { await (s as any).setPlaybackForAllAudio?.(true); } catch {}
-  if (role !== 'listener') {
-    try { await (s as any).setLocalAudioEnabled?.(true); } catch {}
-  }
+  try { await (s as any).setLocalAudioEnabled?.(true); } catch {}
+  console.log('[hms] post-join: speakerphone on, playback on, mic enabled');
 }
 
 export function hmsIsConnected(): boolean {
@@ -55,3 +54,4 @@ export async function hmsLeave() {
 export function __hms_has_instance() {
   return !!sdk;
 }
+
