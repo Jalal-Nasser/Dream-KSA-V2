@@ -247,6 +247,19 @@ export default function RoomChat() {
         <Text style={{ fontSize: 16 }}>💬</Text>
       </Pressable>
 
+      {/* Demo-only: a small Discover button to open Binmo-like page */}
+      {process.env.EXPO_PUBLIC_DEMO_MODE && (
+        <Pressable
+          onPress={() => router.push('/demo/explore')}
+          style={{
+            position: 'absolute', bottom: 86,
+            left: 14, backgroundColor: '#ffffffee', paddingHorizontal: 16, paddingVertical: 10,
+            borderRadius: 999, shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 12, elevation: 6,
+          }}>
+          <Text style={{ fontSize: 16 }}>🏠</Text>
+        </Pressable>
+      )}
+
       {/* Voice bar above chat input (adjust bottom offset to your chat height) */}
       <View style={{ position: "absolute", left: 0, right: 0, bottom: 0, zIndex: 5 }}>
         <VoiceBar
