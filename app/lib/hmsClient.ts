@@ -97,3 +97,6 @@ export function __hms_has_instance() {
   return !!sdk;
 }
 
+// --- router no-op default export so Expo Router doesn't treat this file as a screen ---
+export default function __noop_hmsClient() { return null as any; }
+

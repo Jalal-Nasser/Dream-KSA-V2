@@ -73,3 +73,6 @@ export async function sendMessage(roomId: string, userId: string, text: string) 
   if (!text?.trim()) return;
   await supabase.from('messages').insert({ room_id: roomId, user_id: userId, text: text.trim() });
 }
+
+// --- router no-op default export so Expo Router doesn't treat this file as a screen ---
+export default function __noop_realtime() { return null as any; }
