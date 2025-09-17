@@ -21,12 +21,7 @@ let EXPO_PUBLIC_SUPABASE_ANON_KEY =
   read('EXPO_PUBLIC_SUPABASE_ANON_KEY') ||
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtnY3Blb2lkb3Vhand5dG5kdHFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI5NTc2MzgsImV4cCI6MjA2ODUzMzYzOH0.eV1GRnbrDIQ4xzZ6EsdNOzgGdxUoSFtOXJWoV71wxW4';
 
-console.log(
-  '[app.config.ts] URL prefix:',
-  (EXPO_PUBLIC_SUPABASE_URL || '').slice(0, 40),
-  '…  ANON len:',
-  (EXPO_PUBLIC_SUPABASE_ANON_KEY || '').length
-);
+
 
 const config: ExpoConfig = {
   name: 'DreamKSA',
