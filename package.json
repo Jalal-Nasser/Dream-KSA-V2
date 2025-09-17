@@ -3,6 +3,7 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
+    "dev": "expo start --dev-client",
     "supa:ping": "node scripts/supa-check.mjs ping",
     "supa:rpc": "node scripts/supa-check.mjs rpc",
     "supa:invite": "node scripts/supa-invite.mjs",
